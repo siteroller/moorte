@@ -1,0 +1,17 @@
+div.srMooTextarea{position:absolute; left:0; width:100%; xheight:50px; background-color:cyan; overflow:visible}
+div.srMooTextarea div.srWysEditor { position:absolute; left:0; bottom:0; background-color:#D8D8E0; width:100%; xheight:20px; color:#222; font: 10px Arial; xposition:fixed; xbottom:0; }
+div.srMooTextarea div.srWysEditor div{ width:100%;  xheight:20px; position:relative; xheight:25px;}
+div.srMooTextarea div.srWysEditor span{ display:inline-block; width:16px; height:16px; margin:2px; cursor:pointer;}
+div.srMooTextarea div.srWysEditor input{width:100px; height:18px;}
+div.srMooTextarea>div.srWysEditor>div>div{width:100%}
+div.srMooTextarea div.srWysEditor .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
+.srHide{ display:none; }
+.mtaTextArea{ border:1px solid #666 }
+
+div.srWysEditor>div.srR0{ border-bottom:1px #bbb solid; height:20px; overflow:hidden; vertical-align:bottom; background-image:url('images/background_silver.jpg'); text-align:left;}
+div.srWysEditor>div.srR0>div.srMain_0>span{display:inline; font:bold 11px/20px Tahoma}
+div.srWysEditor>div.srR1{ border-bottom:1px #bbb solid; }
+div.srWysEditor>div.srMain_0>div.srText{ display:block }
+
+div.srWysEditor>div.srR2>div.srAddLink_2 span,div.srWysEditor>div.srR2>div.srAddLink_2 input{display:inline}
+
