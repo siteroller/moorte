@@ -15,8 +15,6 @@ var MooInline = new Class({
 	
 	initialize: function(els, options){
 		this.setOptions(options);
-		//this.Buttons = MooInline.Buttons;
-		//alert(this.Buttons.miMain_0.m0.text)
 		MooInline.Buttons.self = this;
 		this.savePath = new Request({'url':this.options.savePath});
 		this.options.auto ? this.activate(els) : this.toolbar(this.options.toolbar);
@@ -31,7 +29,7 @@ var MooInline = new Class({
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
 			).inject(document.body);	
-			t.toolbar(t.options.toolbar, mta.getElement('.miWysEditor'));
+			t.toolbar(t.options.toolbar, 0, mta.getElement('.miWysEditor'));
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -56,14 +54,13 @@ var MooInline = new Class({
 		})
 	},
 	
-	toolbar: function(row, toolbar){
-		var t = this, num = row.slice(-1), an = 'active'+num; 
-		if(!toolbar) toolbar = t.active;
-		
-		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num}).inject($(toolbar));
-		
-		if(!parent.getElement('.'+row)){ 
-			var bar = new Element('div', {'class':row}).inject(parent);
+	toolbar: function(row, num, toolbar){
+		var t = this, num = row.slice(-1), an = 'active'+num, bar, top=''; 
+		toolbar ? top =' miTop' : toolbar = t.active;
+	
+		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
+		if(!(bar = parent.getElement('.'+row))){ 
+			bar = new Element('div', {'class':row}).inject(parent);
 			MooInline.Buttons[row].each(function(val, key){
 				var properties = new Hash({
 					styles:{'background-image':'url('+t.options.imgPath+key.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0' }, //-16
@@ -89,8 +86,7 @@ var MooInline = new Class({
 	
 	exec: function(args){
 		args = $splat(args);
-		document.execCommand(args[0], args[2]||false, args[1]||null);
-		
+		document.execCommand(args[0], args[2]||false, args[1]||null);  //document.execCommand('justifyRight', false, null);
 	},	
 		
 	getRange:function(){
@@ -176,11 +172,16 @@ MooInline.Buttons = {
 		a3:{ title:'Strikethrough', shortcut:'s' },
 		a4:{ title:'Link', click:'toolbar', args:'miAddLink_2' },
 		a5:{ title:'Unlink' },
-		b0:{ title:'Justify Menu', click:'toolbar', args:'miJustify_2' },
-		b1:{ title:'Indent Menu',  click:'toolbar', args:'miIndent_2' },
-		c0:{ title:'Undo', shortcut:'z' },
-		c1:{ title:'Redo', shortcut:'y' },
-		c2:{ title:'Display HTML', click:function(){
+		j2:{ title:'Justify Menu', click:'toolbar', args:'miJustify_2' },
+		u0:{ title:'Indent Menu',  click:'toolbar', args:'miIndent_2' },
+		i0:{ title:'List Menu',  click:'toolbar', args:'miLists_2' },
+		
+		f0:{ title:'Paste', shortcut:'v' },
+		f1:{ title:'Copy', shortcut:'c' },
+		f2:{ title:'Cut', shortcut:'x' },
+		f3:{ title:'Redo', shortcut:'y' },
+		f4:{ title:'Undo', shortcut:'z' },
+		f5:{ title:'Display HTML', click:function(){
 				var d = $('displayBox');
 				if(d.hasClass('miHide')){
 					//d.removeClass('hide'); 
@@ -207,10 +208,13 @@ MooInline.Buttons = {
 	}),
 	
 	miIndent_2:new Hash({
+		u0:{title:'Numbered List', args:'InsertOrderedList'},
+		u1:{title:'Bulleted List', args:'InsertUnorderedList'}
+	}),
+	
+	miLists_2:new Hash({
 		i0:{title:'Indent'},
-		i1:{title:'Outdent'},
-		i2:{title:'Numbered List', args:'InsertOrderedList'},
-		i3:{title:'Bulleted List', args:'InsertUnorderedList'}
+		i1:{title:'Outdent'}
 	})
 }
 
