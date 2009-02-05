@@ -1,3 +1,5 @@
+//Copyright Sam Goody  ishtov@yahoo.com 
+
 var MooInline = new Class({
 	
 	Implements: [Events, Options],
@@ -6,17 +8,15 @@ var MooInline = new Class({
 		xhtml   : true,
 		auto    : true,
 		inline  : false,
-		floating: true,
-		location: 'multiple', 		// 'single', 'pageTop', 'pageBottom'
-		toolbar : 'miTextEdit_1', 	//'miMain_0' if auto is false
-		imgPath : 'mooinline/images/',
-		savePath: '/siteroller/classes/editor/update.php'
+		floating: true,					// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
+		location: 'multiple', 			// 'single', 'pageBottom'. 'pageTop' doesn't show, as it expands upwards off the page.
+		toolbar : 'miTextEdit_1', 		// 'miMain_0' if auto is false
+		imgPath : 'mooinline/images/'
 	},
 	
 	initialize: function(els, options){
 		this.setOptions(options);
 		MooInline.Buttons.self = this;
-		this.savePath = new Request({'url':this.options.savePath});
 		this.options.auto ? this.activate(els) : this.toolbar(this.options.toolbar);
 	},
 
@@ -29,7 +29,7 @@ var MooInline = new Class({
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
 			).inject(document.body);	
-			t.toolbar(t.options.toolbar, 0, mta.getElement('.miWysEditor'));
+			t.toolbar(t.options.toolbar, mta.getElement('.miWysEditor'));
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -37,10 +37,10 @@ var MooInline = new Class({
 			mta.setStyles({display:'block', width:p.width}); 
 			var top = p.top - mta.getCoordinates().height; 
 			mta.setStyles({ 'left':p.left, 'top':(top > 0 ? top : p.bottom) });
-			el.set('contentEditable', true);
+			el.set('contentEditable', true).focus();
 		}
 		function insertEl(el){
-			var div = new Element('div', {'class':'mtaTextArea '+el.get('class'), 'id':'jay', 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');//el.get('styles'), 'styles':.extend() 
+			var div = new Element('div', {'class':'mtaTextArea '+el.get('class'), 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');//el.get('styles'), 'styles':.extend() 
 			el.addClass('miHide');
 			return div;
 		}
@@ -48,20 +48,23 @@ var MooInline = new Class({
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = insertEl(el);
 			if(l=='i' || !mta) mta = insertToolbar(); 
-			if(!i) positionToolbar(el, mta); else el.addEvents({
-				'click': function(){ positionToolbar(el, mta) }
+			if(l=='b' || l=='t') el.set('contentEditable', true);
+			else if(!i) positionToolbar(el, mta); else el.addEvents({
+				'click': function(){ positionToolbar(el, mta);  },
+				'blur':function(){ mta.setStyle('display','none'); this.set('contentEditable', false);}
 			});
 		})
+		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
 	},
 	
-	toolbar: function(row, num, toolbar){
+	toolbar: function(row, toolbar){
 		var t = this, num = row.slice(-1), an = 'active'+num, bar, top=''; 
 		toolbar ? top =' miTop' : toolbar = t.active;
 	
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
-			MooInline.Buttons[row].each(function(val, key){
+			Hash.each(MooInline.Buttons[row], function(val, key){
 				var properties = new Hash({
 					styles:{'background-image':'url('+t.options.imgPath+key.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0' }, //-16
 					title: val.args,
@@ -70,7 +73,7 @@ var MooInline = new Class({
 						'mousedown': function(e){ 
 							e.stop(); 
 							t.active = this.getParent('.miWysEditor')
-							val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).attempt(val.args||val.title,t) : t.exec(val.args||val.title)
+							val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||val.title,t) : t.exec(val.args||val.title) //run(val.args..)..
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').getClean();
@@ -136,8 +139,6 @@ var MooInline = new Class({
 			[/<p>\s*<br\/?>\s*<\/p>/gi, '<p>\u00a0</p>'],				// Remove padded paragraphs - replace with non breaking space
 			[/<p>(&nbsp;|\s)*<\/p>/gi, '<p>\u00a0</p>'],
 			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
-			//[/<p>\s*<p>/g, '<p>'],									// ! Remove double <p> tags - very dangerous, see next line 
-			//[/<\/p>\s*<\/p>/g, '</p>'],								// ! Remove double ending <p>s. - it will mess up the following: <p>a<p>b</p></p> --consider switching to a system of using node trees.
 			[/<p>\W*<\/p>/g, ''],										// Remove ps with other stuff, may mess up some formatting.
 			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	// Semantic conversion.  Should be separate array that is merged in if semantic is set to true.
 			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],
@@ -147,40 +148,31 @@ var MooInline = new Class({
 		];
 		cleanup.each(function(val, key){ console.log(val); source = source.replace(val[0], val[1]); });
 		return source;
-	},
-
-	save: function(){
-		var content = this.clean(document.body.innerHTML);
-		this.savePath.send( new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 	}
 })
 
 MooInline.Buttons = {
-	miMain_0: new Hash({
+	miMain_0: {
 		m0:{'text':'SiteRoller', args:'Open Siteroller.org Homepage', 'click':function(){ window.open('http://www.siteroller.org') }},
 		m1:{'id':'miTrigger', 'text':'Edit Page', click:'place', args:'body' },
 		m2:{'text':'file'}, 
 		//m3:{'text':'metadata'},		
 		m4:{ title:'Save Changes', 'class':'saveBtn', 'styles':{'width':'75px'}, shortcut:'s', click:'save' }
-	}),
+	},
 	
-	miTextEdit_1: new Hash({ 
+	miTextEdit_1: { 
 		//click, args, shortcut, parent, title 
-		a0:{ title:'Bold', shortcut:'b' },
-		a1:{ title:'Italic', shortcut:'i' },
-		a2:{ title:'Underline', shortcut:'u' },
-		a3:{ title:'Strikethrough', shortcut:'s' },
+		a0:{ title:'Basic Editing', click:'toolbar', args:'miBasic_2'},
 		a4:{ title:'Link', click:'toolbar', args:'miAddLink_2' },
-		a5:{ title:'Unlink' },
 		j2:{ title:'Justify Menu', click:'toolbar', args:'miJustify_2' },
 		u0:{ title:'Indent Menu',  click:'toolbar', args:'miIndent_2' },
 		i0:{ title:'List Menu',  click:'toolbar', args:'miLists_2' },
-		
-		f0:{ title:'Paste', shortcut:'v' },
-		f1:{ title:'Copy', shortcut:'c' },
-		f2:{ title:'Cut', shortcut:'x' },
-		f3:{ title:'Redo', shortcut:'y' },
-		f4:{ title:'Undo', shortcut:'z' },
+		f2:{ title:'Copy, Undo, etc.', click:'toolbar', args:'miFile_2' },
+		l0:{ title:'save', click:function(){
+				var content = MooInline.Buttons.self.clean();
+				(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
+			}
+		},
 		f5:{ title:'Display HTML', click:function(){
 				var d = $('displayBox');
 				if(d.hasClass('miHide')){
@@ -188,34 +180,52 @@ MooInline.Buttons = {
 					$('displayBox').set({'styles':curEl.getCoordinates(), 'class':'', 'text':curEl.innerHTML.trim()});
 				} else d.addClass('miHide'); } 
 		}
-	}),
+	},
 	
-	miAddLink_2: new Hash({
-		l0:{ 'text':'enter the url' },
+	miBasic_2:{
+		a0:{ title:'Bold', shortcut:'b' },
+		a1:{ title:'Italic', shortcut:'i' },
+		a2:{ title:'Underline', shortcut:'u' },
+		a3:{ title:'Strikethrough', shortcut:'s' },
+		a5:{ title:'subscript'},
+		a6:{ title:'superscript'}
+	},
+	
+	miFile_2:{
+		f0:{ title:'Paste', shortcut:'v' },
+		f1:{ title:'Copy', shortcut:'c' },
+		f2:{ title:'Cut', shortcut:'x' },
+		f3:{ title:'Redo', shortcut:'y' },
+		f4:{ title:'Undo', shortcut:'z' }
+	},
+	
+	miAddLink_2: {
+		l0:{ 'text':'enter the url', element:'a' },
 		l1:{ 'type':'text', 'id':'miLink', unselectable: 'off',  events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}}, 
-		l2:{ 'type':'submit', 'value':'add link', events:{'click':function(){ MooInline.Buttons.self.setRange()}}}
-	}),
+		l2:{ 'type':'submit', 'value':'add link', events:{'click':function(){ MooInline.Buttons.self.setRange()}} },
+		a4:{ title:'Unlink' }
+	},
 	
-	miNoLink_2: new Hash({
+	miNoLink_2: {
 		n0:{ 'text':'please select the text to be made into a link'}
-	}),
+	},
 	
-	miJustify_2: new Hash({
+	miJustify_2: {
 		j3:{ title:'Justify Left', args:'JustifyLeft'},
 		j2:{ title:'Justify Center', args:'JustifyCenter'},
 		j1:{ title:'Justify Right', args:'JustifyRight'},
 		j0:{ title:'Justify Full', args:'JustifyFull'}
-	}),
+	},
 	
-	miIndent_2:new Hash({
+	miIndent_2:{
 		u0:{title:'Numbered List', args:'InsertOrderedList'},
 		u1:{title:'Bulleted List', args:'InsertUnorderedList'}
-	}),
+	},
 	
-	miLists_2:new Hash({
+	miLists_2:{
 		i0:{title:'Indent'},
 		i1:{title:'Outdent'}
-	})
+	}
 }
 
-//function debug(msg){ if(console)console.log(msg); else alert(msg) }
+function debug(msg){ if(console)console.log(msg); else alert(msg) }

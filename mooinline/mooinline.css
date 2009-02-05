@@ -1,15 +1,17 @@
 div.miMooInline{position:absolute; left:0; width:100%; xheight:50px; background-color:cyan; overflow:visible}
-div.miMooInline div.miWysEditor { position:absolute; left:0; bottom:0; xbackground-color:#D8D8E0; background-color:#BCBECD; width:100%; xheight:20px; color:#222; font: 10px Arial; xposition:fixed; xbottom:0; }
-div.miMooInline div.miWysEditor div{ width:100%;  xheight:20px; position:relative; xheight:25px;}
+div.miMooInline div.miWysEditor { position:absolute; left:0; bottom:0; background-color:#BCBECD; width:100%; color:#222; font: 10px Arial; background-image:url('images/background_silver.jpg'); background-repeat:repeat-x;}
+div.miMooInline div.miWysEditor div{ width:100%; position:relative; }
 div.miMooInline div.miWysEditor span{ display:inline-block; width:16px; height:16px; margin:2px; cursor:pointer;}
 div.miMooInline div.miWysEditor input{width:100px; height:18px;}
 div.miMooInline>div.miWysEditor>div>div{width:100%}
 div.miMooInline div.miWysEditor .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
-div.miMooInline div.miWysEditor div.miTop{ border-bottom:1px #bbb solid; height:18pxpx; overflow:hidden; vertical-align:bottom; background-image:url('images/background_silver.jpg'); text-align:left; background-repeat:repeat-x}
+div.miMooInline div.miWysEditor div.miTop{ border-bottom:1px #bbb solid; height:18pxpx; overflow:hidden; vertical-align:bottom; text-align:left; }
+div.miMooInline.miPositionb{position:fixed; bottom:0}
+div.miMooInline.miPositiont{position:fixed; top:0;}
 .miHide{ display:none; }
 .mtaTextArea{ border:1px solid #666 }
 
-xdiv.miWysEditor>div.miR0>div.miMain_0>span{display:inline; font:bold 11px/20px Tahoma}
+xdiv.miWysEditor>div.miR0>div.miMain_0>span{xdisplay:inline; font:bold 11px/20px Tahoma}
 div.miWysEditor>div.miR1{ border-bottom:1px #bbb solid; }
 div.miWysEditor>div.miMain_0>div.miText{ display:block }
 
