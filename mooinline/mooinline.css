@@ -1,7 +1,8 @@
 div.miMooInline{position:absolute; left:0; width:100%; xheight:50px; background-color:cyan; overflow:visible}
 div.miMooInline div.miWysEditor { position:absolute; left:0; bottom:0; background-color:#BCBECD; width:100%; color:#222; font: 10px Arial; background-image:url('images/background_silver.jpg'); background-repeat:repeat-x;}
 div.miMooInline div.miWysEditor div{ width:100%; position:relative; }
-div.miMooInline div.miWysEditor span{ display:inline-block; width:16px; height:16px; margin:2px; cursor:pointer;}
+div.miMooInline div.miWysEditor a{ display:inline-block; width:16px; height:16px; margin:2px; cursor:pointer; text-decoration:none;}
+div.miMooInline div.miWysEditor a:hover{ display:inline-block; width:16px; height:16px; margin:0;  border:2px solid red; cursor:pointer;}
 div.miMooInline div.miWysEditor input{width:100px; height:18px;}
 div.miMooInline>div.miWysEditor>div>div{width:100%}
 div.miMooInline div.miWysEditor .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}

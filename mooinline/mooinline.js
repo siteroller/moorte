@@ -9,18 +9,21 @@ var MooInline = new Class({
 		auto    : true,
 		inline  : false,
 		floating: true,					// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
-		location: 'multiple', 			// 'single', 'pageBottom'. 'pageTop' doesn't show, as it expands upwards off the page.
+		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show, as it expands upwards off the page.
 		toolbar : 'miTextEdit_1', 		// 'miMain_0' if auto is false
-		imgPath : 'mooinline/images/'
+		imgPath : 'mooinline/images/',
+		defaults: [ 'Bold,Italic,Underline,Strikethrough,subscript,superscript','Paste,Copy,Cut,Redo,Undo','Unlink,l0,l1,l2',
+					'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull','InsertOrderedList,InsertUnorderedList','Indent,Outdent']
 	},
 	
 	initialize: function(els, options){
+		this.toolbars = {};
 		this.setOptions(options);
 		MooInline.Buttons.self = this;
-		this.options.auto ? this.activate(els) : this.toolbar(this.options.toolbar);
+		this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
 	},
 
-	activate: function(selectors, toolbars){
+	insertMI: function(selectors, toolbars){
 		
 		var els = $$(selectors||'textarea, .mooinline'), i=this.options.inline, l=this.options.location.substr(4,1).toLowerCase(), t=this, mta;
 		
@@ -28,8 +31,8 @@ var MooInline = new Class({
 			var mta = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
-			).inject(document.body);	
-			t.toolbar(t.options.toolbar, mta.getElement('.miWysEditor'));
+			).inject(document.body);
+			t.toolbar(t.createToolbar(t.options.defaults), mta.getElement('.miWysEditor'));//t.options.toolbar
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -48,7 +51,7 @@ var MooInline = new Class({
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = insertEl(el);
 			if(l=='i' || !mta) mta = insertToolbar(); 
-			if(l=='b' || l=='t') el.set('contentEditable', true);
+			if(!l || l=='b' || l=='t') el.set('contentEditable', true);
 			else if(!i) positionToolbar(el, mta); else el.addEvents({
 				'click': function(){ positionToolbar(el, mta);  },
 				'blur':function(){ mta.setStyle('display','none'); this.set('contentEditable', false);}
@@ -57,27 +60,46 @@ var MooInline = new Class({
 		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
 	},
 	
-	toolbar: function(row, toolbar){
-		var t = this, num = row.slice(-1), an = 'active'+num, bar, top=''; 
-		toolbar ? top =' miTop' : toolbar = t.active;
+	createToolbar:function(buttons){
+		var createToolbar = new Hash(), n=0, t=this;
+		buttons.each(function(item, index){
+			var items = item.split(',');
+			if(!items[1]) createToolbar.extend(MooInline.Buttons.item);
+			else {
+				createToolbar[n] = {'click':'toolbar', 'img':MooInline.Buttons[items[0]].img};
+				//if (items[1]) t.toolbars[n++] = items;
+				if (items[1]) MooInline.Buttons[n++] = items;
+			}
+		})
+		MooInline.Buttons['ct'+n] = createToolbar;
+		return 'jt0';
+	},
 	
+	toolbar: function(row, toolbar){
+		
+		debug(row)
+		//debug(Hash.getKeys(row)[0])
+		var t = this, num = row.slice(-1), an = 'active'+num, bar, top=''; //num = ,
+		toolbar ? top =' miTop' : toolbar = t.active; //may throw a global var, improve.
+		
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
-			Hash.each(MooInline.Buttons[row], function(val, key){
+			Hash.each(MooInline.Buttons[row], function(val, key){//row
 				var properties = new Hash({
-					styles:{'background-image':'url('+t.options.imgPath+key.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0' }, //-16
-					title: val.args,
+					href:"#",
+					styles:{val.img?({'background-image':'url('+t.options.imgPath+val.img.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0'}):'' }, //-16
+					title: key || val.args,
 					unselectable: 'on',
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
 							t.active = this.getParent('.miWysEditor')
-							val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||val.title,t) : t.exec(val.args||val.title) //run(val.args..)..
+							val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||key||val.title,t) : t.exec(val.args||val.title) //run(val.args..)..
 						}
 					}
-				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').getClean();
-				var btn = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'span'), properties).inject(bar);
+				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
+				var btn = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
 				if (val.click) bar.addEvent('keydown', function(){ if (event.key == val.shortcut && event.control) val.click });//change to switch
 			})
 		}
@@ -151,7 +173,64 @@ var MooInline = new Class({
 	}
 })
 
+//reserved keywords: { args:[defaults to key than to title] arguments to be passed to click event, click: 'click'event,
+// img:background image, shortcut:keyboard shortcut, element:[defaults to 'a'] element type}
+//If type is 'text','submit',or 'password', element is assumed to be a 'input'.
+//All other key/vals will be passed in to the new Element() and override any default values set.   	
 MooInline.Buttons = {
+	'Bold'         :{ img:'a0', shortcut:'b' },
+	'Italic'       :{ img:'a1', shortcut:'i' },
+	'Underline'    :{ img:'a2', shortcut:'u' },
+	'Strikethrough':{ img:'a3', shortcut:'s' },
+	'Subscript'    :{ img:'a5'},
+	'Superscript'  :{ img:'a6'},
+	'Indent'       :{ img:'i0'},
+	'Outdent'      :{ img:'i1'},
+	'Paste'        :{ img:'f0', shortcut:'v' },
+	'Copy'         :{ img:'f1', shortcut:'c' },
+	'Cut'          :{ img:'f2', shortcut:'x' },
+	'Redo'         :{ img:'f3', shortcut:'y' },
+	'Undo'         :{ img:'f4', shortcut:'z' },
+	'JustifyLeft'  :{ img:'j3', title:'Justify Left'  },
+	'JustifyCenter':{ img:'j2', title:'Justify Center'},
+	'JustifyRight' :{ img:'j1', title:'Justify Right' },
+	'JustifyFull'  :{ img:'j0', title:'Justify Full'  },
+	'InsertOrderedList'  :{img:'u0', title:'Numbered List'},
+	'InsertUnorderedList':{img:'u1', title:'Bulleted List'},
+	'Unlink'       :{ img:'a4'},
+	'l0'           :{ 'text':'enter the url', element:'span' },
+	'l1'           :{ 'type':'text',   events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
+	'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
+	'noLink'       :{ 'text':'please select the text to be made into a link'},
+	'Save'         :{ img:'', click:function(){
+						var content = MooInline.Buttons.self.clean();
+						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
+					}},
+	'Display HTML' :{ click:function(){
+						var d = $('displayBox');
+						if(d.hasClass('miHide')){
+							//d.removeClass('hide'); 
+							$('displayBox').set({'styles':curEl.getCoordinates(), 'class':'', 'text':curEl.innerHTML.trim()});
+						} else d.addClass('miHide'); 
+					}},
+	'colorPicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
+						var lx = mouseLocation.x, ly = mouseLocation.y, Sy=sideSlider.y, b = this.get('width')/7, c=[];
+						for(var i=0; i<3; i++){
+							var n0=b*i-l,n1=l-b*(i+5);
+							if((c[i]=n0<0||n1<0?0:n0<b?n0:n1)>b)c[i]=b; //if(x>b)x=b;x=n0<0||n1<0?0:n0<b?n0:n1;  //c'mon!! Prize for lack of legibility!!!
+							x+=((256-x)/256)*Sy;
+						}
+						c[2]=b-c[2];
+					}},
+	'Open Siteroller.org Homepage':{'text':'SiteRoller', 'click':function(){ window.open('http://www.siteroller.org') }},
+	'body'         :{'id':'miTrigger', 'text':'Edit Page', click:'place'},
+	'file'         :{'text':'file'}, 
+	'metadata'     :{'text':'metadata'},		
+	'Save Changes' :{click:'save', shortcut:'s', 'class':'saveBtn', 'styles':{'width':'75px'} },
+	'newBar'       :{click:'toolbar', args:''}
+}
+/*
+MooInlinex.Buttons = {
 	miMain_0: {
 		m0:{'text':'SiteRoller', args:'Open Siteroller.org Homepage', 'click':function(){ window.open('http://www.siteroller.org') }},
 		m1:{'id':'miTrigger', 'text':'Edit Page', click:'place', args:'body' },
@@ -169,16 +248,17 @@ MooInline.Buttons = {
 		i0:{ title:'List Menu',  click:'toolbar', args:'miLists_2' },
 		f2:{ title:'Copy, Undo, etc.', click:'toolbar', args:'miFile_2' },
 		l0:{ title:'save', click:function(){
-				var content = MooInline.Buttons.self.clean();
-				(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
-			}
+						var content = MooInline.Buttons.self.clean();
+						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
+					}
 		},
 		f5:{ title:'Display HTML', click:function(){
 				var d = $('displayBox');
 				if(d.hasClass('miHide')){
 					//d.removeClass('hide'); 
 					$('displayBox').set({'styles':curEl.getCoordinates(), 'class':'', 'text':curEl.innerHTML.trim()});
-				} else d.addClass('miHide'); } 
+				} else d.addClass('miHide'); 
+			} 
 		}
 	},
 	
@@ -227,5 +307,5 @@ MooInline.Buttons = {
 		i1:{title:'Outdent'}
 	}
 }
-
+*/
 function debug(msg){ if(console)console.log(msg); else alert(msg) }
