@@ -12,8 +12,7 @@ var MooInline = new Class({
 		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show, as it expands upwards off the page.
 		toolbar : 'miTextEdit_1', 		// 'miMain_0' if auto is false
 		imgPath : 'mooinline/images/',
-		defaults: [ 'Bold,Italic,Underline,Strikethrough,subscript,superscript','Paste,Copy,Cut,Redo,Undo','Unlink,l0,l1,l2',
-					'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull','InsertOrderedList,InsertUnorderedList','Indent,Outdent']
+		defaults: ['Main','File','Link','Justify','Lists','Indent']   
 	},
 	
 	initialize: function(els, options){
@@ -32,7 +31,7 @@ var MooInline = new Class({
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
 			).inject(document.body);
-			t.toolbar(t.createToolbar(t.options.defaults), mta.getElement('.miWysEditor'));//t.options.toolbar
+			t.toolbar({'miTop':t.options.defaults}, mta.getElement('.miWysEditor'));//t.options.toolbar
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -75,17 +74,18 @@ var MooInline = new Class({
 		return 'jt0';
 	},
 	
-	toolbar: function(row, toolbar){
-		
-		debug(row)
-		//debug(Hash.getKeys(row)[0])
-		var t = this, num = row.slice(-1), an = 'active'+num, bar, top=''; //num = ,
-		toolbar ? top =' miTop' : toolbar = t.active; //may throw a global var, improve.
+	toolbar: function(rowObj, toolbar){ 	
+
+		var t = this, num = (t.active.num||0), an = 'active'+num, bar, top='', row = row.getKeys()[0], buttons = rowObj.row; //num = row.slice(-1),
+		toolbar ? top =' miTop' : toolbar = t.active.toolbar;  
 		
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
-			Hash.each(MooInline.Buttons[row], function(val, key){//row
+			buttons.each(function(item, index){  
+				key = item;
+				val = MooInline.Buttons[key]
+			//Hash.each(MooInline.Buttons[row], function(val, key){//row.  
 				var properties = new Hash({
 					href:"#",
 					styles:{val.img?({'background-image':'url('+t.options.imgPath+val.img.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0'}):'' }, //-16
@@ -186,9 +186,9 @@ MooInline.Buttons = {
 	'Superscript'  :{ img:'a6'},
 	'Indent'       :{ img:'i0'},
 	'Outdent'      :{ img:'i1'},
-	'Paste'        :{ img:'f0', shortcut:'v' },
-	'Copy'         :{ img:'f1', shortcut:'c' },
-	'Cut'          :{ img:'f2', shortcut:'x' },
+	'Paste'        :{ img:'f0'},
+	'Copy'         :{ img:'f1'},
+	'Cut'          :{ img:'f2'},
 	'Redo'         :{ img:'f3', shortcut:'y' },
 	'Undo'         :{ img:'f4', shortcut:'z' },
 	'JustifyLeft'  :{ img:'j3', title:'Justify Left'  },
@@ -227,7 +227,14 @@ MooInline.Buttons = {
 	'file'         :{'text':'file'}, 
 	'metadata'     :{'text':'metadata'},		
 	'Save Changes' :{click:'save', shortcut:'s', 'class':'saveBtn', 'styles':{'width':'75px'} },
-	'newBar'       :{click:'toolbar', args:''}
+	'newBar'       :{click:'toolbar', args:''},
+	
+	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','subscript','superscript']},
+	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
+	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
+	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
+	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
+	'Indent'       :{click:['Indent','Outdent']}
 }
 /*
 MooInlinex.Buttons = {
@@ -307,5 +314,14 @@ MooInlinex.Buttons = {
 		i1:{title:'Outdent'}
 	}
 }
+
+//debug(row)
+//debug(Hash.getKeys(row)[0])
+//row = array of buttons, or object.  If array, must be from top?  
+//num - the layer down, must be calculated to be one lower thwn active.  Active may need to track the number as well.
+//key = $type(row) == 'array' ? 'miTop' : ;
+//btns = $splat($type(row))
+
+
 */
 function debug(msg){ if(console)console.log(msg); else alert(msg) }
