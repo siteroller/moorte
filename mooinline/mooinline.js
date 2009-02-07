@@ -59,21 +59,6 @@ var MooInline = new Class({
 		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
 	},
 	
-	createToolbar:function(buttons){
-		var createToolbar = new Hash(), n=0, t=this;
-		buttons.each(function(item, index){
-			var items = item.split(',');
-			if(!items[1]) createToolbar.extend(MooInline.Buttons.item);
-			else {
-				createToolbar[n] = {'click':'toolbar', 'img':MooInline.Buttons[items[0]].img};
-				//if (items[1]) t.toolbars[n++] = items;
-				if (items[1]) MooInline.Buttons[n++] = items;
-			}
-		})
-		MooInline.Buttons['ct'+n] = createToolbar;
-		return 'jt0';
-	},
-	
 	toolbar: function(rowObj, toolbar){ 	
 
 		var t = this, num = (t.active.num||0), an = 'active'+num, bar, top='', row = row.getKeys()[0], buttons = rowObj.row; //num = row.slice(-1),
@@ -82,10 +67,8 @@ var MooInline = new Class({
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
-			buttons.each(function(item, index){  
-				key = item;
-				val = MooInline.Buttons[key]
-			//Hash.each(MooInline.Buttons[row], function(val, key){//row.  
+			buttons.each(function(key){  
+				var val = MooInline.Buttons[key];
 				var properties = new Hash({
 					href:"#",
 					styles:{val.img?({'background-image':'url('+t.options.imgPath+val.img.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0'}):'' }, //-16
@@ -321,6 +304,22 @@ MooInlinex.Buttons = {
 //num - the layer down, must be calculated to be one lower thwn active.  Active may need to track the number as well.
 //key = $type(row) == 'array' ? 'miTop' : ;
 //btns = $splat($type(row))
+//Hash.each(MooInline.Buttons[row], function(val, key){//row.  
+createToolbar:function(buttons){
+	var createToolbar = new Hash(), n=0, t=this;
+	buttons.each(function(item, index){
+		var items = item.split(',');
+		if(!items[1]) createToolbar.extend(MooInline.Buttons.item);
+		else {
+			createToolbar[n] = {'click':'toolbar', 'img':MooInline.Buttons[items[0]].img};
+			//if (items[1]) t.toolbars[n++] = items;
+			if (items[1]) MooInline.Buttons[n++] = items;
+		}
+	})
+	MooInline.Buttons['ct'+n] = createToolbar;
+	return 'jt0';
+},
+	
 
 
 */
