@@ -1,4 +1,6 @@
-//Copyright Sam Goody  ishtov@yahoo.com 
+//Copyright November 2008, Sam Goody ishtov@yahoo.com 
+//Ideas and some regexs from MooEditable.  
+//Contributers: Guillerr, 
 
 var MooInline = new Class({
 	
@@ -6,19 +8,19 @@ var MooInline = new Class({
 
 	options:{
 		xhtml   : true,
+		semantic: true,
 		auto    : true,
 		inline  : false,
 		floating: true,					// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
 		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show, as it expands upwards off the page.
 		toolbar : 'miTextEdit_1', 		// 'miMain_0' if auto is false
-		imgPath : 'mooinline/images/',
 		defaults: ['Main','File','Link','Justify','Lists','Indent']   
 	},
 	
 	initialize: function(els, options){
-		this.toolbars = {};
 		this.setOptions(options);
 		MooInline.Buttons.self = this;
+		alert(0)
 		this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
 	},
 
@@ -31,7 +33,8 @@ var MooInline = new Class({
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
 			).inject(document.body);
-			t.toolbar({'miTop':t.options.defaults}, mta.getElement('.miWysEditor'));//t.options.toolbar
+			t.active ={num:0, toolbar:mta.getElement('.miWysEditor')}
+			t.toolbar({'miTop':t.options.defaults});
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -61,29 +64,36 @@ var MooInline = new Class({
 	
 	toolbar: function(rowObj, toolbar){ 	
 
-		var t = this, num = (t.active.num||0), an = 'active'+num, bar, top='', row = row.getKeys()[0], buttons = rowObj.row; //num = row.slice(-1),
-		toolbar ? top =' miTop' : toolbar = t.active.toolbar;  
+		var t = this, num = (t.active.num||0), bar, top='', row = Hash.getKeys(rowObj)[0], buttons = rowObj[row], toolbar = t.active.toolbar; //num = row.slice(-1), an = 'active'+num,
+		//toolbar ? top =' miTop' : toolbar = t.active.toolbar;  
+		//console.log(buttons)
 		
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
-			buttons.each(function(key){  
-				var val = MooInline.Buttons[key];
+			buttons.each(function(btn){
+				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click == 'array'));
+				if(!val.img && clik && MooInline.Buttons[val.click[0].img])val.img = MooInline.Buttons[val.click[0].img];  						//Is there a better way to avoid an error?!!	
+				if($type(val.img == 'number')){ x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
+				
 				var properties = new Hash({
 					href:"#",
-					styles:{val.img?({'background-image':'url('+t.options.imgPath+val.img.substr(0,1)+'.gif)', 'background-position':(16+16*key.substr(1))+'px 0'}):'' }, //-16
-					title: key || val.args,
 					unselectable: 'on',
+					title: btn + clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':''), 						//a)Title, if specified. b) else btn, plus - if opens menu, " Menu".  If has shortcut, (Ctrl+shrtct).  [val.arg has been removed as it cannot be called.]
+					styles:val.img ? {'background-image':'url('+val.img+')', 'background-position':(16+16*x)+'px 0'}:'', //-16
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
-							t.active = this.getParent('.miWysEditor')
-							val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||key||val.title,t) : t.exec(val.args||val.title) //run(val.args..)..
+							t.active = {toolbar:this.getParent('.miWysEditor')}
+							var obj={}; obj[btn]=val.click;
+							console.log(obj)
+							val.click ? (clik ? t.toolbar(obj) : val.click(val.args||btn||val.title)) : t.exec(val.args||val.title)
+							//val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||btn||val.title,t) :  //run(val.args..)..
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
-				var btn = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
-				if (val.click) bar.addEvent('keydown', function(){ if (event.key == val.shortcut && event.control) val.click });//change to switch
+				new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
+				if (val.click) bar.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click });//change to switch
 			})
 		}
 		var n = toolbar.retrieve(num);
@@ -119,7 +129,7 @@ var MooInline = new Class({
 		//var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
 	},
 	
-	clean: function(source){
+	clean: function(html){
 		if($('modalOverlay')){ 
 			debug('modal going'); 
 			$('windowUnderlay').destroy();
@@ -131,6 +141,16 @@ var MooInline = new Class({
 		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
 	
 		var br = '<br'+(this.options.xhtml?'/':'')+'>';
+		var xhtml = [
+			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
+		];
+		var semantic = [
+			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	// Semantic conversion.  Should be separate array that is merged in if semantic is set to true.
+			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],
+			[/<b\b[^>]*>(.*?)<\/b[^>]*>/gi, '<strong>$1</strong>'],
+			[/<i\b[^>]*>(.*?)<\/i[^>]*>/gi, '<em>$1</em>'],
+			[/<u\b[^>]*>(.*?)<\/u[^>]*>/gi, '<span style="text-decoration: underline;">$1</span>']
+		];
 		var cleanup = [
 			[/<br class\="webkit-block-placeholder">/gi, "<br />"],		// Webkit cleanup
 			[/<span class="Apple-style-span">(.*)<\/span>/gi, '$1'],	// should be corrected, not to get messed over on nested spans - SG!!!
@@ -143,15 +163,11 @@ var MooInline = new Class({
 			[/<br\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],		// Remove BRs from end of blocks
 			[/<p>\s*<br\/?>\s*<\/p>/gi, '<p>\u00a0</p>'],				// Remove padded paragraphs - replace with non breaking space
 			[/<p>(&nbsp;|\s)*<\/p>/gi, '<p>\u00a0</p>'],
-			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
 			[/<p>\W*<\/p>/g, ''],										// Remove ps with other stuff, may mess up some formatting.
-			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	// Semantic conversion.  Should be separate array that is merged in if semantic is set to true.
-			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],
-			[/<b\b[^>]*>(.*?)<\/b[^>]*>/gi, '<strong>$1</strong>'],
-			[/<i\b[^>]*>(.*?)<\/i[^>]*>/gi, '<em>$1</em>'],
-			[/<u\b[^>]*>(.*?)<\/u[^>]*>/gi, '<span style="text-decoration: underline;">$1</span>']
 		];
-		cleanup.each(function(val, key){ console.log(val); source = source.replace(val[0], val[1]); });
+		if(this.options.xhtml)cleanup.extend(xhtml);
+		if(this.options.semantic)cleanup.extend(semantic);
+		cleanup.each(function(reg){ console.log(reg); html = html.replace(reg[0], reg[1]); });
 		return source;
 	}
 })
@@ -212,7 +228,7 @@ MooInline.Buttons = {
 	'Save Changes' :{click:'save', shortcut:'s', 'class':'saveBtn', 'styles':{'width':'75px'} },
 	'newBar'       :{click:'toolbar', args:''},
 	
-	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','subscript','superscript']},
+	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
 	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
 	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
 	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
