@@ -1,4 +1,4 @@
-/* Copyright November 2008, Sam Goody ishtov@yahoo.com 
+/* Copyright November 2008, Sam Goody, ishtov@yahoo.com 
 *   Licensed under the Open Source License
 *
 * 	Credits:
@@ -16,11 +16,12 @@
 *		})
 *		
 *	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
-*		click: [defaults to the 'document.execute' command] the mousedown event when the button is pressed,
+*		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
 *		args:  [defaults to object key] arguments to be passed to click event, 
-*		img:   [If a number, defaults to 'images/i.gif'. Otherwise, no default] background image
+*		img:   [If a number, defaults to 'images/i.gif'. If opens toolbar, defaults to image of first button in toolbar.  Otherwise, no default] background image
 *		shortcut: [no default] keyboard shortcut
 *		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
+*		title: [defaults to object key, or to object key plus " Menu" if button opens toolbar.  If has shortcut, defaults to object key plus (Ctrl+shortcut).  ]
 */
 
 var MooInline = new Class({
@@ -32,19 +33,19 @@ var MooInline = new Class({
 		semantic: true,
 		auto    : true,
 		inline  : false,
-		floating: true,					// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
-		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
-		defaults: ['Main','File','Link','Justify','Lists','Indents','|','Save']   //toolbar : 'miTextEdit_1',  'miMain_0' if auto is false
+		floating: true,			// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
+		location: 'multiple', 	// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
+		defaults: ['Main','File','Link','Justify','Lists','Indents','|','Save']
 	},
 	
 	initialize: function(els, options){
-		this.setOptions(options);
+		this.setOptions(options);	alert('h');
 		MooInline.Buttons.self = this;
 		this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
 	},
 
 	insertMI: function(selectors, toolbars){
-		
+	
 		var els = $$(selectors||'textarea, .mooinline'), i=this.options.inline, l=this.options.location.substr(4,1).toLowerCase(), t=this, mta;
 		
 		function insertToolbar(){
@@ -80,23 +81,24 @@ var MooInline = new Class({
 		})
 		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
 	},
-	
+
 	toolbar: function(buttons, row, num){ 	
+	
 		var t = this, bar, toolbar = t.active.toolbar;
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num}).inject($(toolbar));
-		
+	
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
-				//if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];				//Is there a better way to avoid an error?!!	
-				if($type(val.img*1) == 'number'){console.log('val.img'); x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
+				//if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];
+				if($type(val.img*1) == 'number'){ x = val.img; val.img = 'mooinline/images/i.gif' };
 								
 				var properties = new Hash({
 					href:'javascript:void(0)',
 					unselectable: 'on',
-					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')), 						//a)Title, if specified. b) else btn, plus - if opens menu, " Menu".  If has shortcut, (Ctrl+shrtct).  [val.arg has been removed as it cannot be called.]
-					styles:val.img ? {'background-image':'url('+val.img+')', 'background-position':(16+16*x)+'px 0'}:'', //-16
+					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')),	
+					styles:val.img ? {'background-image':'url('+val.img+')', 'background-position':(16+16*x)+'px 0'}:'',
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
@@ -109,6 +111,7 @@ var MooInline = new Class({
 				if (val.click) bar.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click });//change to switch
 			})
 		}
+		
 		var n = toolbar.retrieve(num);
 		if(n) n.setStyle('display', 'none')
 		toolbar.store(num, bar);
@@ -185,10 +188,11 @@ var MooInline = new Class({
 		if(this.options.semantic)cleanup.extend(semantic);
 		cleanup.each(function(reg){ console.log(reg); html = html.replace(reg[0], reg[1]); });
 		return source;
-	}
+	}	
 })
 
 MooInline.Buttons = new Hash({
+
 	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
 	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
 	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
@@ -196,7 +200,7 @@ MooInline.Buttons = new Hash({
 	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
 	'Indents'       :{click:['Indent','Outdent']},
 	
-	'|'            :{text:'|'},
+	'|'            :{text:'|', 'class':'miPipe'},
 	'Bold'         :{ img:'0', shortcut:'b' },
 	'Italic'       :{ img:'1', shortcut:'i' },
 	'Underline'    :{ img:'2', shortcut:'u' },
@@ -243,7 +247,7 @@ MooInline.Buttons = new Hash({
 					}}
 })
 
-
+/*
 MooInline.Buttons.extend({
 	'Open Siteroller.org Homepage':{'text':'SiteRoller', 'click':function(){ window.open('http://www.siteroller.org') }},
 	'body'         :{'id':'miTrigger', 'text':'Edit Page', click:'place'},
@@ -254,3 +258,6 @@ MooInline.Buttons.extend({
 });
 
 function debug(msg){ if(console)console.log(msg); else alert(msg) }
+
+MooInline.Buttons = new Hash({});
+*/
