@@ -1,6 +1,27 @@
-//Copyright November 2008, Sam Goody ishtov@yahoo.com 
-//Ideas and some regexs from MooEditable.  
-//Contributers: Guillerr, 
+/* Copyright November 2008, Sam Goody ishtov@yahoo.com 
+*   Licensed under the Open Source License
+*
+* 	Credits:
+*	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
+*	Regexes from MooEditable (Both the original and Ryan and Orefalo's excellent contributions).
+*	We really want your help!  Please join!!
+*
+*	Usage: 
+*		new MooInline(); - applies to textareas and elements with the class "mooinline"
+*		new MooInline('span.editMe', {inline:true}) - will make the spans with the class of editme editable inline.
+*		new MooInline({defaults:['Bold', 'HelloWorld, ['JustifyLeft',JustifyRight']]}) - Toolbar will have 3 buttons, one of which is custom defined.  Third button opens a menu with 2 justify options.
+*	Extending:
+*		MooInline.Buttons.extend({
+*			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
+*		})
+*		
+*	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
+*		click: [defaults to the 'document.execute' command] the mousedown event when the button is pressed,
+*		args:  [defaults to object key] arguments to be passed to click event, 
+*		img:   [If a number, defaults to 'images/i.gif'. Otherwise, no default] background image
+*		shortcut: [no default] keyboard shortcut
+*		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
+*/
 
 var MooInline = new Class({
 	
@@ -12,15 +33,13 @@ var MooInline = new Class({
 		auto    : true,
 		inline  : false,
 		floating: true,					// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
-		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show, as it expands upwards off the page.
-		toolbar : 'miTextEdit_1', 		// 'miMain_0' if auto is false
-		defaults: ['Main','File','Link','Justify','Lists','Indent']   
+		location: 'multiple', 			// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
+		defaults: ['Main','File','Link','Justify','Lists','Indents','|','Save']   //toolbar : 'miTextEdit_1',  'miMain_0' if auto is false
 	},
 	
 	initialize: function(els, options){
 		this.setOptions(options);
 		MooInline.Buttons.self = this;
-		alert(0)
 		this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
 	},
 
@@ -33,8 +52,8 @@ var MooInline = new Class({
 				 new Element('div', {'class':'miWysEditor' }),
 				 new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })
 			).inject(document.body);
-			t.active ={num:0, toolbar:mta.getElement('.miWysEditor')}
-			t.toolbar({'miTop':t.options.defaults});
+			t.active = {toolbar:mta.getElement('.miWysEditor')}
+			t.toolbar(t.options.defaults, 'miStart', 0);
 			return mta;
 		}
 		function positionToolbar(el, mta){
@@ -62,34 +81,27 @@ var MooInline = new Class({
 		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
 	},
 	
-	toolbar: function(rowObj, toolbar){ 	
-
-		var t = this, bar, top='', num = (t.active.num||0), row = Hash.getKeys(rowObj)[0], buttons = rowObj[row], toolbar = t.active.toolbar; //num = row.slice(-1), an = 'active'+num,
-		//toolbar ? top =' miTop' : toolbar = t.active.toolbar;  
-		//console.log(buttons).  first time {miTop:['Main', 'Justify'].  row = miTop.  val = ['Main', 'Justify'], num = 0, toolbar = .wysEditor}
+	toolbar: function(buttons, row, num){ 	
+		var t = this, bar, toolbar = t.active.toolbar;
+		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num}).inject($(toolbar));
 		
-		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
-				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click == 'array')); //clik = true, val = [click:['Bold', 'Italic']]
-				if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];  						//Is there a better way to avoid an error?!!	
-				if($type(val.img) == 'number'){ x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
-				
+				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
+				//if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];				//Is there a better way to avoid an error?!!	
+				if($type(val.img*1) == 'number'){console.log('val.img'); x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
+								
 				var properties = new Hash({
-					href:"#",
+					href:'javascript:void(0)',
 					unselectable: 'on',
-					title: btn + clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':''), 						//a)Title, if specified. b) else btn, plus - if opens menu, " Menu".  If has shortcut, (Ctrl+shrtct).  [val.arg has been removed as it cannot be called.]
+					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')), 						//a)Title, if specified. b) else btn, plus - if opens menu, " Menu".  If has shortcut, (Ctrl+shrtct).  [val.arg has been removed as it cannot be called.]
 					styles:val.img ? {'background-image':'url('+val.img+')', 'background-position':(16+16*x)+'px 0'}:'', //-16
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
 							t.active = {toolbar:this.getParent('.miWysEditor')}
-							var obj={}; obj[btn]=val.click;
-							console.log(obj)
-							val.click ? (clik ? t.toolbar(obj) : val.click(val.args||btn)) : t.exec(val.args||val.title)
-							//calls toolbar({'Main':['Bold', 'Italics']}).  Problems: 1)dissapears the wrong bar, num not stored correctly.  Cant check obj when obj doesnt exist
-							//val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||btn||val.title,t) :  //run(val.args..)..
+							clik ? t.toolbar(val.click,btn,num+1) : (val.click || t.exec)(val.args||btn);
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
@@ -146,6 +158,9 @@ var MooInline = new Class({
 			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
 		];
 		var semantic = [
+			[/<li>\s*<div>(.+?)<\/div><\/li>/g, '<li>$1</li>'],			//remove divs from <li>
+			[/^([\w\s]+.*?)<div>/i, '<p>$1</p><div>'],					//remove stupid apple divs
+			[/<div>(.+?)<\/div>/ig, '<p>$1</p>'],
 			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	// Semantic conversion.  Should be separate array that is merged in if semantic is set to true.
 			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],
 			[/<b\b[^>]*>(.*?)<\/b[^>]*>/gi, '<strong>$1</strong>'],
@@ -173,28 +188,32 @@ var MooInline = new Class({
 	}
 })
 
-//reserved keywords: { args:[defaults to key than to title] arguments to be passed to click event, click: 'click'event,
-// img:background image, shortcut:keyboard shortcut, element:[defaults to 'a'] element type}
-//If type is 'text','submit',or 'password', element is assumed to be a 'input'.
-//All other key/vals will be passed in to the new Element() and override any default values set.   	
-MooInline.Buttons = {
-	'Bold'         :{ img:'a0', shortcut:'b' },
-	'Italic'       :{ img:'a1', shortcut:'i' },
-	'Underline'    :{ img:'a2', shortcut:'u' },
-	'Strikethrough':{ img:'a3', shortcut:'s' },
-	'Subscript'    :{ img:'a5'},
-	'Superscript'  :{ img:'a6'},
-	'Indent'       :{ img:'i0'},
-	'Outdent'      :{ img:'i1'},
-	'Paste'        :{ img:'f0'},
-	'Copy'         :{ img:'f1'},
-	'Cut'          :{ img:'f2'},
-	'Redo'         :{ img:'f3', shortcut:'y' },
-	'Undo'         :{ img:'f4', shortcut:'z' },
-	'JustifyLeft'  :{ img:'j3', title:'Justify Left'  },
-	'JustifyCenter':{ img:'j2', title:'Justify Center'},
-	'JustifyRight' :{ img:'j1', title:'Justify Right' },
-	'JustifyFull'  :{ img:'j0', title:'Justify Full'  },
+MooInline.Buttons = new Hash({
+	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
+	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
+	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
+	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
+	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
+	'Indents'       :{click:['Indent','Outdent']},
+	
+	'|'            :{text:'|'},
+	'Bold'         :{ img:'0', shortcut:'b' },
+	'Italic'       :{ img:'1', shortcut:'i' },
+	'Underline'    :{ img:'2', shortcut:'u' },
+	'Strikethrough':{ img:'3', shortcut:'s' },
+	'Subscript'    :{ img:'5'},
+	'Superscript'  :{ img:'6'},
+	'Indent'       :{ img:'11'},
+	'Outdent'      :{ img:'12'},
+	'Paste'        :{ img:'13'},
+	'Copy'         :{ img:'14'},
+	'Cut'          :{ img:'15'},
+	'Redo'         :{ img:'16', shortcut:'y' },
+	'Undo'         :{ img:'17', shortcut:'z' },
+	'JustifyLeft'  :{ img:'7', title:'Justify Left'  },
+	'JustifyCenter':{ img:'8', title:'Justify Center'},
+	'JustifyRight' :{ img:'9', title:'Justify Right' },
+	'JustifyFull'  :{ img:'10', title:'Justify Full'  },
 	'InsertOrderedList'  :{img:'u0', title:'Numbered List'},
 	'InsertUnorderedList':{img:'u1', title:'Bulleted List'},
 	'Unlink'       :{ img:'a4'},
@@ -221,123 +240,17 @@ MooInline.Buttons = {
 							x+=((256-x)/256)*Sy;
 						}
 						c[2]=b-c[2];
-					}},
+					}}
+})
+
+
+MooInline.Buttons.extend({
 	'Open Siteroller.org Homepage':{'text':'SiteRoller', 'click':function(){ window.open('http://www.siteroller.org') }},
 	'body'         :{'id':'miTrigger', 'text':'Edit Page', click:'place'},
 	'file'         :{'text':'file'}, 
 	'metadata'     :{'text':'metadata'},		
 	'Save Changes' :{click:'save', shortcut:'s', 'class':'saveBtn', 'styles':{'width':'75px'} },
 	'newBar'       :{click:'toolbar', args:''},
-	
-	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
-	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
-	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
-	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
-	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
-	'Indent'       :{click:['Indent','Outdent']}
-}
-/*
-MooInlinex.Buttons = {
-	miMain_0: {
-		m0:{'text':'SiteRoller', args:'Open Siteroller.org Homepage', 'click':function(){ window.open('http://www.siteroller.org') }},
-		m1:{'id':'miTrigger', 'text':'Edit Page', click:'place', args:'body' },
-		m2:{'text':'file'}, 
-		//m3:{'text':'metadata'},		
-		m4:{ title:'Save Changes', 'class':'saveBtn', 'styles':{'width':'75px'}, shortcut:'s', click:'save' }
-	},
-	
-	miTextEdit_1: { 
-		//click, args, shortcut, parent, title 
-		a0:{ title:'Basic Editing', click:'toolbar', args:'miBasic_2'},
-		a4:{ title:'Link', click:'toolbar', args:'miAddLink_2' },
-		j2:{ title:'Justify Menu', click:'toolbar', args:'miJustify_2' },
-		u0:{ title:'Indent Menu',  click:'toolbar', args:'miIndent_2' },
-		i0:{ title:'List Menu',  click:'toolbar', args:'miLists_2' },
-		f2:{ title:'Copy, Undo, etc.', click:'toolbar', args:'miFile_2' },
-		l0:{ title:'save', click:function(){
-						var content = MooInline.Buttons.self.clean();
-						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
-					}
-		},
-		f5:{ title:'Display HTML', click:function(){
-				var d = $('displayBox');
-				if(d.hasClass('miHide')){
-					//d.removeClass('hide'); 
-					$('displayBox').set({'styles':curEl.getCoordinates(), 'class':'', 'text':curEl.innerHTML.trim()});
-				} else d.addClass('miHide'); 
-			} 
-		}
-	},
-	
-	miBasic_2:{
-		a0:{ title:'Bold', shortcut:'b' },
-		a1:{ title:'Italic', shortcut:'i' },
-		a2:{ title:'Underline', shortcut:'u' },
-		a3:{ title:'Strikethrough', shortcut:'s' },
-		a5:{ title:'subscript'},
-		a6:{ title:'superscript'}
-	},
-	
-	miFile_2:{
-		f0:{ title:'Paste', shortcut:'v' },
-		f1:{ title:'Copy', shortcut:'c' },
-		f2:{ title:'Cut', shortcut:'x' },
-		f3:{ title:'Redo', shortcut:'y' },
-		f4:{ title:'Undo', shortcut:'z' }
-	},
-	
-	miAddLink_2: {
-		l0:{ 'text':'enter the url', element:'a' },
-		l1:{ 'type':'text', 'id':'miLink', unselectable: 'off',  events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}}, 
-		l2:{ 'type':'submit', 'value':'add link', events:{'click':function(){ MooInline.Buttons.self.setRange()}} },
-		a4:{ title:'Unlink' }
-	},
-	
-	miNoLink_2: {
-		n0:{ 'text':'please select the text to be made into a link'}
-	},
-	
-	miJustify_2: {
-		j3:{ title:'Justify Left', args:'JustifyLeft'},
-		j2:{ title:'Justify Center', args:'JustifyCenter'},
-		j1:{ title:'Justify Right', args:'JustifyRight'},
-		j0:{ title:'Justify Full', args:'JustifyFull'}
-	},
-	
-	miIndent_2:{
-		u0:{title:'Numbered List', args:'InsertOrderedList'},
-		u1:{title:'Bulleted List', args:'InsertUnorderedList'}
-	},
-	
-	miLists_2:{
-		i0:{title:'Indent'},
-		i1:{title:'Outdent'}
-	}
-}
+});
 
-//debug(row)
-//debug(Hash.getKeys(row)[0])
-//row = array of buttons, or object.  If array, must be from top?  
-//num - the layer down, must be calculated to be one lower thwn active.  Active may need to track the number as well.
-//key = $type(row) == 'array' ? 'miTop' : ;
-//btns = $splat($type(row))
-//Hash.each(MooInline.Buttons[row], function(val, key){//row.  
-createToolbar:function(buttons){
-	var createToolbar = new Hash(), n=0, t=this;
-	buttons.each(function(item, index){
-		var items = item.split(',');
-		if(!items[1]) createToolbar.extend(MooInline.Buttons.item);
-		else {
-			createToolbar[n] = {'click':'toolbar', 'img':MooInline.Buttons[items[0]].img};
-			//if (items[1]) t.toolbars[n++] = items;
-			if (items[1]) MooInline.Buttons[n++] = items;
-		}
-	})
-	MooInline.Buttons['ct'+n] = createToolbar;
-	return 'jt0';
-},
-	
-
-
-*/
 function debug(msg){ if(console)console.log(msg); else alert(msg) }
