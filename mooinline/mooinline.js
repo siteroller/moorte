@@ -64,17 +64,17 @@ var MooInline = new Class({
 	
 	toolbar: function(rowObj, toolbar){ 	
 
-		var t = this, num = (t.active.num||0), bar, top='', row = Hash.getKeys(rowObj)[0], buttons = rowObj[row], toolbar = t.active.toolbar; //num = row.slice(-1), an = 'active'+num,
+		var t = this, bar, top='', num = (t.active.num||0), row = Hash.getKeys(rowObj)[0], buttons = rowObj[row], toolbar = t.active.toolbar; //num = row.slice(-1), an = 'active'+num,
 		//toolbar ? top =' miTop' : toolbar = t.active.toolbar;  
-		//console.log(buttons)
+		//console.log(buttons).  first time {miTop:['Main', 'Justify'].  row = miTop.  val = ['Main', 'Justify'], num = 0, toolbar = .wysEditor}
 		
 		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num+top}).inject($(toolbar));
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
-				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click == 'array'));
-				if(!val.img && clik && MooInline.Buttons[val.click[0].img])val.img = MooInline.Buttons[val.click[0].img];  						//Is there a better way to avoid an error?!!	
-				if($type(val.img == 'number')){ x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
+				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click == 'array')); //clik = true, val = [click:['Bold', 'Italic']]
+				if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];  						//Is there a better way to avoid an error?!!	
+				if($type(val.img) == 'number'){ x = val.img; val.img = 'mooinline/images/i.gif' }; 				//if !img - no image.  if 'abc.png', that image.  if num, the num.
 				
 				var properties = new Hash({
 					href:"#",
@@ -87,7 +87,8 @@ var MooInline = new Class({
 							t.active = {toolbar:this.getParent('.miWysEditor')}
 							var obj={}; obj[btn]=val.click;
 							console.log(obj)
-							val.click ? (clik ? t.toolbar(obj) : val.click(val.args||btn||val.title)) : t.exec(val.args||val.title)
+							val.click ? (clik ? t.toolbar(obj) : val.click(val.args||btn)) : t.exec(val.args||val.title)
+							//calls toolbar({'Main':['Bold', 'Italics']}).  Problems: 1)dissapears the wrong bar, num not stored correctly.  Cant check obj when obj doesnt exist
 							//val.click ? ($type(val.click)=='string' ? t[val.click] : val.click).run(val.args||btn||val.title,t) :  //run(val.args..)..
 						}
 					}
