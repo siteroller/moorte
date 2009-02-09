@@ -39,7 +39,7 @@ var MooInline = new Class({
 	},
 	
 	initialize: function(els, options){
-		this.setOptions(options);	alert('h');
+		this.setOptions(options);	
 		MooInline.Buttons.self = this;
 		this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
 	},
@@ -91,14 +91,14 @@ var MooInline = new Class({
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
-				//if(!val.img && clik && MooInline.Buttons[val.click[0].img]) val.img = MooInline.Buttons[val.click[0].img];
-				if($type(val.img*1) == 'number'){ x = val.img; val.img = 'mooinline/images/i.gif' };
-								
+				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
+				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif'; console.log(x) };
+				
 				var properties = new Hash({
 					href:'javascript:void(0)',
 					unselectable: 'on',
 					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')),	
-					styles:val.img ? {'background-image':'url('+val.img+')', 'background-position':(16+16*x)+'px 0'}:'',
+					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',//16+
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
@@ -195,41 +195,41 @@ MooInline.Buttons = new Hash({
 
 	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
 	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
-	'Link'         :{click:['l0','l1','l2','Unlink'], img:'a4'},
+	'Link'         :{click:['l0','l1','l2','Unlink'], img:'6'},
 	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
 	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
-	'Indents'       :{click:['Indent','Outdent']},
+	'Indents'      :{click:['Indent','Outdent']},
 	
-	'|'            :{text:'|', 'class':'miPipe'},
-	'Bold'         :{ img:'0', shortcut:'b' },
-	'Italic'       :{ img:'1', shortcut:'i' },
-	'Underline'    :{ img:'2', shortcut:'u' },
-	'Strikethrough':{ img:'3', shortcut:'s' },
-	'Subscript'    :{ img:'5'},
-	'Superscript'  :{ img:'6'},
-	'Indent'       :{ img:'11'},
-	'Outdent'      :{ img:'12'},
-	'Paste'        :{ img:'13'},
-	'Copy'         :{ img:'14'},
-	'Cut'          :{ img:'15'},
-	'Redo'         :{ img:'16', shortcut:'y' },
-	'Undo'         :{ img:'17', shortcut:'z' },
-	'JustifyLeft'  :{ img:'7', title:'Justify Left'  },
-	'JustifyCenter':{ img:'8', title:'Justify Center'},
-	'JustifyRight' :{ img:'9', title:'Justify Right' },
-	'JustifyFull'  :{ img:'10', title:'Justify Full'  },
-	'InsertOrderedList'  :{img:'u0', title:'Numbered List'},
-	'InsertUnorderedList':{img:'u1', title:'Bulleted List'},
-	'Unlink'       :{ img:'a4'},
+	'|'            :{text:'|', 'class':'miPipe', title:''},
+	'Bold'         :{ img:'0', shortcut:'B' },
+	'Italic'       :{ img:'1', shortcut:'I' },
+	'Underline'    :{ img:'2', shortcut:'U' },
+	'Strikethrough':{ img:'3', shortcut:'S' },
+	'Subscript'    :{ img:'4'},
+	'Superscript'  :{ img:'5'},
+	'Indent'       :{ img:'16'},
+	'Outdent'      :{ img:'17'},
+	'Paste'        :{ img:'9', title:'Paste (Ctrl+V)'},
+	'Copy'         :{ img:'7', title:'Copy (Ctrl+C)'},
+	'Cut'          :{ img:'8', title:'Cut (Ctrl+X)'},
+	'Redo'         :{ img:'13', shortcut:'Y' },
+	'Undo'         :{ img:'12', shortcut:'Z' },
+	'JustifyLeft'  :{ img:'20', title:'Justify Left'  },
+	'JustifyCenter':{ img:'18', title:'Justify Center'},
+	'JustifyRight' :{ img:'21', title:'Justify Right' },
+	'JustifyFull'  :{ img:'19', title:'Justify Full'  },
+	'InsertOrderedList'  :{img:'22', title:'Numbered List'},
+	'InsertUnorderedList':{img:'23', title:'Bulleted List'},
+	'Unlink'       :{ img:'6'},
 	'l0'           :{ 'text':'enter the url', element:'span' },
 	'l1'           :{ 'type':'text',   events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
 	'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
 	'noLink'       :{ 'text':'please select the text to be made into a link'},
-	'Save'         :{ img:'', click:function(){
+	'Save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
 						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 					}},
-	'Display HTML' :{ click:function(){
+	'Display HTML' :{ img:'27',  click:function(){
 						var d = $('displayBox');
 						if(d.hasClass('miHide')){
 							//d.removeClass('hide'); 
