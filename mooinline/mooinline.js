@@ -2,8 +2,9 @@
 *   Licensed under the Open Source License
 *
 * 	Credits:
+*	Entirely based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
 *	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
-*	Regexes from MooEditable (Both the original and Ryan and Orefalo's excellent contributions).
+*	Some regexes from MooEditable (Both the original and Ryan and Orefalo's excellent contributions).
 *	Icons from OpenWysiwyg - http://www.openwebware.com
 *	We really want your help!  Please join!!
 *
@@ -66,9 +67,19 @@ var MooInline = new Class({
 			el.set('contentEditable', true).focus();
 		}
 		function insertEl(el){
-			var div = new Element('div', {'class':'mtaTextArea '+el.get('class'), 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');//el.get('styles'), 'styles':.extend() 
+			var div = new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');//el.get('styles'), 'styles':.extend() 
 			el.addClass('miHide');
 			return div;
+		}
+		var cmds = ['Bold','Italic','Underline','Strikethrough','Subscript','Superscript','JustifyLeft','JustifyCenter','JustifyRight','JustifyFull'];
+		var d=['Indent','Outdent','Paste','Copy','Cut','Redo','Undo','InsertOrderedList','InsertUnorderedList','Unlink'];
+		
+		function updateBar(){
+			var bar = t.active.toolbar;
+			cmds.each(function(prop){
+				if (be = bar.getElement('.mi'+prop))
+				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+			}); 
 		}
 		
 		els.each(function(el, index){
@@ -79,32 +90,34 @@ var MooInline = new Class({
 				'click': function(){ positionToolbar(el, mta);  },
 				'blur':function(){ mta.setStyle('display','none'); this.set('contentEditable', false);}
 			});
+			el.addEvents({'mouseup':updateBar, 'keyup':updateBar});
 		})
-		if(l=='b' || l=='t') mta.addClass('miPosition'+l);
+		if(l=='b' || l=='t') mta.addClass('miPage'+l);
 	},
 
-	toolbar: function(buttons, row, num){ 	
+	toolbar: function(buttons, row, level){ 	
 	
 		var t = this, bar, toolbar = t.active.toolbar;
-		var parent = toolbar.getElement('.miR'+num) || new Element('div',{'class':'miR'+num}).inject($(toolbar));
+		var parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
 	
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
 				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
-				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif'; };
+				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
 				
 				var properties = new Hash({
 					href:'javascript:void(0)',
 					unselectable: 'on',
+					'class':'mi'+(val.title||btn),
 					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')),	
-					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',//16+
+					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
 							e.stop(); 
 							t.active = {toolbar:this.getParent('.miWysEditor')}
-							clik ? t.toolbar(val.click,btn,num+1) : (val.click || t.exec)(val.args||btn);
+							clik ? t.toolbar(val.click,btn,level+1) : (val.click || t.exec)(val.args||btn);
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
@@ -113,9 +126,9 @@ var MooInline = new Class({
 			})
 		}
 		
-		var n = toolbar.retrieve(num);
+		var n = toolbar.retrieve(level);
 		if(n) n.setStyle('display', 'none')
-		toolbar.store(num, bar);
+		toolbar.store(level, bar);
 		bar.setStyle('display', 'block'); //update to use effects	
 	},
 	
@@ -147,11 +160,6 @@ var MooInline = new Class({
 	},
 	
 	clean: function(html){
-		if($('modalOverlay')){ 
-			debug('modal going'); 
-			$('windowUnderlay').destroy();
-			$('modalOverlay').destroy(); 
-		}else debug('no modal');
 		
 		$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
 		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });
@@ -201,7 +209,7 @@ MooInline.Buttons = new Hash({
 	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
 	'Indents'      :{click:['Indent','Outdent']},
 	
-	'|'            :{text:'|', 'class':'miPipe', title:''},
+	'|'            :{text:'|', title:'', element:'span'},
 	'Bold'         :{ img:'0', shortcut:'B' },
 	'Italic'       :{ img:'1', shortcut:'I' },
 	'Underline'    :{ img:'2', shortcut:'U' },
@@ -249,6 +257,14 @@ MooInline.Buttons = new Hash({
 })
 
 /*
+clean:
+if($('modalOverlay')){ 
+	debug('modal going'); 
+	$('windowUnderlay').destroy();
+	$('modalOverlay').destroy(); 
+}else debug('no modal');
+
+
 MooInline.Buttons.extend({
 	'Open Siteroller.org Homepage':{'text':'SiteRoller', 'click':function(){ window.open('http://www.siteroller.org') }},
 	'body'         :{'id':'miTrigger', 'text':'Edit Page', click:'place'},

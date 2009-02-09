@@ -1,22 +1,16 @@
-div.miMooInline{position:absolute; left:0; width:100%; xheight:50px; background-color:cyan; overflow:visible}
-div.miMooInline div.miWysEditor { position:absolute; left:0; bottom:0; background-color:#BCBECD; width:100%; color:#222; font: 10px Arial; background-image:url('images/background_silver.jpg'); background-repeat:repeat-x;}
-div.miMooInline div.miWysEditor div{ width:100%; position:relative; }
-div.miMooInline div.miWysEditor a{ display:inline-block; width:16px; height:16px; margin:2px; cursor:pointer; text-decoration:none; vertical-align:bottom}
-div.miMooInline div.miWysEditor a:hover{  border:2px solid red; margin:0; }
-div.miMooInline div.miWysEditor input{width:100px; height:18px;}
-div.miMooInline>div.miWysEditor>div>div{width:100%}
-div.miMooInline div.miWysEditor .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
-div.miMooInline div.miWysEditor div.miTop{ border-bottom:1px #bbb solid; height:18pxpx; overflow:hidden; vertical-align:bottom; text-align:left; }
-div.miMooInline.miPositionb{position:fixed; bottom:0}
-div.miMooInline.miPositiont{position:fixed; top:0;}
+div.miMooInline{ position:absolute; left:0; width:100%; }
+div.miMooInline div.miWysEditor { position:absolute; left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
+div.miMooInline div.miWysEditor div{ position:relative; width:100%; }
+div.miMooInline div.miWysEditor span{ height:18px; margin:2px; display:inline-block; }
+div.miMooInline div.miWysEditor input{ height:18px; width:100px }
+div.miMooInline div.miWysEditor a{ height:16px; width:16px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom}
+div.miMooInline div.miWysEditor a:hover{ border:2px solid red; margin:0; }
+div.miMooInline div.miWysEditor a.miSelected{background-color:white}
+div.miMooInline.miPageb{ position:fixed; bottom:0}
+div.miMooInline.miPaget{ position:fixed; top:0;  }
+div.miWysEditor div.miR0{ border-bottom:1px #bbb solid; }
 .miHide{ display:none; }
-.mtaTextArea{ border:1px solid #666 }
-a.miPipe{text-align:center}
+.miTextArea{ border:1px solid #666 }
 
-xdiv.miWysEditor>div.miR0>div.miMain_0>span{xdisplay:inline; font:bold 11px/20px Tahoma}
-div.miWysEditor>div.miR1{ border-bottom:1px #bbb solid; }
-div.miWysEditor>div.miMain_0>div.miText{ display:block }
-
-div.miWysEditor>div.miR2>div.miAddLink_2 span,div.miWysEditor>div.miR2>div.miAddLink_2 input{display:inline}
-none{display:inline-block; width:16px; height:16px;  cursor:pointer; }
-
+xdiv.miMooInline div.miWysEditor div.miTop{ border-bottom:1px #bbb solid; height:18px; overflow:hidden; vertical-align:bottom; text-align:left; }
+xdiv.miMooInline div.miWysEditor .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
