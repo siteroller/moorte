@@ -4,6 +4,7 @@
 * 	Credits:
 *	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
 *	Regexes from MooEditable (Both the original and Ryan and Orefalo's excellent contributions).
+*	Icons from OpenWysiwyg - http://www.openwebware.com
 *	We really want your help!  Please join!!
 *
 *	Usage: 
@@ -92,7 +93,7 @@ var MooInline = new Class({
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
 				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
-				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif'; console.log(x) };
+				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif'; };
 				
 				var properties = new Hash({
 					href:'javascript:void(0)',
@@ -186,7 +187,7 @@ var MooInline = new Class({
 		];
 		if(this.options.xhtml)cleanup.extend(xhtml);
 		if(this.options.semantic)cleanup.extend(semantic);
-		cleanup.each(function(reg){ console.log(reg); html = html.replace(reg[0], reg[1]); });
+		cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });
 		return source;
 	}	
 })
