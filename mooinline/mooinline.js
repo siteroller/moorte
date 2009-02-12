@@ -11,7 +11,7 @@
 *	Usage: 
 *		new MooInline(); - applies to textareas and elements with the class "mooinline"
 *		new MooInline('span.editMe', {inline:true}) - will make the spans with the class of editme editable inline.
-*		new MooInline({defaults:['Bold', 'HelloWorld, ['JustifyLeft',JustifyRight']]}) - Toolbar will have 3 buttons, one of which is custom defined.  Third button opens a menu with 2 justify options.
+*		new MooInline({defaults:['underline,italics','bold,HelloWorld,[JustifyLeft,JustifyRight]']}) - 2 toolbars: the first with underline and italics.  The second with bold, a custom defined button, and a menu with 2 justify options.
 *	Extending:
 *		MooInline.Buttons.extend({
 *			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
@@ -50,7 +50,7 @@ var MooInline = new Class({
 	insertMI: function(selectors, toolbars){
 	
 		var t = this, els = $$(selectors||'textarea, .mooinline'), i = this.options.inline, l = this.options.location.substr(4,1).toLowerCase(), mi, shortcuts;
-		this.shortcuts =[]; this.shrt = [];
+		this.shortcuts =[]; this.shortcutBtns = [];
 		
 		function insertToolbar(){
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
@@ -72,7 +72,7 @@ var MooInline = new Class({
 			return div;
 		}
 		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
-						'justifyright','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
+						'JustifyRight','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
 		var btnVal = [];
 		updateBtns = t.updateBtns = function(e){
 			var bar = t.bar, be, btn;	//console.log(window.document.QueryCommandEnabled)
@@ -87,7 +87,7 @@ var MooInline = new Class({
 			}) 
 			if(e && e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
 				e.stop(); 
-				btn = t.bar.getElement('.mi'+t.shrt[btn])
+				btn = t.bar.getElement('.mi'+t.shortcutBtns[btn])
 				btn.fireEvent('mousedown', btn)
 			}
 		};
@@ -103,7 +103,6 @@ var MooInline = new Class({
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
 			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); }});
-			//t.bar = mi;
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 	},
@@ -137,7 +136,7 @@ var MooInline = new Class({
 				['args','shortcut','element','click','img'].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
 				if(val.init) val.init.run([val.args||btn, t], e);
-				if(val.shortcut){t.shrt.include(btn); t.shortcuts.include(val.shortcut);}
+				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
 				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
 			})
 		};
@@ -219,7 +218,7 @@ MooInline.Buttons = new Hash({
 	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript']},//console.log()
 	'File'         :{click:['paste','copy','cut','redo','undo']},
 	'Link'         :{click:['l0','l1','l2','unlink'], img:'6'},
-	'Justify'      :{click:['justifyleft','justifycenter','justifyright','justifyfull']},
+	'Justify'      :{click:['justifyleft','justifycenter','JustifyRight','justifyfull']},
 	'Lists'        :{click:['insertorderedlist','insertunorderedlist']},
 	'Indents'      :{click:['indent','outdent']}, //init:function(){this.fireEvent('mousedown')} },
 	
@@ -239,15 +238,15 @@ MooInline.Buttons = new Hash({
 	'undo'         :{img:'12', shortcut:'Z' },
 	'justifyleft'  :{img:'20', title:'Justify Left'  },
 	'justifycenter':{img:'18', title:'Justify Center'},
-	'justifyright' :{img:'21', title:'Justify Right' },
+	'JustifyRight' :{img:'21', title:'Justify Right' },
 	'justifyfull'  :{img:'19', title:'Justify Full'  },
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
 	'test'         :{click:function(){console.log(arguments)}},
 	'unlink'       :{ img:'6'},
 	'l0'           :{ 'text':'enter the url', element:'span' },
-	'l1'           :{ 'type':'text',   events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
-	'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
+	'l1'           :{ 'type':'text',  events:{ 'mousedown':function(args,self){ self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
+	'l2'           :{ 'type':'submit', 'click':function(args,self){ self.setRange() }, 'value':'add link' },
 	'nolink'       :{ 'text':'please select the text to be made into a link'},
 	'save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
@@ -290,13 +289,7 @@ function debug(msg){ if(console)console.log(msg); else alert(msg) }
 */
 
 /* 
-//if(!e)return; //keymove
-			
-
- 
-Keep:
-//t.updateBtns(); //function is being called, but is not updating correctly.  Check the variable is defined.
-																	
+'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
 */
 /*
 ChangeLog:
