@@ -18,12 +18,15 @@
 *		})
 *		
 *	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
+*		init:  [If array, will create a toolbar with those buttons.  Otherwise, defaults to none.] event to be called when button is initialized on the screen.
 *		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
 *		args:  [defaults to object key] arguments to be passed to click event, 
+*	Both init & click are passed the args, followed by a reference to the class.  Within the function(args,t): The active button is 'this', the active field is t.activeField.  All fields associated with the bar is this.getParent('.mooInline').retrieve('fields') 
 *		img:   [If a number, defaults to 'images/i.gif'. If opens toolbar, defaults to image of first button in toolbar.  Otherwise, no default] background image
-*		shortcut: [no default] keyboard shortcut
+*		shortcut: [no default] keyboard shortcut.  All shortcuts are initialized when editor is created, even if the buttons are not yet showing.
 *		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
 *		title: [defaults to object key, or to object key plus " Menu" if button opens toolbar.  If has shortcut, defaults to object key plus (Ctrl+shortcut).  ]
+*		
 */
 
 var MooInline = new Class({
@@ -36,7 +39,7 @@ var MooInline = new Class({
 		inline  : false,
 		floating: true,			// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
 		location: 'multiple', 	// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
-		defaults: ['Main','File','Link','Justify','Lists','Indents','|','Save','Html/Text']
+		defaults: ['Main','File','Link','Justify','Lists','Indents','|','save','Html/Text']
 	},
 	
 	initialize: function(els, options){
@@ -47,7 +50,8 @@ var MooInline = new Class({
 	insertMI: function(selectors, toolbars){
 	
 		var t = this, els = $$(selectors||'textarea, .mooinline'), i = this.options.inline, l = this.options.location.substr(4,1).toLowerCase(), mi, shortcuts;
-		
+		t.shortcuts = []; iii=0;
+t.shrt = []
 		function insertToolbar(){
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miRTE' })
@@ -56,29 +60,34 @@ var MooInline = new Class({
 			return mi;
 		}
 		function positionToolbar(el, mi){
-			console.log('df');
 			var p = el.getCoordinates();
 			mi.setStyles({display:'block', width:p.width}); 
 			var top = p.top - mi.getCoordinates().height; 
-			mi.setStyles({ 'left':p.left, 'top':(top > 0 ? top : p.bottom) });
-			el.set('contentEditable', true).store('bar',mi).focus();
-			console.log(mi)
-			mi.store('field',el);
+			mi.setStyles({ 'left':p.left, 'top':(top > 0 ? top : p.bottom) }).store('field',el);
+			el.set('contentEditable', true).focus();
 		}
 		function textArea(el){
 			var div = new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');
 			el.addClass('miHide');
 			return div;
 		}
-		var btnChk = ['Bold','Italic','Underline','Strikethrough','Subscript','Superscript','JustifyLeft','JustifyCenter',
-						'JustifyRight','JustifyFull','Indent','Outdent','InsertOrderedList','InsertUnorderedList','Unlink'];
-		updateBtns = t.updateBtns = function(){
-			var bar = t.active, be;
+		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
+						'justifyright','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
+		updateBtns = t.updateBtns = function(e){
+			if(!e){console.log('updateBtns:',arguments); return;}
+			var bar = t.bar, be, btn;
+			
 			btnChk.each(function(prop){
 				if (be = bar.getElement('.mi'+prop))
-				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+					window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 			}); 
-		}
+			if(e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
+				e.stop(); 
+				var b = t.bar.getElement('.mi'+t.shrt[btn])
+				b.fireEvent('mousedown', b)
+			}
+			//	console.log('tshirt: ',, t.shrt);  console.log('updateBtn: '+btn+' was pressed');// btn.fireEvent('mousedown');  
+		};
 		
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
@@ -89,25 +98,21 @@ var MooInline = new Class({
 				'click': function(){ positionToolbar(el, mi); },
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
-			el.addEvents({'mouseup':updateBtns.bind(this), 'keyup':updateBtns.bind(this), 'onfocus':function(){t.active = this.retrieve('bar')}});
-			t.options.defaults.each(function(btn){ 
-				el.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click }); 
-			})
+			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); console.log('mousedown: Focus was moved to this field and its attached object'); console.log([this, t.bar])}});
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 	},
 	
-	toolbar: function(toolbar, level, row, buttons){	
-	
-		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
-		//console.log(toolbar)field=new Hash({}),
-		//var field = {};toolbar.getParent('.miMooInline').retrieve('field');
-		//var field = toolbar.getParent('.miMooInline').retrieve('field');
+	toolbar: function(toolbar, level, row, buttons, visible){				
 		
+		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain, 
+		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
+				
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
+				if (clik) clikArray = MooInline.Buttons[btn].click; //clean
 				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
 				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
 				
@@ -115,21 +120,26 @@ var MooInline = new Class({
 					href:'javascript:void(0)',
 					unselectable: 'on',
 					'class':'mi'+(val.title||btn),
-					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut+')':'')),	
+					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
-							e.stop();
+							
 							t.updateBtns();
-							clik ? t.toolbar(this.getParent('.miRTE'),level+1,val.click,btn) : (val.click || t.exec)(val.args||btn, this, t);
+							clik ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec)(val.args||btn, this, t);//btn
+							if(e.stop)e.stop();
+							//console.log(toolbar,level+'_',btn,val.click);
+							//console.log(this.getParent('.miRTE'),level+'_',val.click,clikArray)
+							//why is this.parent instead of toolbar//this.getParent('.miRTE')
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
 				new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
 				if (val.init) val.init(val.args||btn, this, t);
-				if (val.shortcut) t.els.each(function(el){el.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click });//change to switch  !!
+				if(val.shortcut){t.shrt.include(btn); t.shortcuts.include(val.shortcut);}
+				//console.log('btm?:'+btn );  console.log(t.shrt) 
+				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,0)
 			})
-			//return field;  //  !!
 		}
 		
 		var n = toolbar.retrieve(level);
@@ -167,8 +177,7 @@ var MooInline = new Class({
 	clean: function(html){
 		
 		$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
-		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });
-		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
+		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
 	
 		var br = '<br'+(this.options.xhtml?'/':'')+'>';
 		var xhtml = [
@@ -207,45 +216,45 @@ var MooInline = new Class({
 
 MooInline.Buttons = new Hash({
 
-	'Main'         :{click:['Bold','Italic','Underline','Strikethrough','Subscript','Superscript']},
-	'File'         :{click:['Paste','Copy','Cut','Redo','Undo']},
-	'Link'         :{click:['l0','l1','l2','Unlink'], img:'6'},
-	'Justify'      :{click:['JustifyLeft','JustifyCenter','JustifyRight','JustifyFull']},
-	'Lists'        :{click:['InsertOrderedList','InsertUnorderedList']},
-	'Indents'      :{click:['Indent','Outdent']},
+	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript']},
+	'File'         :{click:['paste','copy','cut','redo','undo']},
+	'Link'         :{click:['l0','l1','l2','unlink'], img:'6'},
+	'Justify'      :{click:['justifyleft','justifycenter','justifyright','justifyfull']},
+	'Lists'        :{click:['insertorderedlist','insertunorderedlist']},
+	'Indents'      :{click:['indent','outdent']},
 	
 	'|'            :{text:'|', title:'', element:'span'},
-	'Bold'         :{ img:'0', shortcut:'B', init:function(){} },
-	'Italic'       :{ img:'1', shortcut:'I' },
-	'Underline'    :{ img:'2', shortcut:'U' },
-	'Strikethrough':{ img:'3', shortcut:'S' },
-	'Subscript'    :{ img:'4'},
-	'Superscript'  :{ img:'5'},
-	'Indent'       :{ img:'16'},
-	'Outdent'      :{ img:'17'},
-	'Paste'        :{ img:'9', title:'Paste (Ctrl+V)'},
-	'Copy'         :{ img:'7', title:'Copy (Ctrl+C)'},
-	'Cut'          :{ img:'8', title:'Cut (Ctrl+X)'},
-	'Redo'         :{ img:'13', shortcut:'Y' },
-	'Undo'         :{ img:'12', shortcut:'Z' },
-	'JustifyLeft'  :{ img:'20', title:'Justify Left'  },
-	'JustifyCenter':{ img:'18', title:'Justify Center'},
-	'JustifyRight' :{ img:'21', title:'Justify Right' },
-	'JustifyFull'  :{ img:'19', title:'Justify Full'  },
-	'InsertOrderedList'  :{img:'22', title:'Numbered List'},
-	'InsertUnorderedList':{img:'23', title:'Bulleted List'},
-	'Unlink'       :{ img:'6'},
+	'bold'         :{ img:'0', shortcut:'b', init:function(){} },
+	'italic'       :{ img:'1', shortcut:'i' },
+	'underline'    :{ img:'2', shortcut:'u' },
+	'strikethrough':{ img:'3', shortcut:'s' },
+	'subscript'    :{ img:'4'},
+	'superscript'  :{ img:'5'},
+	'indent'       :{ img:'16'},
+	'outdent'      :{ img:'17'},
+	'paste'        :{ img:'9', title:'Paste (Ctrl+V)'},
+	'copy'         :{ img:'7', title:'Copy (Ctrl+C)'},
+	'cut'          :{ img:'8', title:'Cut (Ctrl+X)'},
+	'redo'         :{ img:'13', shortcut:'Y' },
+	'undo'         :{ img:'12', shortcut:'Z' },
+	'justifyleft'  :{ img:'20', title:'Justify Left'  },
+	'justifycenter':{ img:'18', title:'Justify Center'},
+	'justifyright' :{ img:'21', title:'Justify Right' },
+	'justifyfull'  :{ img:'19', title:'Justify Full'  },
+	'insertorderedlist'  :{img:'22', title:'Numbered List'},
+	'insertunorderedlist':{img:'23', title:'Bulleted List'},
+	'unlink'       :{ img:'6'},
 	'l0'           :{ 'text':'enter the url', element:'span' },
 	'l1'           :{ 'type':'text',   events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
 	'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
-	'noLink'       :{ 'text':'please select the text to be made into a link'},
-	'Save'         :{ img:'11', click:function(){
+	'nolink'       :{ 'text':'please select the text to be made into a link'},
+	'save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
 						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 					}},
 	'Html/Text'    :{ img:'16', click:['DisplayHTML']}, 
 	'DisplayHTML'  :{ type:'text', click:function(el, toolbar){ console.log('here'); console.log(el); console.log(toolbar); this.set({'styles':el.getCoordinates(), 'text':el.innerHTML.trim()})}},
-	'colorPicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
+	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
 						var lx = mouseLocation.x, ly = mouseLocation.y, Sy=sideSlider.y, b = this.get('width')/7, c=[];
 						for(var i=0; i<3; i++){
 							var n0=b*i-l,n1=l-b*(i+5);
@@ -300,8 +309,59 @@ t.active = {toolbar:this.getParent('.miRTE')} //may not be needed, cleanup.
 //try { return s.rangeCount > 0 ? s.getRangeAt(0) : (s.createRange ? s.createRange() : null); } catch (e) { /IE bug when used in frameset/ return this.doc.body.createTextRange(); }
 //buttons, row, toolbar, level
 //$try(function(){ this.range.select(); });
+if (val.shortcut) t.els.each(function(el){el.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click });//change to switch  !!
+//console.log(toolbar)field=new Hash({}),
+//var field = {};toolbar.getParent('.miMooInline').retrieve('field');
+//var field = toolbar.getParent('.miMooInline').retrieve('field');
+return toolbar;  //  !!			
+console.log('df');
+console.log(mi)
+//.extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
+//t.bar = mi.retrieve('bar');;
+console.log(properties);
+//properties =
+var excludeMe=['args','shortcut','element','click','img'];
+excludeMe.each(function(item){properties.erase(item)});//
+properties.getClean();//properties = 
+console.log(properties)
+//console.log(t.shortcuts)		e.stop();
+//design decision change - will only make shortcuts if buttons have been applied.
+var defs = t.options.defaults; //var defs = $A(t.options.defaults); 
+var sh = [];
+var m =0;
+do{
+	
+	defs.each(function(item){
+		val = MooInline.Buttons[item]
+		if(!val.click || $type(vash.click) != 'array') sh[++m] = item;
+		else newArray.include(item.click);
+	})
+}while(++counter < 8);
+console.log(++iii+'f')
+//shrtCuts = t.options.defaults.filter(function(item){return MooInline.Buttons[item].shortcut})
+//buttons = buttons.map(function(i){return i.toLowerCase()})
+console.log(++iii+'t')
+console.log(buttons)
+//btn = btn.toLowerCase()
+console.log($type(btn) + ', '+ btn)
+console.log(val);
 
+//toolbar.getParent('.MooInline').retrieve('fields').each(function(){  });
+
+		
+			
+			
 Keep:
 //t.updateBtns(); //function is being called, but is not updating correctly.  Check the variable is defined.
 																	
+*/
+/*
+ChangeLog:
+1. Default buttons should be an array, where each string is a comma delimited list of buttons, and dynamic menus should be bracketed.
+2. Child toolbars should be named as an underscored digit instead higher numbers.  Toolbars will be numbered.
+3. Button names should be lowercase by convention, but case-insesitive within the program.
+4. All toolbars that have shortcuts within them (and perhaps in their children) should be loaded at startup with display none.  (as otherwise the shortcuts would not be able to 'press' the buttons)
+5. Dynamic flyout buttons will be named and added to the Buttons hash for the duration of the page. 
+6. Special properties removed from properties hash via map.
+7. bind the elent with the call when shortcut is pressed.
 */
