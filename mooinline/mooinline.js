@@ -44,14 +44,15 @@ var MooInline = new Class({
 	
 	initialize: function(els, options){
 		this.setOptions(options);	
+		
 		this.insertMI(els);
 	},
 
 	insertMI: function(selectors, toolbars){
 	
 		var t = this, els = $$(selectors||'textarea, .mooinline'), i = this.options.inline, l = this.options.location.substr(4,1).toLowerCase(), mi, shortcuts;
-		t.shortcuts = []; iii=0;
-t.shrt = []
+		this.shortcuts =[]; this.shrt = [];
+		
 		function insertToolbar(){
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miRTE' })
@@ -74,19 +75,17 @@ t.shrt = []
 		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
 						'justifyright','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
 		updateBtns = t.updateBtns = function(e){
-			if(!e){console.log('updateBtns:',arguments); return;}
 			var bar = t.bar, be, btn;
 			
 			btnChk.each(function(prop){
 				if (be = bar.getElement('.mi'+prop))
 					window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 			}); 
-			if(e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
+			if(e && e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
 				e.stop(); 
-				var b = t.bar.getElement('.mi'+t.shrt[btn])
-				b.fireEvent('mousedown', b)
+				btn = t.bar.getElement('.mi'+t.shrt[btn])
+				btn.fireEvent('mousedown', btn)
 			}
-			//	console.log('tshirt: ',, t.shrt);  console.log('updateBtn: '+btn+' was pressed');// btn.fireEvent('mousedown');  
 		};
 		
 		els.each(function(el, index){
@@ -98,7 +97,7 @@ t.shrt = []
 				'click': function(){ positionToolbar(el, mi); },
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
-			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); console.log('mousedown: Focus was moved to this field and its attached object'); console.log([this, t.bar])}});
+			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); }});
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 	},
@@ -112,7 +111,6 @@ t.shrt = []
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
-				if (clik) clikArray = MooInline.Buttons[btn].click; //clean
 				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
 				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
 				
@@ -124,23 +122,18 @@ t.shrt = []
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
-							
 							t.updateBtns();
 							clik ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec)(val.args||btn, this, t);//btn
 							if(e.stop)e.stop();
-							//console.log(toolbar,level+'_',btn,val.click);
-							//console.log(this.getParent('.miRTE'),level+'_',val.click,clikArray)
-							//why is this.parent instead of toolbar//this.getParent('.miRTE')
 						}
 					}
 				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
 				new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
 				if (val.init) val.init(val.args||btn, this, t);
 				if(val.shortcut){t.shrt.include(btn); t.shortcuts.include(val.shortcut);}
-				//console.log('btm?:'+btn );  console.log(t.shrt) 
 				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,0)
 			})
-		}
+		};
 		
 		var n = toolbar.retrieve(level);
 		if(n) n.setStyle('display', 'none')
@@ -286,81 +279,29 @@ MooInline.Buttons.extend({
 });
 
 function debug(msg){ if(console)console.log(msg); else alert(msg) }
+*/
 
-MooInline.Buttons = new Hash({});
-						
-var d = $('displayBox');
-if(d.hasClass('miHide')){
-	//d.removeClass('hide'); 
-	$('displayBox').set({'styles':curEl.getCoordinates(), 'class':'', 'text':curEl.innerHTML.trim()});
-} else d.addClass('miHide'); 
-//MooInline.Buttons.self = this;
-//this.options.auto ? this.insertMI(els) : this.toolbar(this.options.toolbar);
-// auto    : true,
-//t.active = {toolbar:mta.getElement('.miWysEditor')}  // Could pass as ref to toolbar func instead, but need to track active bar anyways for the updateBar func. 
-//, new Element('textarea', {'class':'miWygEditor miHide', 'type':'text' })	
-//console.log(mta)
-//console.log(mta.retrieve('field'))
-//console.log(',')
-, toolbar = t.active.toolbar
-//console.log(this.getParent('.miMooInline').retrieve('field'))							
-var bar = t.active.toolbar, be;
-t.active = {toolbar:this.getParent('.miRTE')} //may not be needed, cleanup.
-//try { return s.rangeCount > 0 ? s.getRangeAt(0) : (s.createRange ? s.createRange() : null); } catch (e) { /IE bug when used in frameset/ return this.doc.body.createTextRange(); }
-//buttons, row, toolbar, level
-//$try(function(){ this.range.select(); });
-if (val.shortcut) t.els.each(function(el){el.addEvent('keydown', function(){ if (event.btn == val.shortcut && event.control) val.click });//change to switch  !!
-//console.log(toolbar)field=new Hash({}),
-//var field = {};toolbar.getParent('.miMooInline').retrieve('field');
-//var field = toolbar.getParent('.miMooInline').retrieve('field');
-return toolbar;  //  !!			
-console.log('df');
-console.log(mi)
-//.extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
-//t.bar = mi.retrieve('bar');;
-console.log(properties);
-//properties =
-var excludeMe=['args','shortcut','element','click','img'];
-excludeMe.each(function(item){properties.erase(item)});//
-properties.getClean();//properties = 
-console.log(properties)
-//console.log(t.shortcuts)		e.stop();
-//design decision change - will only make shortcuts if buttons have been applied.
-var defs = t.options.defaults; //var defs = $A(t.options.defaults); 
-var sh = [];
-var m =0;
-do{
-	
-	defs.each(function(item){
-		val = MooInline.Buttons[item]
-		if(!val.click || $type(vash.click) != 'array') sh[++m] = item;
-		else newArray.include(item.click);
-	})
-}while(++counter < 8);
-console.log(++iii+'f')
-//shrtCuts = t.options.defaults.filter(function(item){return MooInline.Buttons[item].shortcut})
-//buttons = buttons.map(function(i){return i.toLowerCase()})
-console.log(++iii+'t')
-console.log(buttons)
-//btn = btn.toLowerCase()
-console.log($type(btn) + ', '+ btn)
-console.log(val);
-
-//toolbar.getParent('.MooInline').retrieve('fields').each(function(){  });
-
-		
+/* 
+//if(!e)return; //keymove
 			
-			
+
+ 
 Keep:
 //t.updateBtns(); //function is being called, but is not updating correctly.  Check the variable is defined.
 																	
 */
 /*
 ChangeLog:
-1. Default buttons should be an array, where each string is a comma delimited list of buttons, and dynamic menus should be bracketed.
-2. Child toolbars should be named as an underscored digit instead higher numbers.  Toolbars will be numbered.
-3. Button names should be lowercase by convention, but case-insesitive within the program.
-4. All toolbars that have shortcuts within them (and perhaps in their children) should be loaded at startup with display none.  (as otherwise the shortcuts would not be able to 'press' the buttons)
+24:
+1. Child toolbars should be named as an underscored digit instead higher numbers.  Toolbars will be numbered.
+2. By convention, regular buttons are now lowercased, Toolbars are Uppercased.
+3. All toolbars that have shortcuts within them (and perhaps in their children) should be loaded at startup (as otherwise the shortcuts would not be able to 'press' the buttons)
+4. Shortcuts are now working.
+
+25:
+1. Cleanup.
+2. Default buttons should be an array, where each string is a comma delimited list of buttons, and dynamic menus should be bracketed.
+2. Make default load of toolbars to be with display none. 
 5. Dynamic flyout buttons will be named and added to the Buttons hash for the duration of the page. 
 6. Special properties removed from properties hash via map.
 7. bind the elent with the call when shortcut is pressed.
