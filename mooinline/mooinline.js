@@ -39,12 +39,11 @@ var MooInline = new Class({
 		inline  : false,
 		floating: true,			// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
 		location: 'multiple', 	// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
-		defaults: ['Main','File','Link','Justify','Lists','Indents','|','save','Html/Text']
+		defaults: 'Main,File,Link,Justify,Lists,Indents,|,save,Html/Text'
 	},
 	
 	initialize: function(els, options){
 		this.setOptions(options);	
-		
 		this.insertMI(els);
 	},
 
@@ -57,7 +56,7 @@ var MooInline = new Class({
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miRTE' })
 			).inject(document.body);
-			t.toolbar(mi.getElement('.miRTE'), 0, 'miTop', t.options.defaults);
+			defaults.each(function(buttons){t.toolbar(mi.getElement('.miRTE'), 0, 'miTop', buttons)});
 			return mi;
 		}
 		function positionToolbar(el, mi){
@@ -74,13 +73,18 @@ var MooInline = new Class({
 		}
 		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
 						'justifyright','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
+		var btnVal = [];
 		updateBtns = t.updateBtns = function(e){
-			var bar = t.bar, be, btn;
+			var bar = t.bar, be, btn;	//console.log(window.document.QueryCommandEnabled)
 			
-			btnChk.each(function(prop){
+			btnChk.each(function(prop){	
 				if (be = bar.getElement('.mi'+prop))
-					window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+						window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 			}); 
+			btnVal.each(function(prop){
+				if (be = bar.getElement('.mi'+prop))
+					window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+			}) 
 			if(e && e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
 				e.stop(); 
 				btn = t.bar.getElement('.mi'+t.shrt[btn])
@@ -88,6 +92,7 @@ var MooInline = new Class({
 			}
 		};
 		
+		var defaults = $splat(t.options.defaults).map(function(i){return i.split(',')});
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
 			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
@@ -98,15 +103,16 @@ var MooInline = new Class({
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
 			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); }});
+			//t.bar = mi;
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 	},
 	
-	toolbar: function(toolbar, level, row, buttons, visible){				
-		
+	toolbar: function(toolbar, level, row, buttons, invisible){
 		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain, 
 		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
-				
+		t.bar = toolbar.getParent();
+		
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
@@ -114,7 +120,7 @@ var MooInline = new Class({
 				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
 				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
 				
-				var properties = new Hash({
+				var properties = $H({
 					href:'javascript:void(0)',
 					unselectable: 'on',
 					'class':'mi'+(val.title||btn),
@@ -123,22 +129,23 @@ var MooInline = new Class({
 					events:{
 						'mousedown': function(e){ 
 							t.updateBtns();
-							clik ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec)(val.args||btn, this, t);//btn
-							if(e.stop)e.stop();
+							clik ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
+							if(e && e.stop)e.stop();
 						}
 					}
-				}).extend(val).erase('args').erase('shortcut').erase('element').erase('click').erase('img').getClean();
-				new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties).inject(bar);
-				if (val.init) val.init(val.args||btn, this, t);
+				}).extend(val);
+				['args','shortcut','element','click','img'].map(properties.erase.bind(properties));
+				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
+				if(val.init) val.init.run([val.args||btn, t], e);
 				if(val.shortcut){t.shrt.include(btn); t.shortcuts.include(val.shortcut);}
-				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,0)
+				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
 			})
 		};
 		
 		var n = toolbar.retrieve(level);
 		if(n) n.setStyle('display', 'none')
 		toolbar.store(level, bar);
-		bar.setStyle('display', 'block'); //update to use effects	
+		bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
 	},
 	
 	exec: function(args){
@@ -209,33 +216,34 @@ var MooInline = new Class({
 
 MooInline.Buttons = new Hash({
 
-	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript']},
+	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript']},//console.log()
 	'File'         :{click:['paste','copy','cut','redo','undo']},
 	'Link'         :{click:['l0','l1','l2','unlink'], img:'6'},
 	'Justify'      :{click:['justifyleft','justifycenter','justifyright','justifyfull']},
 	'Lists'        :{click:['insertorderedlist','insertunorderedlist']},
-	'Indents'      :{click:['indent','outdent']},
+	'Indents'      :{click:['indent','outdent']}, //init:function(){this.fireEvent('mousedown')} },
 	
 	'|'            :{text:'|', title:'', element:'span'},
-	'bold'         :{ img:'0', shortcut:'b', init:function(){} },
-	'italic'       :{ img:'1', shortcut:'i' },
-	'underline'    :{ img:'2', shortcut:'u' },
-	'strikethrough':{ img:'3', shortcut:'s' },
-	'subscript'    :{ img:'4'},
-	'superscript'  :{ img:'5'},
-	'indent'       :{ img:'16'},
-	'outdent'      :{ img:'17'},
-	'paste'        :{ img:'9', title:'Paste (Ctrl+V)'},
-	'copy'         :{ img:'7', title:'Copy (Ctrl+C)'},
-	'cut'          :{ img:'8', title:'Cut (Ctrl+X)'},
-	'redo'         :{ img:'13', shortcut:'Y' },
-	'undo'         :{ img:'12', shortcut:'Z' },
-	'justifyleft'  :{ img:'20', title:'Justify Left'  },
-	'justifycenter':{ img:'18', title:'Justify Center'},
-	'justifyright' :{ img:'21', title:'Justify Right' },
-	'justifyfull'  :{ img:'19', title:'Justify Full'  },
+	'bold'         :{img:'0', shortcut:'b' },
+	'italic'       :{img:'1', shortcut:'i' },
+	'underline'    :{img:'2', shortcut:'u' },
+	'strikethrough':{img:'3', shortcut:'s' },
+	'subscript'    :{img:'4'},
+	'superscript'  :{img:'5'},
+	'indent'       :{img:'16'},
+	'outdent'      :{img:'17'},
+	'paste'        :{img:'9', title:'Paste (Ctrl+V)'},
+	'copy'         :{img:'7', title:'Copy (Ctrl+C)'},
+	'cut'          :{img:'8', title:'Cut (Ctrl+X)'},
+	'redo'         :{img:'13', shortcut:'Y' },
+	'undo'         :{img:'12', shortcut:'Z' },
+	'justifyleft'  :{img:'20', title:'Justify Left'  },
+	'justifycenter':{img:'18', title:'Justify Center'},
+	'justifyright' :{img:'21', title:'Justify Right' },
+	'justifyfull'  :{img:'19', title:'Justify Full'  },
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
+	'test'         :{click:function(){console.log(arguments)}},
 	'unlink'       :{ img:'6'},
 	'l0'           :{ 'text':'enter the url', element:'span' },
 	'l1'           :{ 'type':'text',   events:{ 'mousedown':function(){ MooInline.Buttons.self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
@@ -243,7 +251,7 @@ MooInline.Buttons = new Hash({
 	'nolink'       :{ 'text':'please select the text to be made into a link'},
 	'save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
-						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send(new Hash({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
+						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 					}},
 	'Html/Text'    :{ img:'16', click:['DisplayHTML']}, 
 	'DisplayHTML'  :{ type:'text', click:function(el, toolbar){ console.log('here'); console.log(el); console.log(toolbar); this.set({'styles':el.getCoordinates(), 'text':el.innerHTML.trim()})}},
