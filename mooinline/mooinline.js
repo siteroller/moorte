@@ -11,7 +11,7 @@
 *	Usage: 
 *		new MooInline(); - applies to textareas and elements with the class "mooinline"
 *		new MooInline('span.editMe', {inline:true}) - will make the spans with the class of editme editable inline.
-*		new MooInline({defaults:['underline,italics','bold,HelloWorld,[JustifyLeft,JustifyRight]']}) - 2 toolbars: the first with underline and italics.  The second with bold, a custom defined button, and a menu with 2 justify options.
+*		new MooInline({defaults:['underline,italics','bold,HelloWorld,JustifyLeft,JustifyRight']}) - 2 toolbars: the first with underline and italics.  The second with bold, a custom defined button, and 2 justify options.
 *	Extending:
 *		MooInline.Buttons.extend({
 *			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
@@ -56,7 +56,7 @@ var MooInline = new Class({
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miRTE' })
 			).inject(document.body);
-			defaults.each(function(buttons){t.toolbar(mi.getElement('.miRTE'), 0, 'miTop', buttons)});
+			defaults.each(function(buttons, index){t.toolbar(mi.getElement('.miRTE'), index, 'miTop', buttons)});
 			return mi;
 		}
 		function positionToolbar(el, mi){
@@ -102,7 +102,7 @@ var MooInline = new Class({
 				'click': function(){ positionToolbar(el, mi); },
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
-			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'mousedown':function(){t.bar = this.retrieve('bar'); }});
+			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'focus':function(){t.bar = this.retrieve('bar'); }});
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 	},
@@ -115,29 +115,31 @@ var MooInline = new Class({
 		if(!(bar = parent.getElement('.'+row))){ 
 			bar = new Element('div', {'class':row}).inject(parent);
 			buttons.each(function(btn){
-				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), clik = ($type(val.click) == 'array'); //clik = true, val = [click:['Bold', 'Italic']]
-				var img = clik && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
+				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
+				var img = flyout && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
 				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
 				
 				var properties = $H({
 					href:'javascript:void(0)',
 					unselectable: 'on',
 					'class':'mi'+(val.title||btn),
-					title: btn + (clik ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
+					title: btn + (flyout ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
+							this.getParent().getElements('a').removeClass('miSelected');
+							this.addClass('miSelected');
 							t.updateBtns();
-							clik ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
 							if(e && e.stop)e.stop();
+							flyout ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','click','img'].map(properties.erase.bind(properties));
+				['args','shortcut','element','click','img','init'].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
 				if(val.init) val.init.run([val.args||btn, t], e);
 				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
-				if(clik && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
+				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
 			})
 		};
 		
