@@ -67,14 +67,13 @@ var MooInline = new Class({
 			el.set('contentEditable', true).focus();
 		}
 		function textArea(el){
-			var div = new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(
-				new Element('div', {text:el.get('value')})
-			).setStyle('overflow','auto').inject(el, 'before');
+			var div = new Element('div', {text:el.get('value')});
+			new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
 			el.addClass('miHide');
 			return div;
 		}
 		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
-						'JustifyRight','justifyfull','indent','outdent','insertorderedlist','insertunorderedlist','unlink'];				
+						'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'];				
 		var btnVal = [];
 		updateBtns = t.updateBtns = function(e){
 			var bar = t.bar, be, btn;	//console.log(window.document.QueryCommandEnabled)
@@ -97,6 +96,7 @@ var MooInline = new Class({
 		var defaults = $splat(t.options.defaults).map(function(i){return i.split(',')});
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
+			console.log(el)
 			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
 			if(!l || l=='b' || l=='t') el.set('contentEditable', true);		//none[], page[t]op, page[b]ottom
 			else if(!i) positionToolbar(el, mi);							//[i]nline == false 
@@ -154,8 +154,11 @@ var MooInline = new Class({
 	},
 	
 	exec: function(args){
+		var g;
 		args = $splat(args);
+		if(g=Browser.Engine.gecko) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||false, args[1]||null);  //document.execCommand('justifyRight', false, null);
+		if(g) document.designMode = 'off'
 	},	
 		
 	getRange:function(){
@@ -226,7 +229,7 @@ MooInline.Buttons = new Hash({
 	'Link'         :{click:['l0','l1','l2','unlink'], img:'6'},
 	'Justify'      :{click:['justifyleft','justifycenter','JustifyRight','justifyfull']},
 	'Lists'        :{click:['insertorderedlist','insertunorderedlist']},
-	'Indents'      :{click:['indent','outdent']}, //init:function(){this.fireEvent('mousedown')} },
+	'Indents'      :{click:['indent','outdent']},//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -317,8 +320,8 @@ ChangeLog:
 1. Fix - button now updates when pressed [Perfection perhaps in FF 3.1] (FF3) 
 2. Move "init function" till after submneus have been created.
 
-30 - goals:
-1. Fix - justify, other specific commands not working in FF3 in some elements unless they are contained  (FF3).
+30:
+1. Fix - Various workarounds for bugs in FF3 that were blocking certain commands (FF3).
 2. Indent menu not working due to a bug in the update check (FF3)
 3. Begin work on support for FF2 and a modal option.
 4. More documentation.
