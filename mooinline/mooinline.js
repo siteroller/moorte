@@ -1,10 +1,12 @@
-/* Copyright November 2008, Sam Goody, ishtov@yahoo.com 
+/* Copyright November 2008, Sam Goody, ssgoodman@gmail.com 
 *   Licensed under the Open Source License
 *
-* 	Credits:
+* 	Authors:
+*		Ryan Mitchel (ryan@rtnetworks.net) - [regexs]
+*		Sam Goody (ssgoodman@gmail.com)
+*	Credits:
 *	Entirely based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
 *	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
-*	Some regexes from MooEditable (Both the original and Ryan and Orefalo's excellent contributions).
 *	Icons from OpenWysiwyg - http://www.openwebware.com
 *	We really want your help!  Please join!!
 *
@@ -17,15 +19,36 @@
 *			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
 *		})
 *		
+*	Usage Options (default is first on list):
+*		inline    : [false, true] - if set to true, MooInline will show onClick & hide onBlur.  Otherwise, MooInline will always show.
+*		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  False not yet available.   
+*		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
+*		location: ['multiple', 'single', 'pageBottom', 'pageTop', none]  multiple adds a bar to each element passed in.  'single' creates only one bar.  If inline is true, bar will follow the user. 
+*											pageTop and pageBottom will have one bar for whole page.  (pageTop not available yet).  None has no bar.  Shortcuts work.
+*	
+*	Extending:
 *	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
-*		init:  [If array, will create a toolbar with those buttons.  Otherwise, defaults to none.] event to be called when button is initialized on the screen.
-*		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
-*		args:  [defaults to object key] arguments to be passed to click event, 
-*	Both init & click are passed the args, followed by a reference to the class.  Within the function(args,t): The active button is 'this', the active field is t.activeField.  All fields associated with the bar is this.getParent('.mooInline').retrieve('fields') 
 *		img:   [If a number, defaults to 'images/i.gif'. If opens toolbar, defaults to image of first button in toolbar.  Otherwise, no default] background image
 *		shortcut: [no default] keyboard shortcut.  All shortcuts are initialized when editor is created, even if the buttons are not yet showing.
 *		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
 *		title: [defaults to object key, or to object key plus " Menu" if button opens toolbar.  If has shortcut, defaults to object key plus (Ctrl+shortcut).  ]
+*		init:  [If array, will create a toolbar with those buttons.  Otherwise, defaults to none.] event to be called when button is initialized on the screen.
+*		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
+*		args:  [defaults to object key] arguments to be passed to click event, 
+*		Both init & click are passed the args, followed by a reference to the class.  
+*		Within the function(args,classReference): The active button is 'this', the active field is t.activeField.  All fields associated with the bar is this.getParent('.mooInline').retrieve('fields') 
+*		
+*
+*	Outline of the MooInline function:
+*		1. initialize, implements, & options - built in mootools class tools.  See instructions for list of options.
+*		2. exec, getRange, setRange - utility functions for the browser's built it editing tools. 
+*		3. insertRTE - creates an empty div which will have the Rich Text Editor placed into it.
+*			insertToolbar - creates empty div on page for each instance of MooInline, then calls 'toolbar' to inserts toolbars into said empty div.
+*			positionToolbar - places said div wherever it should go on page.
+*			textArea - if MooInline is applied to textarea, called to replace textarea with element. 
+*			updateBtns - called whenever a key or the mouse is pressed. Checks which buttons should appear depressed.
+*		4. toolbar - creates toolbar with passed in buttons.
+*		5. clean - cleans up passed in html before submitting to prevent xss attacks.  Accepts optional xhtml & semantics options.  Utility is not actually used by MooInline.
 *		
 */
 
@@ -34,23 +57,21 @@ var MooInline = new Class({
 	Implements: [Events, Options],
 
 	options:{
-		xhtml   : true,
-		semantic: true,
 		inline  : false,
-		floating: true,			// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
-		location: 'multiple', 	// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
-		defaults: 'Main,File,Link,Justify,Lists,|,Indents,Html/Text'
+		floating: true,
+		location: 'multiple',
+		defaults: 'Main,File,Link,Justify,Lists,Indents,|,Html/Text'
 	},
 	
 	initialize: function(els, options){
 		this.setOptions(options);	
-		this.insertMI(els);
+		this.insertRTE(els);
 	},
 
-	insertMI: function(selectors, toolbars){
+	insertRTE: function(selectors, toolbars){
 	
 		var t = this, els = $$(selectors||'textarea, .mooinline'), i = this.options.inline, l = this.options.location.substr(4,1).toLowerCase(), mi, shortcuts;
-		this.shortcuts =[]; this.shortcutBtns = [];
+		this.shortcuts =[]; this.shortcutBtns = []; MooInline.Buttons.classReference = t;
 		
 		function insertToolbar(){
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
@@ -76,7 +97,7 @@ var MooInline = new Class({
 						'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'];				
 		var btnVal = [];
 		updateBtns = t.updateBtns = function(e){
-			var bar = t.bar, be, btn;	//console.log(window.document.QueryCommandEnabled)
+			var bar = t.bar, be, btn;
 			
 			btnChk.each(function(prop){	
 				if (be = bar.getElement('.mi'+prop))
@@ -96,7 +117,6 @@ var MooInline = new Class({
 		var defaults = $splat(t.options.defaults).map(function(i){return i.split(',')});
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
-			console.log(el)
 			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
 			if(!l || l=='b' || l=='t') el.set('contentEditable', true);		//none[], page[t]op, page[b]ottom
 			else if(!i) positionToolbar(el, mi);							//[i]nline == false 
@@ -115,7 +135,7 @@ var MooInline = new Class({
 		t.bar = toolbar.getParent();
 		
 		if(!(bar = parent.getElement('.'+row))){ 
-			bar = new Element('div', {'class':row}).inject(parent);
+			bar = new Element('div', {'class':'mi'+row+'_toolbar'}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
 				var img = flyout && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
@@ -182,7 +202,7 @@ var MooInline = new Class({
 		//var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
 	},
 	
-	clean: function(html){
+	clean: function(html, xhtml, semantic){
 		
 		$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
 		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
@@ -215,8 +235,8 @@ var MooInline = new Class({
 			[/<p>(&nbsp;|\s)*<\/p>/gi, '<p>\u00a0</p>'],
 			[/<p>\W*<\/p>/g, ''],										// Remove ps with other stuff, may mess up some formatting.
 		];
-		if(this.options.xhtml)cleanup.extend(xhtml);
-		if(this.options.semantic)cleanup.extend(semantic);
+		if(xhtml)cleanup.extend(xhtml);
+		if(semantic)cleanup.extend(semantic);
 		cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });
 		return source;
 	}	
@@ -261,8 +281,12 @@ MooInline.Buttons = new Hash({
 						var content = MooInline.Buttons.self.clean();
 						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 					}},
-	'Html/Text'    :{ img:'16', click:['DisplayHTML']}, 
-	'DisplayHTML'  :{ type:'text', click:function(el, toolbar){ console.log('here'); console.log(el); console.log(toolbar); this.set({'styles':el.getCoordinates(), 'text':el.innerHTML.trim()})}},
+	'Html/Text'    :{ img:'26', click:['DisplayHTML']}, 
+	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', contentEditable:true, init:function(){ 
+						var el=this.getParent('.miMooInline').retrieve('field'), p = el.getParent(); 
+						var size = (p.hasClass('miTextArea') ? p : el).getSize(); 
+						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+					}},
 	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
 						var lx = mouseLocation.x, ly = mouseLocation.y, Sy=sideSlider.y, b = this.get('width')/7, c=[];
 						for(var i=0; i<3; i++){
@@ -299,6 +323,7 @@ function debug(msg){ if(console)console.log(msg); else alert(msg) }
 
 /* 
 'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
+//console.log(window.document.QueryCommandEnabled)
 */
 /*
 ChangeLog:
