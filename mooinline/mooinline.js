@@ -39,7 +39,7 @@ var MooInline = new Class({
 		inline  : false,
 		floating: true,			// false not yet available!  Designed to either insert bar into DOM, or float above relevant element.   
 		location: 'multiple', 	// 'single', 'pageBottom', none. 'pageTop' doesn't show yet, as it expands upwards off the page.
-		defaults: 'Main,File,Link,Justify,Lists,Indents,|,save,Html/Text'
+		defaults: 'Main,File,Link,Justify,Lists,|,Indents,Html/Text'
 	},
 	
 	initialize: function(els, options){
@@ -67,7 +67,9 @@ var MooInline = new Class({
 			el.set('contentEditable', true).focus();
 		}
 		function textArea(el){
-			var div = new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates(), text:el.get('value') }).inject(el, 'before');
+			var div = new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(
+				new Element('div', {text:el.get('value')})
+			).setStyle('overflow','auto').inject(el, 'before');
 			el.addClass('miHide');
 			return div;
 		}
@@ -127,19 +129,21 @@ var MooInline = new Class({
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
+							flyout ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
+							if(e && e.stop)e.stop();
+							
+							//rework logic - will not always do as expected.
 							this.getParent().getElements('a').removeClass('miSelected');
 							this.addClass('miSelected');
 							t.updateBtns();
-							if(e && e.stop)e.stop();
-							flyout ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
 						}
 					}
 				}).extend(val);
 				['args','shortcut','element','click','img','init'].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
-				if(val.init) val.init.run([val.args||btn, t], e);
 				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
 				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
+				if(val.init) val.init.run([val.args||btn, t], e);
 			})
 		};
 		
@@ -308,4 +312,14 @@ ChangeLog:
 5. Dynamic flyout buttons will be named and added to the Buttons hash for the duration of the page. 
 6. Special properties removed from properties hash via map.
 7. bind the elent with the call when shortcut is pressed.
+
+29:
+1. Fix - button now updates when pressed [Perfection perhaps in FF 3.1] (FF3) 
+2. Move "init function" till after submneus have been created.
+
+30 - goals:
+1. Fix - justify, other specific commands not working in FF3 in some elements unless they are contained  (FF3).
+2. Indent menu not working due to a bug in the update check (FF3)
+3. Begin work on support for FF2 and a modal option.
+4. More documentation.
 */

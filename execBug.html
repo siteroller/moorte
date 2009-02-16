@@ -1,0 +1,40 @@
+<!doctype>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+
+<title>execCommand Error Demonstration</title>	
+
+</head>
+
+<body>
+	<p>
+		Unless "content editable" is applied at least twice to the element or its children, many commands will not work.<br/>
+		The first div is the first in its parent to have contentEditable, and "justify right" does not work (even though bold does).<br/>
+		The second div is the second within its parents and justify works.<br/>
+		The third is inside a container with contentEditable set, and therefore is the second, and it works as well.<br/>
+		Much testing proves that these rules are consistant, but crazy.  <br/>
+		(Unselectable='on' was added to make it work correctly in IE.)
+	</p><br/>
+
+	<div id="col1">
+		<p contentEditable="true">This is a <a href="http://www.siteroller.net">LINK</a> to the website building software of choice. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed a urna ut nunc varius vulputate. Duis quis risus. Proin mollis tellus sit amet odio. Donec mauris. Suspendisse cursus lobortis magna. Vivamus vel diam ac mauris viverra dictum. Suspendisse in metus ut felis euismod pulvinar. Curabitur eu metus. Aliquam placerat, eros quis consectetuer vulputate, est nibh cursus lacus, fermentum vestibulum enim diam quis.</p>
+
+		<p contentEditable="true">This is a <a href="http://www.siteroller.net">LINK</a> to the website building software of choice. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed a urna ut nunc varius vulputate. Duis quis risus. Proin mollis tellus sit amet odio. Donec mauris. Suspendisse cursus lobortis magna. Vivamus vel diam ac mauris viverra dictum. Suspendisse in metus ut felis euismod pulvinar. Curabitur eu metus. Aliquam placerat, eros quis consectetuer vulputate, est nibh cursus lacus, fermentum vestibulum enim diam quis.</p> 
+	</div>
+	
+	<div contentEditable="true">
+		<p id="editMe2" contentEditable="true">This is a <a href="http://www.siteroller.net">LINK</a> to the website building software of choice. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed a urna ut nunc varius vulputate. Duis quis risus. Proin mollis tellus sit amet odio. Donec mauris. Suspendisse cursus lobortis magna. Vivamus vel diam ac mauris viverra dictum. Suspendisse in metus ut felis euismod pulvinar. Curabitur eu metus. Aliquam placerat, eros quis consectetuer vulputate, est nibh cursus lacus, fermentum vestibulum enim diam quis.</p> 
+	</div>
+	
+	<button onclick="exec('justifyRight'); return false" unselectable='on'>Justify Right</button>
+	<button onclick="exec('bold'); return false" unselectable='on'>Bold</button>
+	
+	<script>
+		function exec(cmd){
+			document.execCommand(cmd, false, null)
+		}
+	</script>
+
+</body>
+</html>
