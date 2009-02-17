@@ -24,7 +24,7 @@
 *		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  False not yet available.   
 *		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
 *		location: ['multiple', 'single', 'pageBottom', 'pageTop', none]  multiple adds a bar to each element passed in.  'single' creates only one bar.  If inline is true, bar will follow the user. 
-*											pageTop and pageBottom will have one bar for whole page.  (pageTop not available yet).  None has no bar.  Shortcuts work.
+*											pageTop and pageBottom will have one bar for whole page.  None has no bar.  Shortcuts work.
 *	
 *	Extending:
 *	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
@@ -81,11 +81,13 @@ var MooInline = new Class({
 			return mi;
 		}
 		function positionToolbar(el, mi){
-			var p = el.getCoordinates();
-			mi.setStyles({display:'block', width:p.width}); 
-			var top = p.top - mi.getCoordinates().height; 
-			mi.setStyles({ 'left':p.left, 'top':(top > 0 ? top : p.bottom) }).store('field',el);
 			el.set('contentEditable', true).focus();
+			if(l) mi.setStyle('display','block');				//location: !none
+			if(!l || l=='b' || l=='t') return;					//location: none[], page[t]op, page[b]ottom
+
+			var elSize = el.getCoordinates();						
+			mi.setStyle('width', elSize.width); 
+			mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getElement('*:first-child').getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).store('field',el);
 		}
 		function textArea(el){
 			var div = new Element('div', {text:el.get('value')});
@@ -118,15 +120,14 @@ var MooInline = new Class({
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
 			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
-			if(!l || l=='b' || l=='t') el.set('contentEditable', true);		//none[], page[t]op, page[b]ottom
-			else if(!i) positionToolbar(el, mi);							//[i]nline == false 
-			else el.addEvents({
+			!i||!l ? positionToolbar(el,mi) : el.addEvents({					//[i]nline ? false : true
 				'click': function(){ positionToolbar(el, mi); },
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
 			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'focus':function(){t.bar = this.retrieve('bar'); }});
 		})
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
+		if(l=='t') mi.getElement('*:first-child').addClass('miTopDown');
 	},
 	
 	toolbar: function(toolbar, level, row, buttons, invisible){
@@ -164,6 +165,7 @@ var MooInline = new Class({
 				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
 				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
 				if(val.init) val.init.run([val.args||btn, t], e);
+				if(toolbar.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			})
 		};
 		
@@ -274,15 +276,15 @@ MooInline.Buttons = new Hash({
 	'test'         :{click:function(){console.log(arguments)}},
 	'unlink'       :{ img:'6'},
 	'l0'           :{ 'text':'enter the url', element:'span' },
-	'l1'           :{ 'type':'text',  events:{ 'mousedown':function(args,self){ self.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
-	'l2'           :{ 'type':'submit', 'click':function(args,self){ self.setRange() }, 'value':'add link' },
+	'l1'           :{ 'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
+	'l2'           :{ 'type':'submit', 'click':function(args,classRef){ classRef.setRange() }, 'value':'add link' },
 	'nolink'       :{ 'text':'please select the text to be made into a link'},
 	'save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
 						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
 					}},
 	'Html/Text'    :{ img:'26', click:['DisplayHTML']}, 
-	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', contentEditable:true, init:function(){ 
+	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
 						var el=this.getParent('.miMooInline').retrieve('field'), p = el.getParent(); 
 						var size = (p.hasClass('miTextArea') ? p : el).getSize(); 
 						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
@@ -350,4 +352,17 @@ ChangeLog:
 2. Indent menu not working due to a bug in the update check (FF3)
 3. Begin work on support for FF2 and a modal option.
 4. More documentation.
+
+32:
+1. Fix pageTop, auto positioning when too high.
+
+33 - goals:
+1. calculate num in toolbar function instead of requiring
+2. change variable name of updateBtns function
+3. Add "insert picture"
+4. Add float:false, and change to default.
+5. Add min height as option, that will not be shrunk below
+6. Consider other ways to bound size of toolbars.
+7. Work on updateBtn logic.
+8. Work on bug with addLink, and bug with init:indent function
 */
