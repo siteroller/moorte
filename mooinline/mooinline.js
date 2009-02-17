@@ -77,7 +77,7 @@ var MooInline = new Class({
 			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
 				 new Element('div', {'class':'miRTE' })
 			).inject(document.body);
-			defaults.each(function(buttons, index){t.toolbar(mi.getElement('.miRTE'), index, 'miTop', buttons)});
+			defaults.each(function(buttons, index){t.toolbar(mi.getElement('.miRTE'), index, 'Top', buttons)});
 			return mi;
 		}
 		function positionToolbar(el, mi){
@@ -98,14 +98,14 @@ var MooInline = new Class({
 		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
 						'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'];				
 		var btnVal = [];
-		updateBtns = t.updateBtns = function(e){
+		var updateBtns = t.updateBtns = function(e){
 			var bar = t.bar, be, btn;
-			
-			btnChk.each(function(prop){	
+			 
+			btnChk.each(function(prop){		
 				if (be = bar.getElement('.mi'+prop))
 						window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-			}); 
-			btnVal.each(function(prop){
+			})
+			btnVal.each(function(prop){	
 				if (be = bar.getElement('.mi'+prop))
 					window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 			}) 
@@ -131,11 +131,11 @@ var MooInline = new Class({
 	},
 	
 	toolbar: function(toolbar, level, row, buttons, invisible){
-		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain, 
+		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain,
 		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
 		t.bar = toolbar.getParent();
 		
-		if(!(bar = parent.getElement('.'+row))){ 
+		if(!(bar = parent.getElement('.mi'+row+'_toolbar'))){ //'.'+row
 			bar = new Element('div', {'class':'mi'+row+'_toolbar'}).inject(parent);
 			buttons.each(function(btn){
 				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
@@ -155,7 +155,7 @@ var MooInline = new Class({
 							
 							//rework logic - will not always do as expected.
 							this.getParent().getElements('a').removeClass('miSelected');
-							this.addClass('miSelected');
+							if(val.checkState)this.addClass('miSelected');
 							t.updateBtns();
 						}
 					}
@@ -246,12 +246,12 @@ var MooInline = new Class({
 
 MooInline.Buttons = new Hash({
 
-	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript']},//console.log()
-	'File'         :{click:['paste','copy','cut','redo','undo']},
-	'Link'         :{click:['l0','l1','l2','unlink'], img:'6'},
-	'Justify'      :{click:['justifyleft','justifycenter','JustifyRight','justifyfull']},
-	'Lists'        :{click:['insertorderedlist','insertunorderedlist']},
-	'Indents'      :{click:['indent','outdent']},//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
+	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript'], checkState:true},//console.log()
+	'File'         :{click:['paste','copy','cut','redo','undo'], checkState:true},
+	'Link'         :{click:['l0','l1','l2','unlink'], img:'6', checkState:true},
+	'Justify'      :{click:['justifyleft','justifycenter','JustifyRight','justifyfull'], checkState:true},
+	'Lists'        :{click:['insertorderedlist','insertunorderedlist'], checkState:true},
+	'Indents'      :{click:['indent','outdent'], checkState:true},//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -302,62 +302,11 @@ MooInline.Buttons = new Hash({
 					}}
 })
 
-/*
-clean:
-if($('modalOverlay')){ 
-	debug('modal going'); 
-	$('windowUnderlay').destroy();
-	$('modalOverlay').destroy(); 
-}else debug('no modal');
 
-
-MooInline.Buttons.extend({
-	'Open Siteroller.org Homepage':{'text':'SiteRoller', 'click':function(){ window.open('http://www.siteroller.org') }},
-	'body'         :{'id':'miTrigger', 'text':'Edit Page', click:'place'},
-	'file'         :{'text':'file'}, 
-	'metadata'     :{'text':'metadata'},		
-	'Save Changes' :{click:'save', shortcut:'s', 'class':'saveBtn', 'styles':{'width':'75px'} },
-	'newBar'       :{click:'toolbar', args:''},
-});
-
-function debug(msg){ if(console)console.log(msg); else alert(msg) }
-*/
-
-/* 
-'l2'           :{ 'type':'submit', events:{ 'click':    function(){ MooInline.Buttons.self.setRange(); }}, 'value':'add link' },
-//console.log(window.document.QueryCommandEnabled)
-*/
 /*
 ChangeLog:
-24:
-1. Child toolbars should be named as an underscored digit instead higher numbers.  Toolbars will be numbered.
-2. By convention, regular buttons are now lowercased, Toolbars are Uppercased.
-3. All toolbars that have shortcuts within them (and perhaps in their children) should be loaded at startup (as otherwise the shortcuts would not be able to 'press' the buttons)
-4. Shortcuts are now working.
-
-25:
-1. Cleanup.
-2. Default buttons should be an array, where each string is a comma delimited list of buttons, and dynamic menus should be bracketed.
-2. Make default load of toolbars to be with display none. 
-5. Dynamic flyout buttons will be named and added to the Buttons hash for the duration of the page. 
-6. Special properties removed from properties hash via map.
-7. bind the elent with the call when shortcut is pressed.
-
-29:
-1. Fix - button now updates when pressed [Perfection perhaps in FF 3.1] (FF3) 
-2. Move "init function" till after submneus have been created.
-
-30:
-1. Fix - Various workarounds for bugs in FF3 that were blocking certain commands (FF3).
-2. Indent menu not working due to a bug in the update check (FF3)
-3. Begin work on support for FF2 and a modal option.
-4. More documentation.
-
-32:
-1. Fix pageTop, auto positioning when too high.
-
-33 - goals:
-1. calculate num in toolbar function instead of requiring
+34 - goals:
+1. calculate num in toolbar function instead of requiring - needs to be passed either way, I think.
 2. change variable name of updateBtns function
 3. Add "insert picture"
 4. Add float:false, and change to default.

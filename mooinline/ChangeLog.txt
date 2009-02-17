@@ -1,0 +1,27 @@
+24:
+1. Child toolbars should be named as an underscored digit instead higher numbers.  Toolbars will be numbered.
+2. By convention, regular buttons are now lowercased, Toolbars are Uppercased.
+3. All toolbars that have shortcuts within them (and perhaps in their children) should be loaded at startup (as otherwise the shortcuts would not be able to 'press' the buttons)
+4. Shortcuts are now working.
+
+25:
+1. Cleanup.
+2. Default buttons should be an array, where each string is a comma delimited list of buttons, and dynamic menus should be bracketed.
+2. Make default load of toolbars to be with display none. 
+5. Dynamic flyout buttons will be named and added to the Buttons hash for the duration of the page. 
+6. Special properties removed from properties hash via map.
+7. bind the elent with the call when shortcut is pressed.
+
+29:
+1. Fix - button now updates when pressed [Perfection perhaps in FF 3.1] (FF3) 
+2. Move "init function" till after submneus have been created.
+
+30:
+1. Fix - Various workarounds for bugs in FF3 that were blocking certain commands (FF3).
+2. Indent menu not working due to a bug in the update check (FF3)
+3. Begin work on support for FF2 and a modal option.
+4. More documentation.
+
+32:
+1. Fix pageTop, auto positioning when too high.
+
