@@ -21,9 +21,9 @@
 *		
 *	Usage Options (default is first on list):
 *		inline    : [false, true] - if set to true, MooInline will show onClick & hide onBlur.  Otherwise, MooInline will always show.
-*		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  False not yet available.   
+*		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  
 *		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
-*		location: ['multiple', 'single', 'pageBottom', 'pageTop', none]  multiple adds a bar to each element passed in.  'single' creates only one bar.  If inline is true, bar will follow the user. 
+*		location: ['multiple', 'follow', 'pageBottom', 'pageTop', none]  multiple adds a bar to each element passed in.  'single' creates only one bar.  If inline is true, bar will follow the user. 
 *											pageTop and pageBottom will have one bar for whole page.  None has no bar.  Shortcuts work.
 *	
 *	Extending:
@@ -58,7 +58,7 @@ var MooInline = new Class({
 
 	options:{
 		inline  : false,
-		floating: true,
+		floating: false,
 		location: 'multiple',
 		defaults: 'Main,File,Link,Justify,Lists,Indents,|,Html/Text'
 	},
@@ -84,10 +84,13 @@ var MooInline = new Class({
 			el.set('contentEditable', true).focus();
 			if(l) mi.setStyle('display','block');				//location: !none
 			if(!l || l=='b' || l=='t') return;					//location: none[], page[t]op, page[b]ottom
-
+			
 			var elSize = el.getCoordinates();						
-			mi.setStyle('width', elSize.width); 
-			mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getElement('*:first-child').getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).store('field',el);
+			mi.setStyle('width', elSize.width).store('field',el);
+			mi.addClass('miFloat'+t.options.floating); mi.getElement('*:first-child').addClass('miFloat'+t.options.floating) //need not be reapplied every time, messy application, fix
+			if(el.getParent().hasClass('miTextArea')) el = el.getParent();
+			!(t.options.floating) ? mi.inject(el,'before') :
+				mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getElement('*:first-child').getCoordinates().height > 0 ? elSize.top : elSize.bottom) });
 		}
 		function textArea(el){
 			var div = new Element('div', {text:el.get('value')});
@@ -120,12 +123,13 @@ var MooInline = new Class({
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
 			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
-			!i||!l ? positionToolbar(el,mi) : el.addEvents({					//[i]nline ? false : true
+			!i||!l ? positionToolbar(el,mi) : el.addEvents({				//[i]nline ? false : true
 				'click': function(){ positionToolbar(el, mi); },
 				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
 			});
 			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'focus':function(){t.bar = this.retrieve('bar'); }});
 		})
+		
 		if(l=='b' || l=='t') mi.addClass('miPage'+l);
 		if(l=='t') mi.getElement('*:first-child').addClass('miTopDown');
 	},
@@ -209,7 +213,7 @@ var MooInline = new Class({
 		$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
 		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
 	
-		var br = '<br'+(this.options.xhtml?'/':'')+'>';
+		var br = '<br'+(xhtml?'/':'')+'>';
 		var xhtml = [
 			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
 		];
@@ -273,12 +277,19 @@ MooInline.Buttons = new Hash({
 	'justifyfull'  :{img:'19', title:'Justify Full'  },
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
-	'test'         :{click:function(){console.log(arguments)}},
-	'unlink'       :{ img:'6'},
-	'l0'           :{ 'text':'enter the url', element:'span' },
-	'l1'           :{ 'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
-	'l2'           :{ 'type':'submit', 'click':function(args,classRef){ classRef.setRange() }, 'value':'add link' },
-	'nolink'       :{ 'text':'please select the text to be made into a link'},
+	'test'         :{click:function(){console.log(arguments)}, args:this},
+	'unlink'       :{img:'6'},
+	'l0'           :{'text':'enter the url', element:'span' },
+	'l1'           :{'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
+	'l2'           :{'type':'submit', 'click':function(args,classRef){ classRef.setRange() }, 'value':'add link' },
+	'nolink'       :{'text':'please select the text to be made into a link'},
+	'remoteURL'    :{click:['imgSelect','imgInput','insertimage']},
+	'imgSelect'    :{element:'span', text:'URL of image' },
+	'imgInput'     :{type:'text' },
+	'insertimage'  :{click:function(args, classRef){ 
+						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
+					}},
+	'inserthorizontalrule':{img:'22'},	
 	'save'         :{ img:'11', click:function(){
 						var content = MooInline.Buttons.self.clean();
 						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
@@ -303,15 +314,16 @@ MooInline.Buttons = new Hash({
 })
 
 
+//console.log(MooInline.Buttons.test.args);
+//if(!(init || l=='o')) return;						//location: foll[o]w, or multiple&&init
+			
 /*
 ChangeLog:
-34 - goals:
-1. calculate num in toolbar function instead of requiring - needs to be passed either way, I think.
-2. change variable name of updateBtns function
-3. Add "insert picture"
-4. Add float:false, and change to default.
-5. Add min height as option, that will not be shrunk below
-6. Consider other ways to bound size of toolbars.
-7. Work on updateBtn logic.
-8. Work on bug with addLink, and bug with init:indent function
+34:
+1. WontFix - calculate num in toolbar function instead of requiring.
+2. Added float:false, and change to default.
+3. Add "insert picture" button
+4. Consider ways to bound size of toolbars.
+5. change variable name of updateBtns function
+6. Work on bug with addLink, and bug with init:indent function / bind button to button object
 */

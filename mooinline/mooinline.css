@@ -1,5 +1,7 @@
-div.miMooInline{ position:absolute; left:0; width:100%; }
-div.miMooInline div.miRTE { position:absolute; left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
+div.miMooInline{ left:0; width:100%; }
+div.miFloattrue{ position:absolute; }
+div.miFloatfalse{ position:relative;}
+div.miMooInline div.miRTE { left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
 div.miMooInline div.miRTE div{ position:relative; width:100%; }
 div.miMooInline div.miRTE span{ height:18px; margin:2px; display:inline-block; }
 div.miMooInline div.miRTE input{ height:18px; width:100px }
