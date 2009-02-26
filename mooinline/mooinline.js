@@ -60,7 +60,7 @@ var MooInline = new Class({
 		inline  : false,
 		floating: false,
 		location: 'multiple',
-		defaults: 'Main,File,Link,Justify,Lists,Indents,|,Html/Text'
+		defaults: 'Main,File,Link,Justify,Lists,Indents,|,Html/Text,fuUploadBar'
 	},
 	
 	initialize: function(els, options){
@@ -135,7 +135,7 @@ var MooInline = new Class({
 	},
 	
 	toolbar: function(toolbar, level, row, buttons, invisible){
-		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain,
+		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain. 
 		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
 		t.bar = toolbar.getParent();
 		
@@ -164,7 +164,7 @@ var MooInline = new Class({
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','click','img','init'].map(properties.erase.bind(properties));
+				['args','shortcut','element','click','img','init',(val.element?'href':'null')].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
 				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
 				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
@@ -310,12 +310,57 @@ MooInline.Buttons = new Hash({
 						for(var i=0; i<3; i++){
 							x+=((256-x)/256)*Sy;
 						}
-					}}
+					}},
+	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
+						var x = mouse.x, y = mouse.y, h = hue.y*hue.getSize().y/512, a = Math.atan2(x,y)/Math.PI * 3 - 2, d= 256 * Math.sqrt(x*x+y*y) / (this.getSize().x/2);
+						//for(i=0; i<3; i++){ b = Math.abs(++a);	c[i]=b<1?1:b>2?0:-(b-2); }
+						for(i=0; i<3; i++) c[i] = ((b = Math.abs(++a))<1 ? 1 : b>2 ? 0 : -(b-2)) - (i==1?1:0) * (i==1?-1:1) * 256 + (256-c)/256 * h;
+						for(i=0;i<3;i++){ 
+							//var c = ++a<-2||a>2?0:a<-1?a+2:a<1?1:-(a-2);
+							var c = ++a<-2||a>2?0:a<-1?a+2:a<1?1:-(a-2);
+							if(i==1) c = -(--c);	//--c[2]*=-1
+							c+= (256-c)/256 * h;	//256 * 2 * h;
+							color[i] = c;
+					}}},
+	'fuUploadBar1' :{ click:['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'], title:'Upload Image' },
+	'fuUploadBar'  :{ title:'Upload Image', img:25, click:function(args, classRef){
+						classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
+					}},
+	'fuBrowse'     :{ id:"fuBrowse", click:function(){}, element:'span', text:'Browse Files', title:''},
+	'fuUpload'     :{ id:"fuUpload", click:'', element:'span', text:'Upload Files', title:''},
+	'fuClear'      :{ id:"fuClear", click:function(){console.log('clear here')}, element:'span', text:'Clear List' ,title:''},	
+	'fuStatus'     :{ element:'span', id:'fuStatus', init:function(){
+						this.adopt(
+							new Element('strong', {'class':'overall-title'}),
+							new Element('strong', {'class':'current-title'}),
+							new Element('div', {'class':'current-text'}),
+							new Element('img', {'class':'progress overall-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' }),
+							new Element('img', {'class':'progress current-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' })
+						)
+					}},
+	'fuList'       :{ id:'fuList', style:'display:none', init:function(){
+						Asset.javascript('mooinline/plugins/fancyUpload/fancyUpload.js');
+						Asset.css('mooinline/plugins/fancyUpload/fancyUpload.css');
+					}},
+	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
+	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''},
+	'defaults'     :{ init:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','uploadBar']}
 })
 
-
+//plan, on init - replace fuUploadbar.click with a function that moves the toolbar instead.
 //console.log(MooInline.Buttons.test.args);
 //if(!(init || l=='o')) return;						//location: foll[o]w, or multiple&&init
+
+/*ideapad:
+a) perhaps if click returns an array, it should run toolbar?
+b) Move defaults to the buttons hash, allow for init.
+c) allow init before and after initializing buttons within.
+d) add variable to signify whether or not buttons should be run, and remove the default behavior
+e) add preinit, that is run before buttons are initd, and postinit for after.
+f) change numbering system to 123 for toolbars and abc for subbars.
+e) create a subfunction that calls toolbar and use it instead in the mousedown function.
+f) // should there be an init before any buttons are pressed, and a expanded() when all are, or a different set of rules for init on menus?
+*/
 			
 /*
 ChangeLog:
