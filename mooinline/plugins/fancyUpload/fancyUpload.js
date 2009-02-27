@@ -483,51 +483,30 @@ Date.durationsAbbr = {
 //######################################################
 
 function applyUploader(){
-	//$('form-demo').appendText(' Detected Flash ' + Browser.Plugins.Flash.version + '!');
-	//console.log('swiffy called')
-	//console.log($('fuList'))
+
 	var swiffy = new FancyUpload2($('fuStatus'), $('fuList'), {
-		url: 'uploader.php',
+		url: 'uploadHandler.php',
 		fieldName: 'photoupload',
 		path: 'mooinline/plugins/fancyUpload/Swiff.Uploader.swf',
-		limitSize: 2 * 1024 * 1024, // 2Mb
+		limitSize: 2 * 1024 * 1024,
+		typeFilter:{'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'},
 		onLoad: function() {
-			//	$('fuStatus').removeClass('hide');
-			//	$('demo-fallback').destroy();
+			//	$('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
 		},
-		// The changed parts!
-		debug: true, // enable logs, uses console.log
-		target: 'fuBrowse' // the element for the overlay (Flash 10 only)
+		onComplete: function(args){
+
+			console.log(args.name)
+			console.log($A(arguments))
+		},
+		debug: true, 		// enable logs, uses console.log
+		target: 'fuBrowse' 	// the element for the overlay (Flash 10 only).  Not used since we anyways use our own method.
 	});
 	
-	/**
-	 * Various interactions
-	 */
-
-	 
-	 
-	$('fuBrowse').addEvent('mousedown', function() {
-		/**
-		 * Doesn't work anymore with Flash 10: swiffy.browse();
-		 * FancyUpload moves the Flash movie as overlay over the link.
-		 * (see opeion "target" above)
-		 */
-		 
+	$('fuBrowse').addEvent('mousedown', function() {	// Doesn't work anymore with Flash 10: swiffy.browse(); FancyUpload moves the Flash movie as overlay over the link(see "target" option above)
 		swiffy.browse();
 		return false;
 	});
 
-	/**
-	 * The *NEW* way to set the typeFilter, since Flash 10 does not call
-	 * swiffy.browse(), we need to change the type manually before the browse-click.
-	 
-	$('demo-select-images').addEvent('change', function() {
-		var filter = null;
-		if (this.checked) filter = {'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'};
-		swiffy.options.typeFilter = filter;
-	});
-	*/
-	
 	$('fuClear').addEvent('mousedown', function() {
 		swiffy.removeFile();
 		return false;
@@ -539,10 +518,11 @@ function applyUploader(){
 	});
 	
 	$$('object[id^=Swiff]')[0].getParent().setStyles({position:'absolute', top:0, left:0 }).inject('fuBrowse', 'after');
-	MooInline.Buttons.fuUploadBar.click = function(){ console.log('switch'); console.log
+	MooInline.Buttons.fuList.init = '';
+	MooInline.Buttons.fuUploadBar.click = function(){ 
+		console.log('switch'); console.log
 		$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
 	}
-	MooInline.Buttons.fuList.init = '';
 }
 applyUploader();
 

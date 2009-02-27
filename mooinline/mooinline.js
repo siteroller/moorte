@@ -57,84 +57,116 @@ var MooInline = new Class({
 	Implements: [Events, Options],
 
 	options:{
-		inline  : false,
 		floating: false,
-		location: 'multiple',
+		location: 'elements', //[e,n,T,B,'']
 		defaults: 'Main,File,Link,Justify,Lists,Indents,|,Html/Text,fuUploadBar'
 	},
 	
-	initialize: function(els, options){
+	initialize: function(selectors, options){
 		this.setOptions(options);	
-		this.insertRTE(els);
-	},
-
-	insertRTE: function(selectors, toolbars){
-	
-		var t = this, els = $$(selectors||'textarea, .mooinline'), i = this.options.inline, l = this.options.location.substr(4,1).toLowerCase(), mi, shortcuts;
-		this.shortcuts =[]; this.shortcutBtns = []; MooInline.Buttons.classReference = t;
+		var self = this, mi, els = $$(selectors||'textarea, .mooinline'), l = this.options.location.substr(4,1).toLowerCase();
+		this.shortcuts = []; this.shortcutBtns = [];
 		
-		function insertToolbar(){
-			var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
-				 new Element('div', {'class':'miRTE' })
-			).inject(document.body);
-			defaults.each(function(buttons, index){t.toolbar(mi.getElement('.miRTE'), index, 'Top', buttons)});
-			return mi;
-		}
-		function positionToolbar(el, mi){
-			el.set('contentEditable', true).focus();
-			if(l) mi.setStyle('display','block');				//location: !none
-			if(!l || l=='b' || l=='t') return;					//location: none[], page[t]op, page[b]ottom
-			
-			var elSize = el.getCoordinates();						
-			mi.setStyle('width', elSize.width).store('field',el);
-			mi.addClass('miFloat'+t.options.floating); mi.getElement('*:first-child').addClass('miFloat'+t.options.floating) //need not be reapplied every time, messy application, fix
-			if(el.getParent().hasClass('miTextArea')) el = el.getParent();
-			!(t.options.floating) ? mi.inject(el,'before') :
-				mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getElement('*:first-child').getCoordinates().height > 0 ? elSize.top : elSize.bottom) });
-		}
-		function textArea(el){
-			var div = new Element('div', {text:el.get('value')});
-			new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
-			el.addClass('miHide');
-			return div;
-		}
-		var btnChk = ['bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
-						'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'];				
-		var btnVal = [];
-		var updateBtns = t.updateBtns = function(e){
-			var bar = t.bar, be, btn;
-			 
-			btnChk.each(function(prop){		
-				if (be = bar.getElement('.mi'+prop))
-						window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-			})
-			btnVal.each(function(prop){	
-				if (be = bar.getElement('.mi'+prop))
-					window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-			}) 
-			if(e && e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
-				e.stop(); 
-				btn = t.bar.getElement('.mi'+t.shortcutBtns[btn])
-				btn.fireEvent('mousedown', btn)
-			}
-		};
-		
-		var defaults = $splat(t.options.defaults).map(function(i){return i.split(',')});
 		els.each(function(el, index){
-			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = textArea(el);
-			if(l=='i' || !mi) mi = insertToolbar();  						//[L]ocation == mult[i]ple.
-			!i||!l ? positionToolbar(el,mi) : el.addEvents({				//[i]nline ? false : true
-				'click': function(){ positionToolbar(el, mi); },
-				'blur':function(){ mi.setStyle('display','none'); this.set('contentEditable', false);}
+			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
+			if(l=='e' || !mi) mi = self.insertToolbar();  						//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
+			if(l=='b' || l=='t' || !l) el.set('contentEditable', true).focus();	//[L]ocation == page[t]op, page[b]ottom, none[] 
+			else l=='e' ? self.positionToolbar(el,mi) : el.addEvents({			//[L]ocation == elem[e]nts ? inli[n]e
+				'click': function(){ self.positionToolbar(el, mi); },
+				'blur':function(){ 
+					mi.addClass('miHide'); this.set('contentEditable', false);	//modify to prevent from disappearing when focus is moved to the toolbar.
+				}
 			});
-			el.store('bar', mi).addEvents({'mouseup':updateBtns, 'keydown':updateBtns, 'focus':function(){t.bar = this.retrieve('bar'); }});
+			el.store('bar', mi).addEvents({
+				'mouseup':MooInline.Utilities.updateBtns, 
+				'keydown':MooInline.Utilities.updateBtns, 
+				'focus':function(){ t.bar = this.retrieve('bar'); }
+			});
 		})
-		
-		if(l=='b' || l=='t') mi.addClass('miPage'+l);
-		if(l=='t') mi.getElement('*:first-child').addClass('miTopDown');
+		MooInline.Utilities.activeField = els[0];								//in case a button is pressed before anything is selected.
+		if(l=='t') mi.addClass('miPageTop').getFirst().addClass('miTopDown');
+		else if(l=='b') mi.addClass('miPageBottom');
 	},
 	
-	toolbar: function(toolbar, level, row, buttons, invisible){
+	insertToolbar: function (){
+		var mi = new Element('div', {'class':'miRemove miMooInline '+(i?'miHide':''), 'contentEditable':false }).adopt(
+			 new Element('div', {'class':'miRTE' })
+		).inject(document.body);
+		$splat(t.options.defaults).map(function(i){return i.split(',')}).each(
+			function(buttons, index){MooInline.Utilities.addToolbar(mi.getFirst(), index, 'Top', buttons)}
+		);
+		return mi;
+	},
+	
+	positionToolbar: function (el, mi){									//function is sloppy.  Clean!
+		el.set('contentEditable', true).focus();
+		var elSize = el.getCoordinates(), f=this.options.floating;
+		mi.removeClass('miHide').setStyle('width',elSize.width).store('field', mi.retrieve('field', []).include(el));
+		if(f) mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('miFloat').getFirst().addClass('miFloat');
+		else mi.inject((el.getParent().hasClass('miTextArea')?el.getParent():el),'before');
+	},
+	
+	function textArea(el){
+		var div = new Element('div', {text:el.get('value')});
+		new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
+		el.addClass('miHide');
+		return div;
+	}
+})
+
+MooInline.Utilities = {
+	exec: function(args){
+		args = $splat(args);
+		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2)));  //bug for justify in&outdent in FF3
+		if(g) document.designMode = 'on';
+		document.execCommand(args[0], args[2]||false, args[1]||null);  //document.execCommand('justifyRight', false, null);
+		if(g) document.designMode = 'off'
+	},
+	
+	getRange:function(){
+		if(miRangeSelection != 'undefined') console.log( 1 )
+		var sel = window.getSelection ? window.getSelection() : window.document.selection;
+		if (!sel) return null;
+		this.range = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+	},
+	
+	setRange: function() {
+		if(this.range.select) this.range.select(); 
+		else{
+			var sel = window.getSelection ? window.getSelection() : window.document.selection;
+			miRangeSelection = sel;
+			if (sel.addRange){
+				sel.removeAllRanges();
+				sel.addRange(this.range);
+			}
+		}
+ 
+		var url = $('miLink').get('value') || "";
+		MooInline.utilities.exec(['createlink',url]);
+		//var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
+	},
+	
+	updateBtns: function(e){
+		var bar = t.bar, be, btn;
+		 
+		[	'bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
+			'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'
+		].each(function(prop){		
+				if (be = bar.getElement('.mi'+prop))
+					window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+		})
+		[].each(function(prop){	
+			if (be = bar.getElement('.mi'+prop))
+				window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+		}) 
+		if(e && e.control && (btn = t.shortcuts.indexOf(e.key))>-1){ 
+			e.stop(); 
+			btn = t.bar.getElement('.mi'+t.shortcutBtns[btn])
+			btn.fireEvent('mousedown', btn)
+		}
+	},
+	
+	addToolbar: function(toolbar, level, row, buttons, invisible){
 		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain. 
 		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
 		t.bar = toolbar.getParent();
@@ -154,20 +186,20 @@ var MooInline = new Class({
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){ 
-							flyout ? t.toolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
+							flyout ? MooInline.Utilities.addToolbar(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
 							if(e && e.stop)e.stop();
 							
 							//rework logic - will not always do as expected.
 							this.getParent().getElements('a').removeClass('miSelected');
 							if(val.checkState)this.addClass('miSelected');
-							t.updateBtns();
+							MooInline.Utilities.updateBtns();
 						}
 					}
 				}).extend(val);
 				['args','shortcut','element','click','img','init',(val.element?'href':'null')].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
 				if(val.shortcut){t.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
-				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) t.toolbar(toolbar,level+'_',btn,val.click,1)
+				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) MooInline.Utilities.addToolbar(toolbar,level+'_',btn,val.click,1)
 				if(val.init) val.init.run([val.args||btn, t], e);
 				if(toolbar.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			})
@@ -177,35 +209,6 @@ var MooInline = new Class({
 		if(n) n.setStyle('display', 'none')
 		toolbar.store(level, bar);
 		bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
-	},
-	
-	exec: function(args){
-		var g;
-		args = $splat(args);
-		if(g=Browser.Engine.gecko) document.designMode = 'on';
-		document.execCommand(args[0], args[2]||false, args[1]||null);  //document.execCommand('justifyRight', false, null);
-		if(g) document.designMode = 'off'
-	},	
-		
-	getRange:function(){
-		var sel = window.getSelection ? window.getSelection() : window.document.selection;
-		if (!sel) return null;
-		this.range = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-	},
-	
-	setRange: function() {
-		if(this.range.select) this.range.select(); 
-		else{
-			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			if (sel.addRange){
-				sel.removeAllRanges();
-				sel.addRange(this.range);
-			}
-		}
- 
-		var url = $('miLink').get('value') || "";
-		this.exec(['createlink',url]);
-		//var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
 	},
 	
 	clean: function(html, xhtml, semantic){
@@ -245,8 +248,8 @@ var MooInline = new Class({
 		if(semantic)cleanup.extend(semantic);
 		cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });
 		return source;
-	}	
-})
+	}
+}
 
 MooInline.Buttons = new Hash({
 
@@ -301,27 +304,12 @@ MooInline.Buttons = new Hash({
 						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 					}},
 	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
-						var lx = mouseLocation.x, ly = mouseLocation.y, Sy=sideSlider.y, b = this.get('width')/7, c=[];
-						for(var i=0; i<3; i++){
-							var n0=b*i-l,n1=l-b*(i+5);
-							if((c[i]=n0<0||n1<0?0:n0<b?n0:n1)>b)c[i]=b; //if(x>b)x=b;x=n0<0||n1<0?0:n0<b?n0:n1;  //c'mon!! Prize for lack of legibility!!!
-						}
-						c[2]=b-c[2];
-						for(var i=0; i<3; i++){
-							x+=((256-x)/256)*Sy;
-						}
+						//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
+						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
+						for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+						c[1] = -(c[2] - 255*saturation);
+						var hex = c.rgbToHex();
 					}},
-	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
-						var x = mouse.x, y = mouse.y, h = hue.y*hue.getSize().y/512, a = Math.atan2(x,y)/Math.PI * 3 - 2, d= 256 * Math.sqrt(x*x+y*y) / (this.getSize().x/2);
-						//for(i=0; i<3; i++){ b = Math.abs(++a);	c[i]=b<1?1:b>2?0:-(b-2); }
-						for(i=0; i<3; i++) c[i] = ((b = Math.abs(++a))<1 ? 1 : b>2 ? 0 : -(b-2)) - (i==1?1:0) * (i==1?-1:1) * 256 + (256-c)/256 * h;
-						for(i=0;i<3;i++){ 
-							//var c = ++a<-2||a>2?0:a<-1?a+2:a<1?1:-(a-2);
-							var c = ++a<-2||a>2?0:a<-1?a+2:a<1?1:-(a-2);
-							if(i==1) c = -(--c);	//--c[2]*=-1
-							c+= (256-c)/256 * h;	//256 * 2 * h;
-							color[i] = c;
-					}}},
 	'fuUploadBar1' :{ click:['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'], title:'Upload Image' },
 	'fuUploadBar'  :{ title:'Upload Image', img:25, click:function(args, classRef){
 						classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
@@ -347,11 +335,8 @@ MooInline.Buttons = new Hash({
 	'defaults'     :{ init:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','uploadBar']}
 })
 
-//plan, on init - replace fuUploadbar.click with a function that moves the toolbar instead.
-//console.log(MooInline.Buttons.test.args);
-//if(!(init || l=='o')) return;						//location: foll[o]w, or multiple&&init
 
-/*ideapad:
+/* Ideapad:
 a) perhaps if click returns an array, it should run toolbar?
 b) Move defaults to the buttons hash, allow for init.
 c) allow init before and after initializing buttons within.
@@ -359,7 +344,11 @@ d) add variable to signify whether or not buttons should be run, and remove the 
 e) add preinit, that is run before buttons are initd, and postinit for after.
 f) change numbering system to 123 for toolbars and abc for subbars.
 e) create a subfunction that calls toolbar and use it instead in the mousedown function.
-f) // should there be an init before any buttons are pressed, and a expanded() when all are, or a different set of rules for init on menus?
+f) should there be an init before any buttons are pressed, and a expanded() when all are, or a different set of rules for init on menus?
+g) throws an error sometimes when inline
+h) remove 'contentEditable' from page when func begins with ...
+i) when inline - clicking the bar should not make it dissapear!!
+j) by default btoolbar is showing - no good when 'none' is selected.
 */
 			
 /*
