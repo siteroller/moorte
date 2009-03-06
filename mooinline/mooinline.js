@@ -1,9 +1,9 @@
 /* Copyright November 2008, Sam Goody, ssgoodman@gmail.com 
 *   Licensed under the Open Source License
 *
-* 	Authors:
-*		Ryan Mitchel (ryan@rtnetworks.net) - [regexs]
+* 	Authors:		
 *		Sam Goody (ssgoodman@gmail.com)
+*		Ryan Mitchel (ryan@rtnetworks.net) - [regexs]
 *	Credits:
 *	Entirely based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
 *	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
@@ -20,11 +20,11 @@
 *		})
 *		
 *	Usage Options (default is first on list):
-*		inline    : [false, true] - if set to true, MooInline will show onClick & hide onBlur.  Otherwise, MooInline will always show.
+
 *		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  
 *		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
-*		location: ['multiple', 'follow', 'pageBottom', 'pageTop', none]  multiple adds a bar to each element passed in.  'single' creates only one bar.  If inline is true, bar will follow the user. 
-*											pageTop and pageBottom will have one bar for whole page.  None has no bar.  Shortcuts work.
+*		location: ['elements', 'inline', 'pageBottom', 'pageTop', none]  elements adds a bar to each element passed in.  'inline' acts like elements but shows the bar only on selection, and remove it onblur.  Only one bar is created. 
+*											pageTop and pageBottom shows one bar for whole page, and the location can be edited via css.  None shows no bar, but shortcuts work.
 *	
 *	Extending:
 *	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
@@ -36,7 +36,7 @@
 *		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
 *		args:  [defaults to object key] arguments to be passed to click event, 
 *		Both init & click are passed the args, followed by a reference to the class.  
-*		Within the function(args,classReference): The active button is 'this', the active field is t.activeField.  All fields associated with the bar is this.getParent('.mooInline').retrieve('fields') 
+*		Within the function(args,classReference): The active button is 'this', the toolbar is this.getParent('.miMooInline');.  The active field is t.activeField, an array of all fields associated with the bar is t.fields. 
 *		
 *
 *	Outline of the MooInline function:
@@ -171,50 +171,24 @@ return
 	addCollection: function(buttons, place, invisible){
 		//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > div.miR0[?] > div.miTop[div collection] > a.miMain[a button]. - byebye r0!
 		
-		//console.log($type(place))
-		//console.log('in addCollection - place: ',place)
-		//console.log('in addCollection - collection: ',collection)
-		//if place is an array, collection is 
-		//if(!caller) caller = MooInline.Properties.activeBtn.getParent('.miRTE');  //incorrectly using caller to refer to caller's parent
-		//var miRTE = (noBtn ? caller : caller.getParent('.miRTE')); //clean!!
-		//, collection =  caller.getParent('.miRTE').getElement('.miCollection_'+caller);
-		//MooInline.bar = place;
-		//MooInline.bar = collection;
-		//.myElement.getNext('.miCollection_'+place);
-		// if place is an array, adjust for place.  Otherwise assume it is a button.  Still not convinced if the button should be passed or set on click (partly what will be when auto-clicked)
-		//console.log(!isNaN(val.img))
-		//console.log(val)
-		//console.log(collection)
-		//if(val.click) val.click = expandFunc(val.click);
-		//else 
-		//console.log('vc', val)				
-		//$each([val.onLoad, val.click], expandFunc)
-		//if(val.onLoad)val.onLoad = expandFunc(val.onLoad);
-		// console.log(val)						
-		// console.log(this)	
-		
 		if ($type(place) == 'element') place = [place.getParent(),'after', place.get('id')];
 		var self = this, collection = place[0].getParent().getElementById(place[2]), img, args;
 		function run(prop, args, self, btn){
+			if(!prop) return;
 			console.log('where to')
 			console.log(prop, args, self)
 			switch($type(prop)){
-				case 'function':prop(args||btn); return; 
-				case 'array': MooInline.Utilities.addCollection(prop, self); break;	
-				//args = prop; prop = 'addCollection';  break;				
+				case 'function':prop.bind(self)(args||btn); return; 
+				case 'array': MooInline.Utilities.addCollection(prop, self); break;			
 				case 'string': MooInline.Utilities[prop].bind(self)(args); break;
 			}
-			console.log(prop, args, self)
-			
 		}
 		if(!collection){
 			collection = new Element('div', {'class':'miCollection_'+(place[2]||Math.random())}).inject(place[0], place[1]);//caller, (noBtn?'bottom':'after')
 			buttons.each(function(btn){
 				var bgPos = 0, val = MooInline.Buttons[btn]; 
 				if(!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
-				// console.log('out',val.img) console.log('in',val.img); console.log(val)
-				// [val.onLoad, val.click].map(function(prop){ prop = expandFunc(prop); console.log('prop', prop)	 });
-				console.log('d')
+				
 				var properties = $H({
 					href:'javascript:void(0)',
 					unselectable: 'on',
@@ -223,20 +197,22 @@ return
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){					
-							if(!val.click && (!val.element || val.element == 'a')) val.click = MooInline.Utilities.execute;
+							if(!val.click && (!val.element || val.element == 'a')) MooInline.Utilities.exec(args||btn);
 							run(val.click, val.args, this, btn)
-//				val.click.bind(this)(val.args||btn);
 							if(e && e.stop)e.stop();
 							
-							this.getParent().getElements().removeClass('miSelected');
+							console.log(this.getParent());
+							//this.getParent().getElements().removeClass('miSelected');
 							if(!val.ignoreState)this.addClass('miSelected');
+							
+							// val.click.bind(this)(val.args||btn);
 							//flyout ? MooInline.Utilities.addCollection(val.click,this) : (val.click || self.exec).bind(this)(val.args||btn);//btn
 							//if($type(r) == 'array') MooInline.Utilities.addCollection(r,this);						
 							//MooInline.Utilities.updateBtns();
 						}
 					}
 				}).extend(val);
-				console.log('e');
+				//console.log('e');
 				['args','shortcut','element','click','img','onLoad','onExpand','onHide',(val.element?'href':'null')].map(properties.erase.bind(properties));
 				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(collection);
 				
@@ -245,56 +221,11 @@ return
 				//	if($type(val.onLoad)=='string' || run=='expand') MooInline.Utilities.addCollection(val.click,e,val.expand=='hidden'?1:0)
 				//}
 				if(val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
-				console.log('f')
+				//console.log('f')
 				if(collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
-				console.log('g')
+				//console.log('g')
 			})
 		}
-	},
-	
-	addToolbar: function(toolbar, level, row, buttons, invisible){
-		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain. 
-		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
-		MooInline.bar = toolbar.getParent();
-		
-		if(!(bar = parent.getElement('.mi'+row+'_toolbar'))){ //'.'+row
-			bar = new Element('div', {'class':'mi'+row+'_toolbar'}).inject(parent);
-			buttons.each(function(btn){
-				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
-				var img = flyout && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
-				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
-				
-				var properties = $H({
-					href:'javascript:void(0)',
-					unselectable: 'on',
-					'class':'mi'+(val.title||btn),
-					title: btn + (flyout ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
-					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
-					events:{
-						'mousedown': function(e){ 
-							flyout ? MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
-							if(e && e.stop)e.stop();
-							
-							//rework logic - will not always do as expected.
-							this.getParent().getElements('a').removeClass('miSelected');
-							if(val.checkState)this.addClass('miSelected');
-							MooInline.Utilities.updateBtns();
-						}
-					}
-				}).extend(val);
-				['args','shortcut','element','click','img','init',(val.element?'href':'null')].map(properties.erase.bind(properties));
-				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
-				if(val.shortcut){MooInline.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
-				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click,1)
-				if(val.init) val.init.run([val.args||btn, t], e);
-				if(toolbar.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
-			})
-		};
-		
-		var n = toolbar.retrieve(level);
-		if(n) n.setStyle('display', 'none')
-		toolbar.store(level, bar);
-		bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
 	},
 	
 	clean: function(html, xhtml, semantic){
@@ -467,4 +398,78 @@ ChangeLog:
 a) rename toolbar to collection
 b) if click returns an array, it will not run toolbar (but wrote and greyed out line, can be reconsidered.
 c) 
+*/
+
+/*
+addToolbar: function(toolbar, level, row, buttons, invisible){
+		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain. 
+		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
+		MooInline.bar = toolbar.getParent();
+		
+		if(!(bar = parent.getElement('.mi'+row+'_toolbar'))){ //'.'+row
+			bar = new Element('div', {'class':'mi'+row+'_toolbar'}).inject(parent);
+			buttons.each(function(btn){
+				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
+				var img = flyout && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
+				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
+				
+				var properties = $H({
+					href:'javascript:void(0)',
+					unselectable: 'on',
+					'class':'mi'+(val.title||btn),
+					title: btn + (flyout ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
+					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
+					events:{
+						'mousedown': function(e){ 
+							flyout ? MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
+							if(e && e.stop)e.stop();
+							
+							//rework logic - will not always do as expected.
+							this.getParent().getElements('a').removeClass('miSelected');
+							if(val.checkState)this.addClass('miSelected');
+							MooInline.Utilities.updateBtns();
+						}
+					}
+				}).extend(val);
+				['args','shortcut','element','click','img','init',(val.element?'href':'null')].map(properties.erase.bind(properties));
+				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
+				if(val.shortcut){MooInline.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
+				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click,1)
+				if(val.init) val.init.run([val.args||btn, t], e);
+				if(toolbar.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
+			})
+		};
+		
+		var n = toolbar.retrieve(level);
+		if(n) n.setStyle('display', 'none')
+		toolbar.store(level, bar);
+		bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
+	},
+	
+	
+		//console.log($type(place))
+		//console.log('in addCollection - place: ',place)
+		//console.log('in addCollection - collection: ',collection)
+		//if place is an array, collection is 
+		//if(!caller) caller = MooInline.Properties.activeBtn.getParent('.miRTE');  //incorrectly using caller to refer to caller's parent
+		//var miRTE = (noBtn ? caller : caller.getParent('.miRTE')); //clean!!
+		//, collection =  caller.getParent('.miRTE').getElement('.miCollection_'+caller);
+		//MooInline.bar = place;
+		//MooInline.bar = collection;
+		//.myElement.getNext('.miCollection_'+place);
+		// if place is an array, adjust for place.  Otherwise assume it is a button.  Still not convinced if the button should be passed or set on click (partly what will be when auto-clicked)
+		//console.log(!isNaN(val.img))
+		//console.log(val)
+		//console.log(collection)
+		//if(val.click) val.click = expandFunc(val.click);
+		//else 
+		//console.log('vc', val)				
+		//$each([val.onLoad, val.click], expandFunc)
+		//if(val.onLoad)val.onLoad = expandFunc(val.onLoad);
+		// console.log(val)						
+		// console.log(this)	
+		// console.log('out',val.img) console.log('in',val.img); console.log(val)
+				// [val.onLoad, val.click].map(function(prop){ prop = expandFunc(prop); console.log('prop', prop)	 });
+				//console.log('d')
+				
 */
