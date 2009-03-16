@@ -25,3 +25,71 @@
 32:
 1. Fix pageTop, auto positioning when too high.
 
+34:
+1. WontFix - calculate num in toolbar function instead of requiring.
+2. Added float:false, and change to default.
+3. Add "insert picture" button
+4. Consider ways to bound size of toolbars.
+5. change variable name of updateBtns function
+6. Work on bug with addLink, and bug with init:indent function / bind button to button object
+
+35:
+a) rename toolbar to collection
+b) if click returns an array, it will not run toolbar (but wrote and greyed out line, can be reconsidered.
+
+38:
+a) renamed collection to addCollection
+b) moved defaults into the buttons hash, allowing for onLoad
+c) onLoad runs before subCollections are run
+d) only put page in design mode for justify and indent
+e) toolbar should not display when set to none
+f) All collections are now within the same div
+g) Each collection should be part of a group - by default named after the collection - of which only one from each group can show at a time.
+h) rejected - expandHidden
+i) rejected - change numbering system to 123 for toolbars and abc for subbars.
+j) Removed the default behavior of opening subcollections that have shortcuts related to them.
+
+
+Old Docs:
+*
+*	Usage: 
+*		new MooInline(); - applies to textareas and elements with the class "mooinline"
+*		new MooInline('span.editMe', {inline:true}) - will make the spans with the class of editme editable inline.
+*		new MooInline({defaults:['underline,italics','bold,HelloWorld,JustifyLeft,JustifyRight']}) - 2 toolbars: the first with underline and italics.  The second with bold, a custom defined button, and 2 justify options.
+*	Extending:
+*		MooInline.Buttons.extend({
+*			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
+*		})
+*		
+*	Usage Options (default is first on list):
+
+*		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  
+*		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
+*		location: ['elements', 'inline', 'pageBottom', 'pageTop', none]  elements adds a bar to each element passed in.  'inline' acts like elements but shows the bar only on selection, and remove it onblur.  Only one bar is created. 
+*											pageTop and pageBottom shows one bar for whole page, and the location can be edited via css.  None shows no bar, but shortcuts work.
+*	
+*	Extending:
+*	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
+*		img:   [If a number, defaults to 'images/i.gif'. If opens toolbar, defaults to image of first button in toolbar.  Otherwise, no default] background image
+*		shortcut: [no default] keyboard shortcut.  All shortcuts are initialized when editor is created, even if the buttons are not yet showing.
+*		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
+*		title: [defaults to object key, or to object key plus " Menu" if button opens toolbar.  If has shortcut, defaults to object key plus (Ctrl+shortcut).  ]
+*		init:  [If array, will create a toolbar with those buttons.  Otherwise, defaults to none.] event to be called when button is initialized on the screen.
+*		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
+*		args:  [defaults to object key] arguments to be passed to click event, 
+*		Both init & click are passed the args, followed by a reference to the class.  
+*		Within the function(args,classReference): The active button is 'this', the toolbar is this.getParent('.miMooInline');.  The active field is t.activeField, an array of all fields associated with the bar is t.fields. 
+*		
+*
+*	Outline of the MooInline function:
+*		1. initialize, implements, & options - built in mootools class tools.  See instructions for list of options.
+*		2. exec, getRange, setRange - utility functions for the browser's built it editing tools. 
+*		3. insertRTE - creates an empty div which will have the Rich Text Editor placed into it.
+*			insertToolbar - creates empty div on page for each instance of MooInline, then calls 'toolbar' to inserts toolbars into said empty div.
+*			positionToolbar - places said div wherever it should go on page.
+*			textArea - if MooInline is applied to textarea, called to replace textarea with element. 
+*			updateBtns - called whenever a key or the mouse is pressed. Checks which buttons should appear depressed.
+*		4. toolbar - creates toolbar with passed in buttons.
+*		5. clean - cleans up passed in html before submitting to prevent xss attacks.  Accepts optional xhtml & semantics options.  Utility is not actually used by MooInline.
+*		
+

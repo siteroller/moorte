@@ -3,53 +3,14 @@
 *
 * 	Authors:		
 *		Sam Goody (ssgoodman@gmail.com)
-*		Ryan Mitchel (ryan@rtnetworks.net) - [regexs]
+*		Mark Kohen
+*		T. Anolik
 *	Credits:
 *	Entirely based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
-*	Ideas and inspiration: Guillerr from the Mootools IRC, MooEditable
+*	Ideas and inspiration: Guillerr, MooEditable
 *	Icons from OpenWysiwyg - http://www.openwebware.com
+*	Many of the cleanup regexs from CheeAun and Ryan's work on MooEditable
 *	We really want your help!  Please join!!
-*
-*	Usage: 
-*		new MooInline(); - applies to textareas and elements with the class "mooinline"
-*		new MooInline('span.editMe', {inline:true}) - will make the spans with the class of editme editable inline.
-*		new MooInline({defaults:['underline,italics','bold,HelloWorld,JustifyLeft,JustifyRight']}) - 2 toolbars: the first with underline and italics.  The second with bold, a custom defined button, and 2 justify options.
-*	Extending:
-*		MooInline.Buttons.extend({
-*			'HelloWorld':{img:'images/smiley.gif', title:'please click', click:function(){alert('hello World!')}},
-*		})
-*		
-*	Usage Options (default is first on list):
-
-*		floating: [true, false] - If true, bar will float above DOM, and not interfere with layout.  Otherwise it will insert the bar into the dom before the element.  
-*		defaults: [comma delimitted string or array of strings, where each string is a row of buttons.  Defaults to 'Main,File,Link,Justify,Lists,|,Indents,Html/Text']
-*		location: ['elements', 'inline', 'pageBottom', 'pageTop', none]  elements adds a bar to each element passed in.  'inline' acts like elements but shows the bar only on selection, and remove it onblur.  Only one bar is created. 
-*											pageTop and pageBottom shows one bar for whole page, and the location can be edited via css.  None shows no bar, but shortcuts work.
-*	
-*	Extending:
-*	Any properties in extended object will be passed into the new button.  The following are predefined and have special meaning (All are optional):
-*		img:   [If a number, defaults to 'images/i.gif'. If opens toolbar, defaults to image of first button in toolbar.  Otherwise, no default] background image
-*		shortcut: [no default] keyboard shortcut.  All shortcuts are initialized when editor is created, even if the buttons are not yet showing.
-*		element:[if type is 'text','submit',or 'password', defaults to input.  Otherwise defaults to 'a'] element type
-*		title: [defaults to object key, or to object key plus " Menu" if button opens toolbar.  If has shortcut, defaults to object key plus (Ctrl+shortcut).  ]
-*		init:  [If array, will create a toolbar with those buttons.  Otherwise, defaults to none.] event to be called when button is initialized on the screen.
-*		click: [If array, will create a toolbar with those buttons.  Otherwise, defaults to the 'document.execute' command] the mousedown event when the button is pressed,
-*		args:  [defaults to object key] arguments to be passed to click event, 
-*		Both init & click are passed the args, followed by a reference to the class.  
-*		Within the function(args,classReference): The active button is 'this', the toolbar is this.getParent('.miMooInline');.  The active field is t.activeField, an array of all fields associated with the bar is t.fields. 
-*		
-*
-*	Outline of the MooInline function:
-*		1. initialize, implements, & options - built in mootools class tools.  See instructions for list of options.
-*		2. exec, getRange, setRange - utility functions for the browser's built it editing tools. 
-*		3. insertRTE - creates an empty div which will have the Rich Text Editor placed into it.
-*			insertToolbar - creates empty div on page for each instance of MooInline, then calls 'toolbar' to inserts toolbars into said empty div.
-*			positionToolbar - places said div wherever it should go on page.
-*			textArea - if MooInline is applied to textarea, called to replace textarea with element. 
-*			updateBtns - called whenever a key or the mouse is pressed. Checks which buttons should appear depressed.
-*		4. toolbar - creates toolbar with passed in buttons.
-*		5. clean - cleans up passed in html before submitting to prevent xss attacks.  Accepts optional xhtml & semantics options.  Utility is not actually used by MooInline.
-*		
 */
 
 var MooInline = new Class({
@@ -64,7 +25,7 @@ var MooInline = new Class({
 	
 	initialize: function(selectors, options){
 		this.setOptions(options);	
-		var self = this, mi, els = $$(selectors||'textarea, .mooinline'), l = this.options.location.substr(4,1).toLowerCase();
+		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
 		MooInline.shortcuts = MooInline.shortcutBtns = MooInline.activeField = MooInline.activeBtn = [];
 		
 		els.each(function(el, index){
@@ -93,7 +54,10 @@ var MooInline = new Class({
 			 new Element('div', {'class':'miRTE' })
 		).inject(document.body);
 		$splat(this.options.defaults).map(function(i){return i.split(',')}).each(
-			function(buttons, index){MooInline.Utilities.addCollection(buttons,[mi.getFirst(), 'bottom', 'Top'], 0, [])}
+			function(buttons, index){
+				MooInline.activeBtn = mi.getFirst();
+				MooInline.Utilities.addCollection(buttons, mi.getFirst(), 'bottom', '', [], 0)
+			}//buttons,[mi.getFirst(), 'bottom', 'Top'], 0, []
 		);
 
 		return mi;
@@ -169,35 +133,69 @@ return
 		}
 	},
 	
-	addCollection: function(buttons, place, invisible, group){
-		//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > div.miR0[?] > div.miTop[div collection] > a.miMain[a button]. - byebye r0!
-		
-		if ($type(place) == 'element') place = [place.getParent(),'after', place.get('class').match(/mi(?!Selection)[^\s]+/)[0]];
-		var self = this, collection = place[0].getParent().getElement('.miCollection_'+place[2]), img, args;
-		function run(prop, args, self, group){
+	addCollection: function(buttons, place, relative, name, hides, invisible){
+		//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > custom elements
+		function run(prop, args, self, hides){
 			if(!prop) return;
-			console.log('group: ',group);
+			console.log('hides: ',hides);
 			switch($type(prop)){
 				case 'function':prop.bind(self)(args); return; 
-				case 'array': MooInline.Utilities.addCollection(prop, self, 0, group); break;			
 				case 'string': MooInline.Utilities[prop].bind(self)(args); break;
+				//default: MooInline.Utilities.addCollection(prop, self, 0, hides); break; //case 'object': case 'array'
+				default: MooInline.Utilities.addCollection(prop, self, 'bottom', hides, 0); break; //case 'object': case 'array'
 			}
 		}
 		
+		if(!hides) hides = '';
+		if(!place) place = MooInline.activeBtn.getParent('.miRTE');
+		console.log(place, 'place')
+		if(!name ) name = Hash.toQueryString(buttons);//.exec(/(\w)*/);
+		console.log(name, 'name');
+		console.log($type(name), 'nameType')
+		console.log(name.match(/\w/g), 'nameMatch')
+		
+		var self = this, collection = place.getElement('.'+name), btns = [], img, args;
+		buttons = $splat(buttons);
+		
+		buttons.each(function(item){
+			switch($type(item)){
+				case 'string': btns.push(item); break;
+				case 'array' : item.each(function(val){btns.push(val)}); break;	//item.each(buttons.push);
+				case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
+			}
+		})
+		buttons = $A(btns);
+		
+		console.log(buttons, 'buttons')
+		//console.log(buttons, 'buttons')
+		//console.log(buttons, 'buttons')
+		//console.log(item, ': item')
+		//should it pass in a ref to the caller if available, and collect from there the parent and group.
+		//if ($type(place) == 'element') place = [place.getParent(),'after', place.get('class').match(/mi(?!Selection)[^\s]+/)[0]];
+		//var self = this, collection = place[0].getParent().getElement('.miCollection_'+place[2]), img, args;
+		
 		if(!collection){
-			collection = new Element('div', {'class':'miCollection_'+(place[2]||Math.random())}).inject(place[0], place[1]);//caller, (noBtn?'bottom':'after')//.store('caller')
+	//console.log(name, 'co0llection');
+		//if(!collection){
+			//collection = new Element('div', {'class':'miCollection_'+(place[2]||Math.random())}).inject(place[0], place[1]);
+			//collection = new Element('div', {'class':name}).inject(place, relative||'bottom');
 			buttons.each(function(btn){
-				var bgPos = 0, val = MooInline.Buttons[btn]; 
-				if(!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
 				
+				console.log('btn: ',btn)
+				var btnVals;
+				if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
+				var bgPos = 0, val = MooInline.Buttons[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type);
+				if(!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
+
 				var properties = $H({
 					href:'javascript:void(0)',
-					unselectable: 'on',
+					unselectable: (input ? 'off' : 'on'),
 					'class':'mi'+(val.title||btn),															//Will apply the first that exists: mi + [class, title, key] 
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
 					events:{
-						'mousedown': function(e){					
+						'mousedown': function(e){
+							MooInline.activeBtn = this;
 							if(!val.click && (!val.element || val.element == 'a')) MooInline.Utilities.exec(args||btn);
 							run(val.click, val.args, this, buttons)
 							if(e && e.stop)e.stop();
@@ -208,10 +206,13 @@ return
 					}
 				}).extend(val);
 				['args','shortcut','element','click','img','onLoad','onExpand','onHide',(val.element?'href':'null')].map(properties.erase.bind(properties));
-				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(collection);
+				console.log(properties);
+				var e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom');
 				
-				run(val.onLoad, val.args, e, [])	
+				run(val.onLoad, val.args, place, [])	
 				if(val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
+				console.log(btnVals, 'btnvals')
+				if (btnVals) MooInline.Utilities.addCollection(btnVals);//lots to work out still.
 				if(collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			})
 		}
@@ -266,13 +267,15 @@ return
 
 MooInline.Buttons = new Hash({
 
-	'Defaults'     :{onLoad:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']},	//group - defaults
-	'Main'         :{click:['bold','italic','underline','strikethrough','subscript','superscript'], img:'0'},//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
-	'File'         :{click:['paste','copy','cut','redo','undo'], img:9},
-	'Link'         :{click:['l0','l1','l2','unlink'], img:'6', checkState:true},
-	'Justify'      :{click:['justifyleft','justifycenter','JustifyRight','justifyfull'], img:18},
-	'Lists'        :{click:['insertorderedlist','insertunorderedlist'], img:22},
-	'Indents'      :{click:['indent','outdent'], img:16},//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
+	'Defaults'     :{onLoad:{toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
+	'Main'         :{img: '0', click:['bold','italic','underline','strikethrough','subscript','superscript'] },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
+	'File'         :{img: '9', click:['paste','copy','cut','redo','undo'] },
+	'Link'         :{img: '6', click:['l0','l1','l2','unlink'],  checkState:true},
+	'Justify'      :{img:'18', click:{toolbar:['justifyleft','justifycenter','JustifyRight','justifyfull']} },
+	'Lists'        :{img:'22', click:['insertorderedlist','insertunorderedlist'] },
+	'Indents'      :{img:'16', click:['indent','outdent'] },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
+	
+	'toolbar'      :{element:'div', 'class':'miToolbar'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -365,9 +368,11 @@ l) add object of functions it should check on each update key {widetBtn:function
 m) Add support for args to be a function. Run function for value of args.
 n) Allow defaults to have spaces when passed in.
 o) editing functions should not work out of the scope of the toolbar's fields (I shouldn't be able to click on a button on the "wrong" toolbar, and certainly not a field is not meant to be editable.)
-p) the defaults when passed in shopuld have all the new flexibilty scheduled for the hash.
+p) the defaults when passed in should have all the new flexibilty scheduled for the hash.
 q) if a input/textarea, unselectable should be off.
-r) 
+r) pressing buttons should only work for text within a associated field.
+s) Add a tab button.
+t) Add an onHide() handler
 
 Design Decisions:
 a) Logic of button check:
@@ -403,135 +408,10 @@ b) when inline - clicking the bar should not make it dissapear!!
 			
 /*
 ChangeLog:
-34:
-1. WontFix - calculate num in toolbar function instead of requiring.
-2. Added float:false, and change to default.
-3. Add "insert picture" button
-4. Consider ways to bound size of toolbars.
-5. change variable name of updateBtns function
-6. Work on bug with addLink, and bug with init:indent function / bind button to button object
+40: 
 
-35:
-a) rename toolbar to collection
-b) if click returns an array, it will not run toolbar (but wrote and greyed out line, can be reconsidered.
-
-38:
-a) renamed collection to addCollection
-b) moved defaults into the buttons hash, allowing for onLoad
-c) onLoad runs before subCollections are run
-d) only put page in design mode for justify and indent
-e) toolbar should not display when set to none
-f) All collections are now within the same div
-g) Each collection should be part of a group - by default named after the collection - of which only one from each group can show at a time.
-h) rejected - expandHidden
-i) rejected - change numbering system to 123 for toolbars and abc for subbars.
-j) Removed the default behavior of opening subcollections that have shortcuts related to them.
 */
 
-/*
-addToolbar: function(toolbar, level, row, buttons, invisible){
-		//div.MooInline > toolbar[div.miRTE] > parent/level[div.miR0] > bar/row[div.miTop] > a.miMain. 
-		var t = this, bar, parent = toolbar.getElement('.miR'+level) || new Element('div',{'class':'miR'+level}).inject($(toolbar));
-		MooInline.bar = toolbar.getParent();
-		
-		if(!(bar = parent.getElement('.mi'+row+'_toolbar'))){ //'.'+row
-			bar = new Element('div', {'class':'mi'+row+'_toolbar'}).inject(parent);
-			buttons.each(function(btn){
-				var x = 0, val = ($type(btn)=='array' ? {'click':btn} : MooInline.Buttons[btn]), flyout = ($type(val.click) == 'array'); 
-				var img = flyout && !val.img ? MooInline.Buttons[val.click[0]].img : val.img;  
-				if($type(img*1) == 'number'){ x = img; img = 'mooinline/images/i.gif' };
-				
-				var properties = $H({
-					href:'javascript:void(0)',
-					unselectable: 'on',
-					'class':'mi'+(val.title||btn),
-					title: btn + (flyout ? ' Menu' : (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':'')),	
-					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*x)+'px -2px'}:'',
-					events:{
-						'mousedown': function(e){ 
-							flyout ? MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click) : (val.click || t.exec).bind(this)(val.args||btn, t);//btn
-							if(e && e.stop)e.stop();
-							
-							//rework logic - will not always do as expected.
-							this.getParent().getElements('a').removeClass('miSelected');
-							if(val.checkState)this.addClass('miSelected');
-							MooInline.Utilities.updateBtns();
-						}
-					}
-				}).extend(val);
-				['args','shortcut','element','click','img','init',(val.element?'href':'null')].map(properties.erase.bind(properties));
-				var e = new Element(('submit,text,password'.contains(val.type) ? 'input' : val.element||'a'), properties.getClean()).inject(bar);
-				if(val.shortcut){MooInline.shortcuts.include(val.shortcut); t.shortcutBtns.include(btn);}
-				if(flyout && val.click.some(function(item){ return MooInline.Buttons[item].shortcut })) MooInline.Utilities.addCollection(toolbar,level+'_',btn,val.click,1)
-				if(val.init) val.init.run([val.args||btn, t], e);
-				if(toolbar.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
-			})
-		};
-		
-		var n = toolbar.retrieve(level);
-		if(n) n.setStyle('display', 'none')
-		toolbar.store(level, bar);
-		bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
-	},
-	
-	
-		//console.log($type(place))
-		//console.log('in addCollection - place: ',place)
-		//console.log('in addCollection - collection: ',collection)
-		//if place is an array, collection is 
-		//if(!caller) caller = MooInline.Properties.activeBtn.getParent('.miRTE');  //incorrectly using caller to refer to caller's parent
-		//var miRTE = (noBtn ? caller : caller.getParent('.miRTE')); //clean!!
-		//, collection =  caller.getParent('.miRTE').getElement('.miCollection_'+caller);
-		//MooInline.bar = place;
-		//MooInline.bar = collection;
-		//.myElement.getNext('.miCollection_'+place);
-		// if place is an array, adjust for place.  Otherwise assume it is a button.  Still not convinced if the button should be passed or set on click (partly what will be when auto-clicked)
-		//console.log(!isNaN(val.img))
-		//console.log(val)
-		//console.log(collection)
-		//if(val.click) val.click = expandFunc(val.click);
-		//else 
-		//console.log('vc', val)				
-		//$each([val.onLoad, val.click], expandFunc)
-		//if(val.onLoad)val.onLoad = expandFunc(val.onLoad);
-		// console.log(val)						
-		// console.log(this)	
-		// console.log('out',val.img) console.log('in',val.img); console.log(val)
-				// [val.onLoad, val.click].map(function(prop){ prop = expandFunc(prop); console.log('prop', prop)	 });
-				//console.log('d')
-				
-				console.log('place0: ', place)
-		console.log('addCollection: ',prop, args, self)
-		console.log('collection: ', collection)
-		console.log('place1: ', place)
-			console.log('btn: ',btn)
-			// val.click.bind(this)(val.args||btn);
-							//flyout ? MooInline.Utilities.addCollection(val.click,this) : (val.click || self.exec).bind(this)(val.args||btn);//btn
-							//if($type(r) == 'array') MooInline.Utilities.addCollection(r,this);						
-							//MooInline.Utilities.updateBtns();
-						//console.log('e');
-						//if(flyout){
-				//	if($type(val.onLoad)=='function') var run = val.onLoad.bind(e)(val.args||btn);  			//not using 'run' or 'attempt' as they crash if a variable is not defined.
-				//	if($type(val.onLoad)=='string' || run=='expand') MooInline.Utilities.addCollection(val.click,e,val.expand=='hidden'?1:0)
-				//}//console.log('f')//console.log('g')
-				//Logic - check group that collection is part of.  hide all other bars within same group.  this group has file etc, should
-		//collection.store(group, buttons);
-		//var caller = MooInline.Buttons[caller];
-		//var group = caller.group || caller.click || caller.onLoad;
-		//var group = collection.retrieve('group') || [];
-		//
-		// .getElements(.addClass('miHide');//+group[i]
-		//for(i=0; i<group.length; i++) collection.getParent().getElements('[class^=miCollection_]').addClass('miHide');//+group[i]
-		//if(!invisible) collection.removeClass('miHide'); //update to use effects
-		//if(n) n.setStyle('display', 'none')
-		//toolbar.store(group, bar);
-		//bar.setStyle('display', (invisible ? 'none' : 'block')); //update to use effects	
-		console.log('group', group)
-			//console.log(this.getParent());
-							//for(i=0; i<buttons.length; i++){
-							//	var el = par.getElement('.mi'+buttons[i]);
-							//	if(el)el.removeClass('miSelected')
-							//}						
-		
-				
+/* Old Code:
+
 */
