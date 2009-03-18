@@ -134,22 +134,11 @@ return
 	},
 	
 	addCollection: function(buttons, place, relative, name, hides, invisible){
-		//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > custom elements
-		console.log('name: ', name)
-		function run(prop, args, self, hides){
-			if(!prop) return;
-			console.log('hides: ',hides);
-			switch($type(prop)){
-				case 'function':prop.bind(self)(args); return; 
-				case 'string': MooInline.Utilities[prop].bind(self)(args); break;
-				//default: MooInline.Utilities.addCollection(prop, self, 0, hides); break; //case 'object': case 'array'
-				default: MooInline.Utilities.addCollection(prop, self, 'bottom', 'Group_', hides, 0); break; //case 'object': case 'array'
-			}
-		}
 		
 		if(!hides) hides = '';
 		if(!place) place = MooInline.activeBtn;
 		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img; 
+		//if ($type(buttons)=='string')buttons.split(',')
 		$splat(buttons).each(function(item){
 			switch($type(item)){
 				case 'string': btns.push(item); break;
@@ -159,23 +148,24 @@ return
 		});
 		
 		btns.each(function(btn){
-			if(!false){ //should be checking if button exists already 
-				console.log('btn: ',btn)
-				var btnVals;
-				if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
+			var btnVals;
+			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
+			var e = parent.getElement('.'+name||'.mi'+btn);
+			
+			if(!e){
 				var bgPos = 0, val = MooInline.Buttons[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type);
 				if (!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
-				
+			
 				var properties = $H({
 					href:'javascript:void(0)',
-					unselectable: (input ? 'off' : 'on'),
+					unselectable:(input ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){
 							MooInline.activeBtn = this;
 							if(!val.click && (!val.element || val.element == 'a')) MooInline.Utilities.exec(val.args||btn);
-							run(val.click, val.args, parent, buttons)
+							run(val.click, val.args, val.hides, parent, this, btn)
 							if(e && e.stop)e.stop();
 							
 							this.getParent().getChildren().removeClass('miSelected');
@@ -184,24 +174,34 @@ return
 					}
 				}).extend(val);
 				['args','shortcut','element','click','img','onLoad','onExpand','onHide',(val.element?'href':'null')].map(properties.erase.bind(properties));
-				var e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass('mi'+(name||'')+(val.title||btn));
+				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
-				run(val.onInit, val.args, parent, []);
-				run(val.contains, val.args, e, []);
-				run(val.onLoad, val.args, parent, []); 
+				if (btnVals) e.store('children', btnVals);
 				if (val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
-				if (btnVals) MooInline.Utilities.addCollection(btnVals, e);
+				run(val.onInit, val.args, val.hides, parent, e, btn);
+				run(val.onLoad, val.args, val.hides, parent, e, btn);
+				if (val.contains) MooInline.Utilities.addCollection(val.contains, e);
+				if (btnVals){ MooInline.Utilities.addCollection(btnVals, e); }
+				e.removeClass('miHide');
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			}
+			e.removeClass('miHide')
 		})
-		/*
-		var par = collection.getParent('.miRTE');
-		for(i=0; i<group.length; i++){
-			var el = par.getElement('.miCollection_mi'+group[i]);
-			if(el)el.addClass('miHide')
+		
+		function run(prop, args, hides, self, caller, name, el){
+			if(!prop) return;
+			switch($type(prop)){
+				case 'function':prop.bind(self)(args); return; 
+				case 'string': MooInline.Utilities[prop].bind(self)(args); break;
+				default:
+					if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
+						if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
+					})
+					MooInline.Utilities.addCollection(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
+				break; //case 'object': case 'array'
+			}
 		}
-		if(!invisible)collection.removeClass('miHide')
-		*/
+		
 	},
 	
 	clean: function(html, xhtml, semantic){
@@ -247,15 +247,15 @@ return
 
 MooInline.Buttons = new Hash({
 
-	'Defaults'     :{onLoad:{toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'Main'         :{img: '0', click:{toolbar:['bold','italic','underline','strikethrough','subscript','superscript']} },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
-	'File'         :{img: '9', click:{toolbar:['paste','copy','cut','redo','undo']} },
-	'Link'         :{img: '6', click:{toolbar:['l0','l1','l2','unlink']},  checkState:true},
-	'Justify'      :{img:'18', click:{toolbar:['justifyleft','justifycenter','JustifyRight','justifyfull']} },
-	'Lists'        :{img:'22', click:{toolbar:['insertorderedlist','insertunorderedlist']} },
-	'Indents'      :{img:'16', click:{toolbar:['indent','outdent']} },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
+	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
+	'Main'         :{img: '0', click:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']} },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
+	'File'         :{img: '9', click:{Toolbar:['paste','copy','cut','redo','undo']} },
+	'Link'         :{img: '6', click:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
+	'Justify'      :{img:'18', onLoad:{Toolbar:['justifyleft','justifycenter','JustifyRight','justifyfull']} },
+	'Lists'        :{img:'22', click:{Toolbar:['insertorderedlist','insertunorderedlist']} },
+	'Indents'      :{img:'16', click:{Toolbar:['indent','outdent']} },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
 	
-	'toolbar'      :{element:'div'},//, 'class':'miToolbar'
+	'Toolbar'      :{element:'div'},//, 'class':'miToolbar'
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -423,5 +423,43 @@ ChangeLog:
 		//if(!name ) name = 'mi_'+Hash.toQueryString(buttons).length;//.exec(/(\w));
 		var //, args;collection = place.getElement('.'+name), 
 //'class':'mi'+(name||'')+(val.title||btn),															//Will apply the first that exists: mi + [class, title, key] 
-							
+	//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > custom elements
+		//1) [Defaults]
+		//2) [toolbar] //btnVals = true. new toolbar created. run called. defaults is caller.  Array does not exist by defaults.  Array is added now to toolbar  
+		//3) [main, file, etc.]
+		//4) on press: [toolbar ]  //btnVals = true. new toolbar created. run called. main is caller.  Array exists.  
+		//5) [bold, italics]
+		
+		//console.log('name: ', name)
+		//console.log('hides: ',hides);
+			//console.log('running');
+			//If it got here, it is about to create a new collection.  It may have a caller, it may not.
+// if not - from the original loading, there are no associated groups?
+// if yes - the caller is available from here:  either MooInline.activeBtn (if pressed && ?)
+// so go through hides, or get the array from the caller [or its parent]					
+					//if ($type(prop)=='object') //hide all other bars!! 
+					//if (parent != MooInline.activeBtn) hides = MooInline.activeBtn.getParent().retrieve('children');
+					//console.log('prop:',prop);
+					//(hides || []).each(function(clas){
+					//if(clas){
+						//console.log(clas, 'clas')
+						//console.log(self, 'self')
+						//console.log(self.getChildren('.mi'+clas), 'classes')
+					//	if (elsd = self.getChildren('.mi'+clas)) elsd.addClass('miHide');
+						//console.log(elsd, 'elsd')
+						//[].addClass('miHide');
+					//}
+					//});
+					//console.log('New Collection. hides: ',hides,', Name:',name)
+					//console.log('create new collection.  initiative from the following button.default - none.  ')
+					
+		var par = collection.getParent('.miRTE');
+		for(i=0; i<group.length; i++){
+			var el = par.getElement('.miCollection_mi'+group[i]);
+			if(el)el.addClass('miHide')
+		}
+		if(!invisible)collection.removeClass('miHide')
+		console.log('btn:',btn,', e:',e,(name||'.mi'+btn))
+//console.log('btn:',btn,', btnvals:',btnVals);//,', place:', place
+						
 */
