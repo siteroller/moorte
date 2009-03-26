@@ -190,10 +190,13 @@ return
 		})
 		
 		function run(prop, args, hides, self, caller, name, el){
-			if(!prop) return;
+			
+			if(!prop) return;console.log(prop)
 			switch($type(prop)){
-				case 'function':prop.bind(self)(args); return; 
-				case 'string': MooInline.Utilities[prop].bind(self)(args); break;
+				case 'function':console.log(prop);prop.bind(self)(args); return; 
+				case 'string': MooInline.Utilities[prop] 
+					? MooInline.Utilities[prop].bind(self)(args) 
+					: MooInline.Utilities.addCollection(prop, self, 'bottom', 'miGroup_'+name, hides, 0); break;
 				default:
 					if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
 						if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
@@ -309,22 +312,17 @@ MooInline.Buttons = new Hash({
 						var hex = c.rgbToHex();
 					}},
 	'fuUploadBar1' :{ click:['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'], title:'Upload Image' },
-	'fuUploadBar'  :{ title:'Upload Image', img:25, click:function(args, classRef){
-						classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
-					}},
-	'fuBrowse'     :{ id:"fuBrowse", click:function(){}, element:'span', text:'Browse Files', title:''},
+	'fuUploadBar'  :{ title:'Upload Image', img:25, click:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
+	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
 	'fuUpload'     :{ id:"fuUpload", click:'', element:'span', text:'Upload Files', title:''},
 	'fuClear'      :{ id:"fuClear", click:function(){console.log('clear here')}, element:'span', text:'Clear List' ,title:''},	
-	'fuStatus'     :{ element:'span', id:'fuStatus', init:function(){
-						this.adopt(
-							new Element('strong', {'class':'overall-title'}),
-							new Element('strong', {'class':'current-title'}),
-							new Element('div', {'class':'current-text'}),
-							new Element('img', {'class':'progress overall-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' }),
-							new Element('img', {'class':'progress current-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' })
-						)
-					}},
-	'fuList'       :{ id:'fuList', style:'display:none', init:function(){
+	'fuStatus'     :{ element:'span', id:'fuStatus', contains:'[fu1,fu2,fu3,fu4,fu5]'},
+	'fu1'          :{ element:'strong', 'class':'overall-title'},
+	'fu2'          :{ element:'strong', 'class':'current-title'},
+	'fu3'          :{ element:'div',    'class':'current-text' },
+	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
 						Asset.javascript('mooinline/plugins/fancyUpload/fancyUpload.js');
 						Asset.css('mooinline/plugins/fancyUpload/fancyUpload.css');
 					}},
@@ -336,7 +334,8 @@ MooInline.Buttons = new Hash({
 1. Regex to convert string to object: Easy but tedious to fix - If these are important to anyone, let me know!
 	a) will not ignore escaped qoutes.  Use double/single quotes. 
 	b) Objects nested more than one layer deep will not become objects (a:b:c will become {a:{b:c}}), but so will a:b:c:d, which will become a:{b:{c:d}}
-2. 
+2. Throws an error sometimes when inline
+3. When inline - clicking the bar should not make it dissapear!!
 */
 
 /* Ideapad:
@@ -388,85 +387,19 @@ h) Should there be a postFunc that runs after function is run?
 	a) to create the subdialogs, using postfunc.
 j) Add invisible parameter to make invisible? or rely on adding the miHide class
 k) Can onLoad be told to run 'click'?
-		
-Bugs:
-a) Throws an error sometimes when inline
-b) when inline - clicking the bar should not make it dissapear!!
+l) When a string is passed to addCollection, it should wrap it in brackets, in case it is an array.  [commonly, arrays will be created without brackets].
+m) the while in addCollection should protect even against stacked arrays  (ie: the following should not create an error - [[[bold, italics]]].  Currently, [[bold, italcs]] is cleaned, with two brackets.  needed for l to work.)
 */
 			
 /*
 ChangeLog:
-40: 
+44: 
 
 */
 
 /* Old Code:
-
-//		buttons = $A(btns);
-		
-//		console.log(buttons, 'buttons')
-		//console.log(buttons, 'buttons')
-		//console.log(buttons, 'buttons')
-		//console.log(item, ': item')
-		//should it pass in a ref to the caller if available, and collect from there the parent and group.
-		//if ($type(place) == 'element') place = [place.getParent(),'after', place.get('class').match(/mi(?!Selection)[^\s]+/)[0]];
-		//var self = this, collection = place[0].getParent().getElement('.miCollection_'+place[2]), img, args;
-		
-//		if(!collection){
-	//console.log(name, 'co0llection');
-		//if(!collection){
-			//collection = new Element('div', {'class':'miCollection_'+(place[2]||Math.random())}).inject(place[0], place[1]);
-			//collection = new Element('div', {'class':name}).inject(place, relative||'bottom');
-			console.log(place, 'place')
-		
-	console.log(name, 'name');
-		console.log($type(name), 'nameType')
-		console.log(name.match(/\w/g), 'nameMatch')
+	//click:function(args, classRef){
+	//classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
+	//}
 	
-				console.log('properties: ',properties);
-				console.log('btnvals: ',btnVals)
-				//if(!place) place = MooInline.activeBtn.getParent('.miRTE');
-		//console.log('place: ',place)
-		//if(!name ) name = 'mi_'+Hash.toQueryString(buttons).length;//.exec(/(\w));
-		var //, args;collection = place.getElement('.'+name), 
-//'class':'mi'+(name||'')+(val.title||btn),															//Will apply the first that exists: mi + [class, title, key] 
-	//div.MooInline[absPos. height:0] > div.miRTE[absPos height:auto] > custom elements
-		//1) [Defaults]
-		//2) [toolbar] //btnVals = true. new toolbar created. run called. defaults is caller.  Array does not exist by defaults.  Array is added now to toolbar  
-		//3) [main, file, etc.]
-		//4) on press: [toolbar ]  //btnVals = true. new toolbar created. run called. main is caller.  Array exists.  
-		//5) [bold, italics]
-		
-		//console.log('name: ', name)
-		//console.log('hides: ',hides);
-			//console.log('running');
-			//If it got here, it is about to create a new collection.  It may have a caller, it may not.
-// if not - from the original loading, there are no associated groups?
-// if yes - the caller is available from here:  either MooInline.activeBtn (if pressed && ?)
-// so go through hides, or get the array from the caller [or its parent]					
-					//if ($type(prop)=='object') //hide all other bars!! 
-					//if (parent != MooInline.activeBtn) hides = MooInline.activeBtn.getParent().retrieve('children');
-					//console.log('prop:',prop);
-					//(hides || []).each(function(clas){
-					//if(clas){
-						//console.log(clas, 'clas')
-						//console.log(self, 'self')
-						//console.log(self.getChildren('.mi'+clas), 'classes')
-					//	if (elsd = self.getChildren('.mi'+clas)) elsd.addClass('miHide');
-						//console.log(elsd, 'elsd')
-						//[].addClass('miHide');
-					//}
-					//});
-					//console.log('New Collection. hides: ',hides,', Name:',name)
-					//console.log('create new collection.  initiative from the following button.default - none.  ')
-					
-		var par = collection.getParent('.miRTE');
-		for(i=0; i<group.length; i++){
-			var el = par.getElement('.miCollection_mi'+group[i]);
-			if(el)el.addClass('miHide')
-		}
-		if(!invisible)collection.removeClass('miHide')
-		console.log('btn:',btn,', e:',e,(name||'.mi'+btn))
-//console.log('btn:',btn,', btnvals:',btnVals);//,', place:', place
-						
 */

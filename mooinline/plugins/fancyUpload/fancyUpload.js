@@ -5,7 +5,6 @@
  * @author		Harald Kirschner <mail [at] digitarald [dot] de>
  * @copyright	Authors
  */
-
 Fx.ProgressBar = new Class({
 
 	Extends: Fx,
@@ -491,6 +490,7 @@ function applyUploader(){
 		limitSize: 2 * 1024 * 1024,
 		typeFilter:{'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'},
 		onLoad: function() {
+			console.log('loaded')
 			//	$('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
 		},
 		onComplete: function(args){
@@ -502,6 +502,7 @@ function applyUploader(){
 		target: 'fuBrowse' 	// the element for the overlay (Flash 10 only).  Not used since we anyways use our own method.
 	});
 	
+			
 	$('fuBrowse').addEvent('mousedown', function() {	// Doesn't work anymore with Flash 10: swiffy.browse(); FancyUpload moves the Flash movie as overlay over the link(see "target" option above)
 		swiffy.browse();
 		return false;
@@ -520,8 +521,9 @@ function applyUploader(){
 	$$('object[id^=Swiff]')[0].getParent().setStyles({position:'absolute', top:0, left:0 }).inject('fuBrowse', 'after');
 	MooInline.Buttons.fuList.init = '';
 	MooInline.Buttons.fuUploadBar.click = function(){ 
-		console.log('switch'); console.log
-		$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
+		console.log('switch');
+		$('fancyUploadSwiff').inject(this, 'top')
+		//$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
 	}
 }
 applyUploader();
