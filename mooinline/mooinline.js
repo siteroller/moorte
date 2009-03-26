@@ -20,7 +20,7 @@ var MooInline = new Class({
 	options:{
 		floating: false,
 		location: 'elements', 														//[e,n,T,B,'']
-		defaults: 'Defaults'
+		defaults: 'Toolbar:[Main,File,Link,Justify,Lists,Indents,|,Html/Text,fuUploadBar]'
 	},
 	
 	initialize: function(selectors, options){
@@ -53,13 +53,8 @@ var MooInline = new Class({
 		var mi = new Element('div', {'class':'miRemove miMooInline '+(!pos||pos=='n'?'miHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'miRTE' })
 		).inject(document.body);
-		$splat(this.options.defaults).map(function(i){return i.split(',')}).each(
-			function(buttons, index){
-				MooInline.activeBtn = mi.getFirst();
-				MooInline.Utilities.addCollection(buttons, mi.getFirst(), 'bottom', '', [], 0)
-			}//buttons,[mi.getFirst(), 'bottom', 'Top'], 0, []
-		);
-
+		MooInline.activeBtn = mi.getFirst();  // not used!
+		MooInline.Utilities.addCollection(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
 		return mi;
 	},
 	
@@ -138,7 +133,13 @@ return
 		if(!hides) hides = '';
 		if(!place) place = MooInline.activeBtn;
 		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img; 
-		//if ($type(buttons)=='string')buttons.split(',')
+		if($type(buttons) == 'string'){
+			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
+			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
+			buttons = JSON.decode(buttons);
+		}
 		$splat(buttons).each(function(item){
 			switch($type(item)){
 				case 'string': btns.push(item); break;
@@ -331,6 +332,12 @@ MooInline.Buttons = new Hash({
 	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''}
 })
 
+/* Known Issues:
+1. Regex to convert string to object: Easy but tedious to fix - If these are important to anyone, let me know!
+	a) will not ignore escaped qoutes.  Use double/single quotes. 
+	b) Objects nested more than one layer deep will not become objects (a:b:c will become {a:{b:c}}), but so will a:b:c:d, which will become a:{b:{c:d}}
+2. 
+*/
 
 /* Ideapad:
 a) add variable to signify whether or not buttons should be run, 
