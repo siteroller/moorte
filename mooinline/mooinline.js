@@ -54,7 +54,7 @@ var MooInline = new Class({
 			 new Element('div', {'class':'miRTE' })
 		).inject(document.body);
 		MooInline.activeBtn = mi.getFirst();  // not used!
-		MooInline.Utilities.addCollection(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
+		MooInline.Utilities.addElements(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
 		return mi;
 	},
 	
@@ -128,7 +128,7 @@ return
 		}
 	},
 	
-	addCollection: function(buttons, place, relative, name, hides, invisible){
+	addElements: function(buttons, place, relative, name, hides, invisible){
 		
 		if(!hides) hides = '';
 		if(!place) place = MooInline.activeBtn;
@@ -140,13 +140,19 @@ return
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
 			buttons = JSON.decode(buttons);
 		}
-		$splat(buttons).each(function(item){
-			switch($type(item)){
-				case 'string': btns.push(item); break;
-				case 'array' : item.each(function(val){btns.push(val)}); break;	//item.each(buttons.push);
-				case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
-			}
-		});
+		
+		loopStop = 0;
+		while(loop && ++loopStop < 5){
+			var loop = false;
+			if(btns[0]){ buttons = btns; btns = [];}
+			$splat(buttons).each(function(item){
+				switch($type(item)){
+					case 'string': btns.push(item); break;
+					case 'array' : if(item.length==1)loop=true; item.each(function(val){btns.push(val)}); break;	//item.each(buttons.push);
+					case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
+				}
+			});
+		}
 		
 		btns.each(function(btn){
 			var btnVals;
@@ -159,14 +165,14 @@ return
 			
 				var properties = $H({
 					href:'javascript:void(0)',
-					unselectable:(input ? 'off' : 'on'),
+					unselectable:(input || (val.element && val.element.toLowerCase() == 'textarea') ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
 					events:{
 						'mousedown': function(e){
 							MooInline.activeBtn = this;
 							if(!val.click && (!val.element || val.element == 'a')) MooInline.Utilities.exec(val.args||btn);
-							run(val.click, val.args, val.hides, parent, this, btn)
+							MooInline.Utilities.run(val.click, val.args, val.hides, parent, this, btn)
 							if(e && e.stop)e.stop();
 							
 							this.getParent().getChildren().removeClass('miSelected');
@@ -179,33 +185,31 @@ return
 				
 				if (btnVals) e.store('children', btnVals);
 				if (val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
-				run(val.onInit, val.args, val.hides, parent, e, btn);
-				run(val.onLoad, val.args, val.hides, parent, e, btn);
-				if (val.contains) MooInline.Utilities.addCollection(val.contains, e);
-				if (btnVals){ MooInline.Utilities.addCollection(btnVals, e); }
+				MooInline.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
+				if (btnVals) MooInline.Utilities.addElements(btnVals, e);
+				else if (val.contains) MooInline.Utilities.addElements(val.contains, e);	
+				MooInline.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
 				e.removeClass('miHide');
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			}
 			e.removeClass('miHide')
 		})
-		
-		function run(prop, args, hides, self, caller, name, el){
-			
-			if(!prop) return;console.log(prop)
-			switch($type(prop)){
-				case 'function':console.log(prop);prop.bind(self)(args); return; 
-				case 'string': MooInline.Utilities[prop] 
-					? MooInline.Utilities[prop].bind(self)(args) 
-					: MooInline.Utilities.addCollection(prop, self, 'bottom', 'miGroup_'+name, hides, 0); break;
-				default:
-					if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
-						if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
-					})
-					MooInline.Utilities.addCollection(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
-				break; //case 'object': case 'array'
-			}
+	},
+	
+	run: function(prop, args, hides, self, caller, name, el){
+		if(!prop) return;console.log(prop)
+		switch($type(prop)){
+			case 'function':console.log(prop);prop.bind(self)(args); return; 
+			case 'string': MooInline.Utilities[prop] 
+				? MooInline.Utilities[prop].bind(self)(args) 
+				: MooInline.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); break;
+			default:
+				if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
+					if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
+				})
+				MooInline.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
+			break; //case 'object': case 'array'
 		}
-		
 	},
 	
 	clean: function(html, xhtml, semantic){
@@ -215,34 +219,74 @@ return
 	
 		var br = '<br'+(xhtml?'/':'')+'>';
 		var xhtml = [
-			//[/(<(?:img|input|br)[^/>]*)>/g, '$1 />'] 					// if (this.options.xhtml)//make tags xhtml compatable
+			[/(<(?:img|input)[^\/>]*)>/g, '$1 />']						//+ Greyed out -  make img tags xhtml compatable 	#if (this.options.xhtml)
 		];
 		var semantic = [
-			[/<li>\s*<div>(.+?)<\/div><\/li>/g, '<li>$1</li>'],			//remove divs from <li>
-			[/^([\w\s]+.*?)<div>/i, '<p>$1</p><div>'],					//remove stupid apple divs
-			[/<div>(.+?)<\/div>/ig, '<p>$1</p>'],
-			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	// Semantic conversion.  Should be separate array that is merged in if semantic is set to true.
-			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],
-			[/<b\b[^>]*>(.*?)<\/b[^>]*>/gi, '<strong>$1</strong>'],
-			[/<i\b[^>]*>(.*?)<\/i[^>]*>/gi, '<em>$1</em>'],
-			[/<u\b[^>]*>(.*?)<\/u[^>]*>/gi, '<span style="text-decoration: underline;">$1</span>']
+			[/<li>\s*<div>(.+?)<\/div><\/li>/g, '<li>$1</li>'],			//+ remove divs from <li>		#if (Browser.Engine.trident)
+			[/<span style="font-weight: bold;">(.*)<\/span>/gi, '<strong>$1</strong>'],	 			//+
+			[/<span style="font-style: italic;">(.*)<\/span>/gi, '<em>$1</em>'],					//+
+			[/<b\b[^>]*>(.*?)<\/b[^>]*>/gi, '<strong>$1</strong>'],									//+
+			[/<i\b[^>]*>(.*?)<\/i[^>]*>/gi, '<em>$1</em>'],											//+
+			[/<u\b[^>]*>(.*?)<\/u[^>]*>/gi, '<span style="text-decoration: underline;">$1</span>'],	//+
+			[/<p>[\s\n]*(<(?:ul|ol)>.*?<\/(?:ul|ol)>)(.*?)<\/p>/ig, '$1<p>$2</p>'], 				//+ <p> tags around a list will get moved to after the list.  not working properly in safari? #if (['gecko', 'presto', 'webkit'].contains(Browser.Engine.name))
+			[/<\/(ol|ul)>\s*(?!<(?:p|ol|ul|img).*?>)((?:<[^>]*>)?\w.*)$/g, '</$1><p>$2</p>'],		//+ "
+			[/<br[^>]*><\/p>/g, '</p>'],								//+ Remove <br>'s that end a paragraph here.
+			[/<p>\s*(<img[^>]+>)\s*<\/p>/ig, '$1\n'],				 	//+ If a <p> only contains <img>, remove the <p> tags	
+			[/<p([^>]*)>(.*?)<\/p>(?!\n)/g, '<p$1>$2</p>\n'], 			//+ Break after paragraphs
+			[/<\/(ul|ol|p)>(?!\n)/g, '</$1>\n'],	    				//+ Break after </p></ol></ul> tags
+			[/><li>/g, '>\n\t<li>'],          							//+ Break and indent <li>
+			[/([^\n])<\/(ol|ul)>/g, '$1\n</$2>'],    					//+ Break before </ol></ul> tags
+			[/([^\n])<img/ig, '$1\n<img'],    							//+ Move images to their own line
+			[/^\s*$/g, '']										        //+ Delete empty lines in the source code (not working in opera)
+		];
+		var nonSemantic = [	[/\s*<br ?\/?>\s*<\/p>/gi, '</p>']	];		//+ if (!this.options.semantics) - Remove padded paragraphs
+		var appleCleanup = [
+			[/<br class\="webkit-block-placeholder">/gi, "<br />"],		//+ Webkit cleanup - add an if(webkit) check
+			[/<span class="Apple-style-span">(.*)<\/span>/gi, '$1'],	//+ Webkit cleanup - should be corrected not to get messed over on nested spans - SG!!!
+			[/ class="Apple-style-span"/gi, ''],						//+ Webkit cleanup
+			[/<span style="">/gi, ''],									//+ Webkit cleanup	
+			[/^([\w\s]+.*?)<div>/i, '<p>$1</p><div>'],					//+ remove stupid apple divs 	#if (Browser.Engine.webkit)
+			[/<div>(.+?)<\/div>/ig, '<p>$1</p>']						//+ remove stupid apple divs 	#if (Browser.Engine.webkit)
 		];
 		var cleanup = [
-			[/<br class\="webkit-block-placeholder">/gi, "<br />"],		// Webkit cleanup
-			[/<span class="Apple-style-span">(.*)<\/span>/gi, '$1'],	// should be corrected, not to get messed over on nested spans - SG!!!
-			[/ class="Apple-style-span"/gi, ''],
-			[/<span style="">/gi, ''],
-			[/<br\s*\/?>/gi, br],										// Fix BRs, make it easier for next BR steps.
-			[/><br\/?>/g, '>'],											// Remove (arguably) useless BRs
-			[/^<br\/?>/g, ''],											// Remove leading BRs - perhaps combine with removing useless brs.
-			[/<br\/?>$/g, ''],											// Remove leading BRs
-			[/<br\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],		// Remove BRs from end of blocks
-			[/<p>\s*<br\/?>\s*<\/p>/gi, '<p>\u00a0</p>'],				// Remove padded paragraphs - replace with non breaking space
-			[/<p>(&nbsp;|\s)*<\/p>/gi, '<p>\u00a0</p>'],
-			[/<p>\W*<\/p>/g, ''],										// Remove ps with other stuff, may mess up some formatting.
+			[/<br\s*\/?>/gi, br],										//+ Fix BRs, make it easier for next BR steps.
+			[/><br\/?>/g, '>'],											//+ Remove (arguably) useless BRs
+			[/^<br\/?>/g, ''],											//+ Remove leading BRs - perhaps combine with removing useless brs.
+			[/<br\/?>$/g, ''],											//+ Remove trailing BRs
+			[/<br\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],		//+ Remove BRs from end of blocks
+			[/<p>\s*<br\/?>\s*<\/p>/gi, '<p>\u00a0</p>'],				//+ Remove padded paragraphs - replace with non breaking space
+			[/<p>(&nbsp;|\s)*<\/p>/gi, '<p>\u00a0</p>'],				//+ "
+			[/<p>\W*<\/p>/g, ''],										//+ Remove ps with other stuff, may mess up some formatting.
+			[/<\/p>\s*<\/p>/g, '</p>'],									//+ Remove empty <p> tags
+			[/<[^> ]*/g, function(match){return match.toLowerCase();}],	//+ Replace uppercase element names with lowercase
+			[/<[^>]*>/g, function(match){								//+ Replace uppercase attribute names with lowercase
+			   match = match.replace(/ [^=]+=/g, function(match2){return match2.toLowerCase();});
+			   return match;
+			}],
+			[/<[^>]*>/g, function(match){								//+ Put quotes around unquoted attributes
+			   match = match.replace(/( [^=]+=)([^"][^ >]*)/g, "$1\"$2\"");
+			   return match;
+			}]
 		];
-		if(xhtml)cleanup.extend(xhtml);
-		if(semantic)cleanup.extend(semantic);
+		var depracated = [
+			// The same except for BRs have had optional space removed
+			[/<p>\s*<br ?\/?>\s*<\/p>/gi, '<p>\u00a0</p>'],				//= modified as <br> is handled previously
+			[/<br>/gi, "<br />"],										//= Replace improper BRs if (this.options.xhtml) Handled at very beginning			
+			[/<br ?\/?>$/gi, ''],										//= Remove leading and trailing BRs
+			[/^<br ?\/?>/gi, ''],										//= Remove trailing BRs
+			[/><br ?\/?>/gi,'>'],										//= Remove useless BRs
+			[/<br ?\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],		//= Remove BRs right before the end of blocks
+			//Handled with DOM:
+			[/<p>(?:\s*)<p>/g, '<p>'],									//= Remove double <p> tags
+		];
+		
+		do{
+			var cleaned = source;
+			if(xhtml)cleanup.extend(xhtml);
+			if(semantic)cleanup.extend(semantic);
+			if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
+			source = source.trim();
+		} while (cleaned != source);		
 		cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });
 		return source;
 	}
@@ -311,7 +355,6 @@ MooInline.Buttons = new Hash({
 						c[1] = -(c[2] - 255*saturation);
 						var hex = c.rgbToHex();
 					}},
-	'fuUploadBar1' :{ click:['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'], title:'Upload Image' },
 	'fuUploadBar'  :{ title:'Upload Image', img:25, click:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
 	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
 	'fuUpload'     :{ id:"fuUpload", click:'', element:'span', text:'Upload Files', title:''},
@@ -339,28 +382,28 @@ MooInline.Buttons = new Hash({
 */
 
 /* Ideapad:
-a) add variable to signify whether or not buttons should be run, 
-b) add postInit that is run after buttons are init'd.
-c) addCollection takes as the second parameter the object after which to put the toolbar.  It must exist, so we will now manually create it for init, and must modify buttons to send along parent
-d) create a subfunction that calls toolbar and use it instead in the mousedown function.
-e) should there be an init before any buttons are pressed, and a expanded() when all are, or a different set of rules for init on menus?
-f) extend elements with .mooInline() if option is set.
-g) some way for new groups to be made on the same row as the old groups are (like toolbars in word)
-h) onIint:expand() and expandHidden should expand.
-i) add an onExpand, onExpandHidden and onCollapse, and a onCollapse function
-j) defualt styles for a etc should be added to api docs
+a) Add variable to signify whether or not buttons should be run.
+b) Add support for args to be a function. Run function for value of args.
+c) Editing functions should not work out of the scope of the toolbar's fields (I shouldn't be able to click on a button on the "wrong" toolbar, and certainly not a field is not meant to be editable.)
+d) inline toolbar class should be added to button hash, for the who want all their toolbars on the same line (like toolbars in word)
+e) create a structure to add or remove elements with a .mooInline().  Adding should be made available for all elements that are passed if option is set.
+f) default styles for 'a' etc should be added to api docs
+g) add object of functions it should check on each update key {widetBtn:function(){widteVar?true:false;}}
+h) add an onExpand, onExpandHidden and onCollapse, and a onCollapse function
+i) and a expanded() when all are, or a different set of rules for init on menus?
+j) onIint:expand() and expandHidden should expand.
 k) press btn which will press key / expand menu, and run optional function afterwards.
-l) add object of functions it should check on each update key {widetBtn:function(){widteVar?true:false;}}
-m) Add support for args to be a function. Run function for value of args.
-n) Allow defaults to have spaces when passed in.
-o) editing functions should not work out of the scope of the toolbar's fields (I shouldn't be able to click on a button on the "wrong" toolbar, and certainly not a field is not meant to be editable.)
-p) the defaults when passed in should have all the new flexibilty scheduled for the hash.
-q) if a input/textarea, unselectable should be off.
-r) pressing buttons should only work for text within a associated field.
-s) Add a tab button.
-t) Add an onHide() handler
-u) subsume the padding and margin, adopt the align and text-align of element it is applied to.  Or go inside the element?
-v) it now overwrites the classes with those defined in the buttons hash, it should append it.
+l) Add a tab button.
+m) Add an onHide() handler
+n) When a string is passed to addCollection, it should wrap it in brackets, in case it is an array.  [commonly, arrays will be created without brackets].
+o) onLoad should be able to be told to run 'onClick'
+p) add the logic of hides to the API.
+q) Logic for overflow [buttons that dont fit] should be added to either each button in the Hash, or globally.  Options should be noted.
+r) Add invisible parameter to make invisible? or rely on adding the miHide class 
+s) Should each passed in element of an object be checked if it exists?  If yes, how will it define what already exists?  [ie. mitoolbar exists many times, but the right one is needed.]  
+	Perhaps, in the onLoad/onInit/onClick it should be able to take multiple classes inside parenthasis.  So toolbar(insertImage):['it0', 'it2(it3)'] should look for the element classed insertImage, and add a toolbar with that class if it does not exist. 
+ 
+
 Design Decisions:
 a) Logic of button check:
 	at press, all other buttons within it's collection are reset.
@@ -373,33 +416,106 @@ b) What parameters should addCollection require?
 		Buttons(cannot just pass location, as this is more flexible, and any button can have button list in more than one place)
 		Containing div (key of object).  Optional, as it will use a plain div (with the styles of a tollbar from openwysiwyg) if none is passed.
 		Group which the containing div is a part of.  -  explain - should groups be maintained separately?
-		
-c) More work on groups / collections. 	
-d) should defaults be dynamically added to the buttons hash if different?
-e) some way of applying classes, events. etc to collections (add to hash?)
-f) Expand the 'collection' array object. 
-	a) It already can be called onLoad and onClick.  Add to args?
-	b) Allow it to be an object, where the key refers to the containing element.  {main:['bold', 'italics']} becomes <div class="miCollection_Main"><a class="miBold">..
-	c) Allow it to have within it nested arrays: [['main','bold'],['italics']] where each will expand.
-		If done correctly, this should make it infinitely more flexible (and confusing?)
-g) Alternatively, should there be a contains tag which allows subgroups to be expanded to be run?
-h) Should there be a postFunc that runs after function is run?
-	a) to create the subdialogs, using postfunc.
-j) Add invisible parameter to make invisible? or rely on adding the miHide class
-k) Can onLoad be told to run 'click'?
-l) When a string is passed to addCollection, it should wrap it in brackets, in case it is an array.  [commonly, arrays will be created without brackets].
-m) the while in addCollection should protect even against stacked arrays  (ie: the following should not create an error - [[[bold, italics]]].  Currently, [[bold, italcs]] is cleaned, with two brackets.  needed for l to work.)
 */
 			
 /*
 ChangeLog:
 44: 
-
+a. Cleanup regexs updated to reflect the latest changes made to the MooEditable codebase.  Does NOT behave exactly the same, but similar.  Further modifications are planned.
+b. passed in values now override the 'contains' attribute of the buttons hash.
+c. buttons hash cleaned some
+d. 'buttons' cleanup in addCollection now a loop.
+e. Defaults can have spaces, can be a string, etc., as they are handled by addCollection
+f. It appends classes from the buttons hash instead of overwriting the originals.
+g. if a input/textarea, unselectable defaults to off.
+h. onLoad runs after buttons are init'd, whether by 'contains' or 'onInit'.
+i. The logic for the following idea was reworked: addCollection takes as the second parameter the object after which to put the toolbar.  It must exist, so we will now manually create it for init, and must modify buttons to send along parent
+j. run function - called by mousedown, onLoad and onInit - now exists standalone within the utilities hash.
+k. onInit is run before any buttons are pressed
+l. Is now added within the element inside of before it, in order to be better positioned.
+m. Renamed addCollection() to addElements().
+n. mThe while in addCollection now protects even against stacked arrays  (ie: the following should not create an error - [[[bold, italics]]].  Currently, [[bold, italcs]] is cleaned, with two brackets.  needed for l to work.)
+o. contains tag added to buttons hash.
+p. Due to changes, now classes, events. etc can be applied to collections (add to hash?)
+q. defaults are not dynamically added to the buttons hash even if they have no match.
+r. Expanded the 'collection' array object. 
+	a) It already can be called onLoad and onClick.  Add to args?
+	b) Allow it to be an object, where the key refers to the containing element.  {main:['bold', 'italics']} becomes <div class="miCollection_Main"><a class="miBold">..
+	c) Allow it to have within it nested arrays: [['main','bold'],['italics']] where each will expand.
+		If done correctly, this should make it infinitely more flexible (and confusing?)
 */
 
 /* Old Code:
 	//click:function(args, classRef){
 	//classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
 	//}
+
+All of the attempts to make the code to convert a string to an object!!
+	var addQuotes1 = ([^][{}:,\s]+); 
+	var addQuotes = ([^\]\[\}\{\:\s\,]+); 
+	var addQuotesAfterSpace = (\s|^|\[|\{) + addQoutes;
+	var surroundWithQoutesIncludingotherQoutes = (\'[^\']*\'|\"[^\"]*\"|[^\]\[\}\{\:\s\,]+);
+	var surroundWithQoutesIncludingotherQoutes2 = (([\"\'])([^\"\']*)\2|([^\]\[\}\{\:\s\,]+));
+	var surroundWithQoutesAndQoutedStringsToSinglEQoute = (\'([^\']*)\'|\"([^\"]*)\"|([^\]\[\}\{\:\s\,]+))
+	var findClosingBrace = new Regex([^\s:]+:\[([^]]|\]\s*\})*](?!}));  // will find closing brace of 
+	var = [\s\,\[]([^\s\,\[\{\:]+\s*:( \[[^\]\[]+ \]  |  [^\s]*\s))
+	
+	//still having trouble working out the logic:
+	//1. Go through quoting everything that should be quoted.
+	//2. chang all unsurrounded arrays to objects.
+	//2. In the first iteration, it will not 
+	//no support for escaped quotes or arrays within arrays(should be easy to add, but not crucial)
+	//was (([\"\'])([^\"\']*)\2|([^\]\[\}\{\:\s\,]+))
+	var buttons = 'abc:[abc, abc:[def, {"g hi":[d]}, {a:[a, b, c]}, abc], jkl], as:[]';
+	console.log("buttons - at start:", buttons)
+	var abcd = 0;
+	if($type(buttons) == 'string'){
+		buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
+		console.log("buttons - with quotes:", buttons)
+		//var notARegExp = new RegExp("[^\s:,]+:\s*\\[([^\]]|\]\s*\})*](?!})");
+		//var addObjects = new RegExp("[^\s:,]+:\s*\\[([^\]]|\]\s*\})*\](?!})");
+		//var addObjects = new RegExp("([^\s:,]+:\s*\\[([^\]]|\]\s*\})*\](?!}))");
+		//([^\s:,]+:\s*\[({[^}]+}|[^\[\]])*\](?!}))
+					
+		//<table\b[^>]*>(?:(?=([^<]+))\1|<(?!table\b[^>]*>))*?</table>
+		//\b[^:\s]*:\[(?:(?=([^:]+))\1|:(?![\]]table\b[^>]*>))*?</table>
+		(  '   [^']+ ' \s* : \s* \[ (?:   (?=([^]{']+))\2|   {.*?}|   '(?![^']+ ' \s* : \s* \[ [^]]+ \]))*\](?!}))
+var itAlmostWorks = ([^{])('   [^']+ ' \s* : \s* \[ (?:   (?=([^]{']+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\]);
+var itWorks = ((?:^|[,[])\s*)('[^']+'\s*:\s*\[(?:(?=([^]{']+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}));
+var backu[ = ((?:^|[,[])\s*)('   [^']+ ' \s* : \s* \[ (?:  (?=([^]+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}))	
+var finalRegex = /((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^],[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^]]|\]})+\]))*\](?!}))/
+var final11 = ((?:[,[]|^)\s*)('[^']+ ' \s* : \s* \[ (?:   (?=([^],[]+))\3 | \]} |   [,[](?!\s*'[^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}));
+var final12 = ((?:[,[]|^)\s*)('[^']+ ' \s* : \s* \[ (?:   (?=([^],[]+))\3 | \]} |   [,[](?!\s*'[^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}))
+var wrapStringObjs = /((?:[,[]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[],}]))/ 
+while( ++abcd < 3){
+		//(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\).+)
+			console.log(buttons.match(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*)/gm));
+			console.log(buttons.replace(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*)/gm, "$2"));
+			//buttons = buttons.replace(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*\](?!}))/gm,"{$1}"); 
+		
+		
+
+			//console.log("e:",e)
+			//fred = buttons.match(addObjects)
+			//console.log('fred', fred)
+			//buttons = buttons.replace(/([^\s:,]+:\s*\[([^\]]|\]\s*\})*\](?!}))/gm, "{$1}")
+			//buttons = buttons.replace(/([^\s:,]+:\s*\[({[^}]+:[^}]+}|[^\[\]])*\](?!}))/gm, "{$1}")
+			console.log("buttons - mid:",buttons);
+		}
+		console.log("buttons - finalOutput:",buttons)
+	}
+	
+i=0			
+	function d(a,b){ console.log(a,':',b) }
+		var buttons = '[abc:"def", "kl", m:[abc, abc:[def, {"g hi":[d]}, {a:[a, b, c]}, f:abc:fgr, abc], jkl], as:[]]';
+		d('buttons',buttons)
+		buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
+		d('buttons quoted',buttons)
+		buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+		d('buttons simple obj',buttons)
+		buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+		d('buttons simple obj',buttons)
+		while (++i < 4 && buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
+		d('buttons brackets obj',buttons)
 	
 */

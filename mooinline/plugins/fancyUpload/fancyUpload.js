@@ -521,8 +521,8 @@ function applyUploader(){
 	$$('object[id^=Swiff]')[0].getParent().setStyles({position:'absolute', top:0, left:0 }).inject('fuBrowse', 'after');
 	MooInline.Buttons.fuList.init = '';
 	MooInline.Buttons.fuUploadBar.click = function(){ 
-		console.log('switch');
-		$('fancyUploadSwiff').inject(this, 'top')
+		console.log('this is:',MooInline.activeBtn);
+		$('fancyUploadSwiff').getParent().inject(MooInline.activeBtn.getParent().getParent())
 		//$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
 	}
 }
