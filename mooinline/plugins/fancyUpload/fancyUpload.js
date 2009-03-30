@@ -490,13 +490,21 @@ function applyUploader(){
 		limitSize: 2 * 1024 * 1024,
 		typeFilter:{'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'},
 		onLoad: function() {
-			console.log('loaded')
-			//	$('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
+			// console.log('loaded')
+			// MooInline.Utilities.storeRange('insertImage');
+			// console.log(MooInline.ranges.insertImage)
+			// $('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
 		},
-		onComplete: function(args){
-
-			console.log(args.name)
+		onComplete: function(file, response){
+			//console.log('about to set range')
+			//console.log(args)
+			//console.log('http://localhost/siteRoller/siteroller/classes/mooinline/plugins/fancyUpload/uploads/'+args.name)
 			console.log($A(arguments))
+			// MooInline.Utilities.setRange('insertImage');
+			//MooInline.Utilities.exec("insertimage", "/siteRoller/siteroller/classes/mooinline/mooinline/plugins/fancyUpload/uploads/"+args.name)
+			response = JSON.decode(response);
+			console.log('response:',response)
+			if(response.result == 'success') MooInline.Utilities.exec("insertimage", response.file);
 		},
 		debug: true, 		// enable logs, uses console.log
 		target: 'fuBrowse' 	// the element for the overlay (Flash 10 only).  Not used since we anyways use our own method.

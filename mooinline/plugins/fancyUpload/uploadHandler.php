@@ -30,6 +30,7 @@ if (isset($_FILES['photoupload']) )
 		$result['result'] = 'failed';
 		$result['error'] = $error;
 	} else {
+		$result['file'] = "/siteRoller/siteroller/classes/mooinline/mooinline/plugins/fancyUpload/uploads/$name";
 		$result['result'] = 'success';
 		$result['size'] = "Uploaded an image ({$size['mime']}) with  {$size[0]}px/{$size[1]}px.";
 	}

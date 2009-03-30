@@ -26,7 +26,7 @@ var MooInline = new Class({
 	initialize: function(selectors, options){
 		this.setOptions(options);	
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
-		MooInline.shortcuts = MooInline.shortcutBtns = MooInline.activeField = MooInline.activeBtn = [];
+		MooInline.shortcuts = MooInline.shortcutBtns = MooInline.activeField = MooInline.activeBtn = []; MooInline.ranges = {};
 		
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -76,35 +76,30 @@ var MooInline = new Class({
 
 MooInline.Utilities = {
 	exec: function(args){
-		args = $splat(args);
+		args = $A(arguments).flatten(); //completely untested - not sure if this is needed or even works originally args = $splat(args);  Logic is that args can be passed as an array(for the hash), or as arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||false, args[1]||null);  				//document.execCommand('justifyRight', false, null);
 		if(g) document.designMode = 'off'
 	},
 	
-	getRange:function(){
-		if(miRangeSelection != 'undefined') console.log( 1 )
+	storeRange:function(rangeName){
 		var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		if (!sel) return null;
-		this.range = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		MooInline.ranges[rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
-	setRange: function() {
-		if(this.range.select) this.range.select(); 
-		else{
+	setRange: function(rangeName) {
+		var range = MooInline.ranges[rangeName || 1]
+		if(range.select) range.select(); 
+		else{	
 			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			miRangeSelection = sel;
 			if (sel.addRange){
 				sel.removeAllRanges();
-				sel.addRange(this.range);
+				sel.addRange(range);
 			}
 		}
- 
-		var url = $('miLink').get('value') || "";
-		MooInline.utilities.exec(['createlink',url]);
-		//var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
-	},
+ 	},
 	
 	updateBtns: function(e){
 return	
@@ -141,8 +136,9 @@ return
 			buttons = JSON.decode(buttons);
 		}
 		
-		loopStop = 0;
-		while(loop && ++loopStop < 5){
+		var loopStop = 0;
+		do{
+			console.log(buttons)
 			var loop = false;
 			if(btns[0]){ buttons = btns; btns = [];}
 			$splat(buttons).each(function(item){
@@ -152,7 +148,7 @@ return
 					case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
 				}
 			});
-		}
+		} while(loop && ++loopStop < 5);
 		
 		btns.each(function(btn){
 			var btnVals;
@@ -197,7 +193,7 @@ return
 	},
 	
 	run: function(prop, args, hides, self, caller, name, el){
-		if(!prop) return;console.log(prop)
+		if(!prop) return;
 		switch($type(prop)){
 			case 'function':console.log(prop);prop.bind(self)(args); return; 
 			case 'string': MooInline.Utilities[prop] 
@@ -328,7 +324,7 @@ MooInline.Buttons = new Hash({
 	'test'         :{click:function(){console.log(arguments)}, args:this},
 	'unlink'       :{img:'6'},
 	'l0'           :{'text':'enter the url', element:'span' },
-	'l1'           :{'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.getRange(); }}, 'id':'miLink', unselectable: 'off' }, 
+	'l1'           :{'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.storeRange(); }}, 'id':'miLink', unselectable: 'off' }, 
 	'l2'           :{'type':'submit', 'click':function(args,classRef){ classRef.setRange() }, 'value':'add link' },
 	'nolink'       :{'text':'please select the text to be made into a link'},
 	'remoteURL'    :{click:['imgSelect','imgInput','insertimage']},
@@ -339,8 +335,8 @@ MooInline.Buttons = new Hash({
 					}},
 	'inserthorizontalrule':{img:'22'},	
 	'save'         :{ img:'11', click:function(){
-						var content = MooInline.Buttons.self.clean();
-						(savePath || (savePath = new Request({'url':'http://www.google.com'}))).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString() );	
+						var content = MooInline.Utilities.clean(this.get('html'));
+						var savePath = new Request({'url':'http://www.google.com'}).send($H({ 'page': window.location.pathname, 'content': content }).toQueryString());	
 					}},
 	'Html/Text'    :{ img:'26', click:['DisplayHTML']}, 
 	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
@@ -418,104 +414,18 @@ b) What parameters should addCollection require?
 		Group which the containing div is a part of.  -  explain - should groups be maintained separately?
 */
 			
-/*
-ChangeLog:
-44: 
-a. Cleanup regexs updated to reflect the latest changes made to the MooEditable codebase.  Does NOT behave exactly the same, but similar.  Further modifications are planned.
-b. passed in values now override the 'contains' attribute of the buttons hash.
-c. buttons hash cleaned some
-d. 'buttons' cleanup in addCollection now a loop.
-e. Defaults can have spaces, can be a string, etc., as they are handled by addCollection
-f. It appends classes from the buttons hash instead of overwriting the originals.
-g. if a input/textarea, unselectable defaults to off.
-h. onLoad runs after buttons are init'd, whether by 'contains' or 'onInit'.
-i. The logic for the following idea was reworked: addCollection takes as the second parameter the object after which to put the toolbar.  It must exist, so we will now manually create it for init, and must modify buttons to send along parent
-j. run function - called by mousedown, onLoad and onInit - now exists standalone within the utilities hash.
-k. onInit is run before any buttons are pressed
-l. Is now added within the element inside of before it, in order to be better positioned.
-m. Renamed addCollection() to addElements().
-n. mThe while in addCollection now protects even against stacked arrays  (ie: the following should not create an error - [[[bold, italics]]].  Currently, [[bold, italcs]] is cleaned, with two brackets.  needed for l to work.)
-o. contains tag added to buttons hash.
-p. Due to changes, now classes, events. etc can be applied to collections (add to hash?)
-q. defaults are not dynamically added to the buttons hash even if they have no match.
-r. Expanded the 'collection' array object. 
-	a) It already can be called onLoad and onClick.  Add to args?
-	b) Allow it to be an object, where the key refers to the containing element.  {main:['bold', 'italics']} becomes <div class="miCollection_Main"><a class="miBold">..
-	c) Allow it to have within it nested arrays: [['main','bold'],['italics']] where each will expand.
-		If done correctly, this should make it infinitely more flexible (and confusing?)
+/* ChangeLog:
+46:
+
 */
 
 /* Old Code:
-	//click:function(args, classRef){
-	//classRef.toolbar(this.getParent('.miRTE'),'0_','fuUploadBar',['fuBrowse', 'fuUpload', 'fuClear','fuStatus','fuList'])
-	//}
+	// console.log('range:', range )
+	// console.log("This browser supports sel.addRange:", sel.addRange)
 
-All of the attempts to make the code to convert a string to an object!!
-	var addQuotes1 = ([^][{}:,\s]+); 
-	var addQuotes = ([^\]\[\}\{\:\s\,]+); 
-	var addQuotesAfterSpace = (\s|^|\[|\{) + addQoutes;
-	var surroundWithQoutesIncludingotherQoutes = (\'[^\']*\'|\"[^\"]*\"|[^\]\[\}\{\:\s\,]+);
-	var surroundWithQoutesIncludingotherQoutes2 = (([\"\'])([^\"\']*)\2|([^\]\[\}\{\:\s\,]+));
-	var surroundWithQoutesAndQoutedStringsToSinglEQoute = (\'([^\']*)\'|\"([^\"]*)\"|([^\]\[\}\{\:\s\,]+))
-	var findClosingBrace = new Regex([^\s:]+:\[([^]]|\]\s*\})*](?!}));  // will find closing brace of 
-	var = [\s\,\[]([^\s\,\[\{\:]+\s*:( \[[^\]\[]+ \]  |  [^\s]*\s))
-	
-	//still having trouble working out the logic:
-	//1. Go through quoting everything that should be quoted.
-	//2. chang all unsurrounded arrays to objects.
-	//2. In the first iteration, it will not 
-	//no support for escaped quotes or arrays within arrays(should be easy to add, but not crucial)
-	//was (([\"\'])([^\"\']*)\2|([^\]\[\}\{\:\s\,]+))
-	var buttons = 'abc:[abc, abc:[def, {"g hi":[d]}, {a:[a, b, c]}, abc], jkl], as:[]';
-	console.log("buttons - at start:", buttons)
-	var abcd = 0;
-	if($type(buttons) == 'string'){
-		buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
-		console.log("buttons - with quotes:", buttons)
-		//var notARegExp = new RegExp("[^\s:,]+:\s*\\[([^\]]|\]\s*\})*](?!})");
-		//var addObjects = new RegExp("[^\s:,]+:\s*\\[([^\]]|\]\s*\})*\](?!})");
-		//var addObjects = new RegExp("([^\s:,]+:\s*\\[([^\]]|\]\s*\})*\](?!}))");
-		//([^\s:,]+:\s*\[({[^}]+}|[^\[\]])*\](?!}))
-					
-		//<table\b[^>]*>(?:(?=([^<]+))\1|<(?!table\b[^>]*>))*?</table>
-		//\b[^:\s]*:\[(?:(?=([^:]+))\1|:(?![\]]table\b[^>]*>))*?</table>
-		(  '   [^']+ ' \s* : \s* \[ (?:   (?=([^]{']+))\2|   {.*?}|   '(?![^']+ ' \s* : \s* \[ [^]]+ \]))*\](?!}))
-var itAlmostWorks = ([^{])('   [^']+ ' \s* : \s* \[ (?:   (?=([^]{']+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\]);
-var itWorks = ((?:^|[,[])\s*)('[^']+'\s*:\s*\[(?:(?=([^]{']+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}));
-var backu[ = ((?:^|[,[])\s*)('   [^']+ ' \s* : \s* \[ (?:  (?=([^]+))\3 | {'| \]} |   '(?![^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}))	
-var finalRegex = /((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^],[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^]]|\]})+\]))*\](?!}))/
-var final11 = ((?:[,[]|^)\s*)('[^']+ ' \s* : \s* \[ (?:   (?=([^],[]+))\3 | \]} |   [,[](?!\s*'[^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}));
-var final12 = ((?:[,[]|^)\s*)('[^']+ ' \s* : \s* \[ (?:   (?=([^],[]+))\3 | \]} |   [,[](?!\s*'[^']+ ' \s* : \s* \[ ([^]]|\]})+ \]))*\](?!}))
-var wrapStringObjs = /((?:[,[]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[],}]))/ 
-while( ++abcd < 3){
-		//(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\).+)
-			console.log(buttons.match(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*)/gm));
-			console.log(buttons.replace(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*)/gm, "$2"));
-			//buttons = buttons.replace(/('[^']+'\s*:\s*\[(?:(?=([^\]{']+))$2|{.*}|'(?![^']+'\s*:\s*\[.*\]))*\](?!}))/gm,"{$1}"); 
-		
-		
-
-			//console.log("e:",e)
-			//fred = buttons.match(addObjects)
-			//console.log('fred', fred)
-			//buttons = buttons.replace(/([^\s:,]+:\s*\[([^\]]|\]\s*\})*\](?!}))/gm, "{$1}")
-			//buttons = buttons.replace(/([^\s:,]+:\s*\[({[^}]+:[^}]+}|[^\[\]])*\](?!}))/gm, "{$1}")
-			console.log("buttons - mid:",buttons);
-		}
-		console.log("buttons - finalOutput:",buttons)
-	}
-	
-i=0			
-	function d(a,b){ console.log(a,':',b) }
-		var buttons = '[abc:"def", "kl", m:[abc, abc:[def, {"g hi":[d]}, {a:[a, b, c]}, f:abc:fgr, abc], jkl], as:[]]';
-		d('buttons',buttons)
-		buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
-		d('buttons quoted',buttons)
-		buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
-		d('buttons simple obj',buttons)
-		buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
-		d('buttons simple obj',buttons)
-		while (++i < 4 && buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
-		d('buttons brackets obj',buttons)
-	
+	// var url = $('miLink').get('value') || "";
+	// MooInline.Utilities.exec('createlink',url);
+	// var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
+	// if($defined(MooInline.ranges)) console.log( 1 )
+	// this.range = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 */

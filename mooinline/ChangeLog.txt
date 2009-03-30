@@ -49,6 +49,30 @@ h) rejected - expandHidden
 i) rejected - change numbering system to 123 for toolbars and abc for subbars.
 j) Removed the default behavior of opening subcollections that have shortcuts related to them.
 
+45:
+44: 
+a. Cleanup regexs updated to reflect the latest changes made to the MooEditable codebase.  Does NOT behave exactly the same, but similar.  Further modifications are planned.
+b. passed in values now override the 'contains' attribute of the buttons hash.
+c. buttons hash cleaned some
+d. 'buttons' cleanup in addCollection now a loop.
+e. Defaults can have spaces, can be a string, etc., as they are handled by addCollection
+f. It appends classes from the buttons hash instead of overwriting the originals.
+g. if a input/textarea, unselectable defaults to off.
+h. onLoad runs after buttons are init'd, whether by 'contains' or 'onInit'.
+i. The logic for the following idea was reworked: addCollection takes as the second parameter the object after which to put the toolbar.  It must exist, so we will now manually create it for init, and must modify buttons to send along parent
+j. run function - called by mousedown, onLoad and onInit - now exists standalone within the utilities hash.
+k. onInit is run before any buttons are pressed
+l. Is now added within the element inside of before it, in order to be better positioned.
+m. Renamed addCollection() to addElements().
+n. mThe while in addCollection now protects even against stacked arrays  (ie: the following should not create an error - [[[bold, italics]]].  Currently, [[bold, italcs]] is cleaned, with two brackets.  needed for l to work.)
+o. contains tag added to buttons hash.
+p. Due to changes, now classes, events. etc can be applied to collections (add to hash?)
+q. defaults are not dynamically added to the buttons hash even if they have no match.
+r. Expanded the 'collection' array object. 
+	a) It already can be called onLoad and onClick.  Add to args?
+	b) Allow it to be an object, where the key refers to the containing element.  {main:['bold', 'italics']} becomes <div class="miCollection_Main"><a class="miBold">..
+	c) Allow it to have within it nested arrays: [['main','bold'],['italics']] where each will expand.
+		If done correctly, this should make it infinitely more flexible (and confusing?)
 
 Old Docs:
 *
