@@ -26,7 +26,7 @@ var MooInline = new Class({
 	initialize: function(selectors, options){
 		this.setOptions(options);	
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
-		MooInline.shortcuts = MooInline.shortcutBtns = MooInline.activeField = MooInline.activeBtn = []; MooInline.ranges = {};
+		MooInline.activeField = MooInline.activeBtn = []; MooInline.ranges = MooInline.shortcuts = $H({});	// = MooInline.shortcutBtns = 
 		
 		els.each(function(el, index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -44,7 +44,7 @@ var MooInline = new Class({
 				'focus':function(){ MooInline.bar = this.retrieve('bar'); }
 			});
 		})
-		MooInline.Utilities.activeField = els[0];									//in case a button is pressed before anything is selected.
+		MooInline.activeField = els[0];									//in case a button is pressed before anything is selected.
 		if(l=='t') mi.addClass('miPageTop').getFirst().addClass('miTopDown');
 		else if(l=='b') mi.addClass('miPageBottom');
 	},
@@ -80,7 +80,7 @@ MooInline.Utilities = {
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||false, args[1]||null);				//document.execCommand('justifyRight', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
-		if(g) document.designMode = 'off'
+		if(g) document.designMode = 'off';
 	},
 	
 	storeRange:function(rangeName){
@@ -102,25 +102,25 @@ MooInline.Utilities = {
  	},
 	
 	updateBtns: function(e){
-return	
-	var bar = MooInline.bar, be, btn;
-		console.log(bar);
-		var vv = [	'bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
+	
+		//var bar = MooInline.activeBtn.getParent('.miRTE'), be, btn;//$chk(btn = MooInline.shortcuts.keyOf(e.key)) $chk to allow index 0, may not be needed. 
+		var bar = MooInline.activeField.retrieve('bar'), be, btn;	
+		if(e && e.control && MooInline.shortcuts.has(e.key)){	
+			e.stop();
+			btn = bar.getElement('.mi'+MooInline.shortcuts[e.key])
+			btn.fireEvent('mousedown', btn)
+		};
+		[	'bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
 			'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'
-		]
-		vv.each(function(prop){		
-				if (be = bar.getElement('.mi'+prop))
-					window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-		})
-		[''].each(function(prop){	
+		].each(function(prop){		
+			if (be = bar.getElement('.mi'+prop))
+				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+		});
+		['fontSize'].each(function(prop){	
 			if (be = bar.getElement('.mi'+prop))
 				window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 		}) 
-		if(e && e.control && (btn = MooInline.shortcuts.indexOf(e.key))>-1){ 
-			e.stop(); 
-			btn = bar.getElement('.mi'+t.shortcutBtns[btn])
-			btn.fireEvent('mousedown', btn)
-		}
+		return;	
 	},
 	
 	addElements: function(buttons, place, relative, name, hides, invisible){
@@ -178,7 +178,8 @@ return
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
 				if (btnVals) e.store('children', btnVals);
-				if (val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
+				//if (val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
+				if (val.shortcut){ MooInline.shortcuts[val.shortcut] = btn; } 
 				MooInline.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
 				if (btnVals) MooInline.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooInline.Utilities.addElements(val.contains, e);	
@@ -293,7 +294,6 @@ MooInline.Elements = new Hash({
 	'Main'         :{img: '0', click:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']} },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
 	'File'         :{img: '9', click:{Toolbar:['paste','copy','cut','redo','undo']} },
 	'Link'         :{img: '6', click:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
-	//'Link'         :{img: '6', click:'linkBar',  checkState:true},
 	'Justify'      :{img:'18', onLoad:{Toolbar:['justifyleft','justifycenter','JustifyRight','justifyfull']} },
 	'Lists'        :{img:'22', click:{Toolbar:['insertorderedlist','insertunorderedlist']} },
 	'Indents'      :{img:'16', click:{Toolbar:['indent','outdent']} },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
@@ -321,11 +321,9 @@ MooInline.Elements = new Hash({
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
 	'test'         :{click:function(){console.log(arguments)}, args:this},
-	'linkBar'      :{element:'form', contains:'[l0,l1,l2]' },
 	'l0'           :{'text':'enter the url', element:'span' },
 	'l1'           :{'type':'text',  'click':MooInline.Utilities.storeRange }, 
-	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stop();}, 'click':function(e){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-	//'l2'         :{'type':'submit', events:{'mouseup':function(){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value'))}}, 'value':'add link' },
+	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'click':function(e){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
 	//'l2'         :{'type':'submit', 'click':function(){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
 	'nolink'       :{'text':'please select the text to be made into a link'},
 	'unlink'       :{img:'6'},
