@@ -19,7 +19,7 @@ var MooInline = new Class({
 
 	options:{
 		floating: false,
-		location: 'elements', 														//[e,n,T,B,'']
+		location: 'elements', 											   //[e,n,T,B,'']
 		defaults: 'Toolbar:[Main,File,Link,Justify,Lists,Indents,|,Html/Text,fuUploadBar]'
 	},
 	
@@ -76,10 +76,10 @@ var MooInline = new Class({
 
 MooInline.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten(); //completely untested - not sure if this is needed or even works originally args = $splat(args);  Logic is that args can be passed as an array(for the hash), or as arguments(elsewhere).
+		args = $A(arguments).flatten(); 											// args can be an array (for the hash), or regular arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
-		document.execCommand(args[0], args[2]||false, args[1]||null);  				//document.execCommand('justifyRight', false, null);
+		document.execCommand(args[0], args[2]||false, args[1]||null);				//document.execCommand('justifyRight', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
 		if(g) document.designMode = 'off'
 	},
 	
@@ -127,7 +127,7 @@ return
 		
 		if(!hides) hides = '';
 		if(!place) place = MooInline.activeBtn;
-		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img; 
+		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img, loop; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); //surrounds all strings with single quotes.  Qouted phrases are converted to single quoutes. 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
@@ -136,15 +136,13 @@ return
 			buttons = JSON.decode(buttons);
 		}
 		
-		var loopStop = 0;
+		var loopStop = 0; //remove after testing!!
 		do{
-			console.log(buttons)
-			var loop = false;
 			if(btns[0]){ buttons = btns; btns = [];}
 			$splat(buttons).each(function(item){
 				switch($type(item)){
 					case 'string': btns.push(item); break;
-					case 'array' : if(item.length==1)loop=true; item.each(function(val){btns.push(val)}); break;	//item.each(buttons.push);
+					case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
 					case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
 				}
 			});
@@ -156,12 +154,12 @@ return
 			var e = parent.getElement('.'+name||'.mi'+btn);
 			
 			if(!e){
-				var bgPos = 0, val = MooInline.Buttons[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type);
+				var bgPos = 0, val = MooInline.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				if (!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
 			
 				var properties = $H({
 					href:'javascript:void(0)',
-					unselectable:(input || (val.element && val.element.toLowerCase() == 'textarea') ? 'off' : 'on'),
+					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
 					events:{
@@ -169,14 +167,14 @@ return
 							MooInline.activeBtn = this;
 							if(!val.click && (!val.element || val.element == 'a')) MooInline.Utilities.exec(val.args||btn);
 							MooInline.Utilities.run(val.click, val.args, val.hides, parent, this, btn)
-							if(e && e.stop)e.stop();
+							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 							
 							this.getParent().getChildren().removeClass('miSelected');
 							if(!val.ignoreState)this.addClass('miSelected');
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','click','img','onLoad','onExpand','onHide',(val.element?'href':'null')].map(properties.erase.bind(properties));
+				['args','shortcut','element','click','img','onLoad','onExpand','onHide',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
 				if (btnVals) e.store('children', btnVals);
@@ -195,7 +193,7 @@ return
 	run: function(prop, args, hides, self, caller, name, el){
 		if(!prop) return;
 		switch($type(prop)){
-			case 'function':console.log(prop);prop.bind(self)(args); return; 
+			case 'function':prop.bind(caller)(args); return;
 			case 'string': MooInline.Utilities[prop] 
 				? MooInline.Utilities[prop].bind(self)(args) 
 				: MooInline.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); break;
@@ -289,12 +287,13 @@ return
 }
 
 
-MooInline.Buttons = new Hash({
+MooInline.Elements = new Hash({
 
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'Main'         :{img: '0', click:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']} },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
 	'File'         :{img: '9', click:{Toolbar:['paste','copy','cut','redo','undo']} },
 	'Link'         :{img: '6', click:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
+	//'Link'         :{img: '6', click:'linkBar',  checkState:true},
 	'Justify'      :{img:'18', onLoad:{Toolbar:['justifyleft','justifycenter','JustifyRight','justifyfull']} },
 	'Lists'        :{img:'22', click:{Toolbar:['insertorderedlist','insertunorderedlist']} },
 	'Indents'      :{img:'16', click:{Toolbar:['indent','outdent']} },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
@@ -322,11 +321,14 @@ MooInline.Buttons = new Hash({
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
 	'test'         :{click:function(){console.log(arguments)}, args:this},
-	'unlink'       :{img:'6'},
+	'linkBar'      :{element:'form', contains:'[l0,l1,l2]' },
 	'l0'           :{'text':'enter the url', element:'span' },
-	'l1'           :{'type':'text',  events:{ 'mousedown':function(){ MooInline.Buttons.classReference.storeRange(); }}, 'id':'miLink', unselectable: 'off' }, 
-	'l2'           :{'type':'submit', 'click':function(args,classRef){ classRef.setRange() }, 'value':'add link' },
+	'l1'           :{'type':'text',  'click':MooInline.Utilities.storeRange }, 
+	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stop();}, 'click':function(e){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+	//'l2'         :{'type':'submit', events:{'mouseup':function(){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value'))}}, 'value':'add link' },
+	//'l2'         :{'type':'submit', 'click':function(){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
 	'nolink'       :{'text':'please select the text to be made into a link'},
+	'unlink'       :{img:'6'},
 	'remoteURL'    :{click:['imgSelect','imgInput','insertimage']},
 	'imgSelect'    :{element:'span', text:'URL of image' },
 	'imgInput'     :{type:'text' },
@@ -420,12 +422,5 @@ b) What parameters should addCollection require?
 */
 
 /* Old Code:
-	// console.log('range:', range )
-	// console.log("This browser supports sel.addRange:", sel.addRange)
-
-	// var url = $('miLink').get('value') || "";
-	// MooInline.Utilities.exec('createlink',url);
-	// var url = window.prompt("Enter an URL:", "."); document.execCommand('createlink', false, url);
-	// if($defined(MooInline.ranges)) console.log( 1 )
-	// this.range = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+	
 */

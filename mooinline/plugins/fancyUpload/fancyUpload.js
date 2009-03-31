@@ -490,21 +490,14 @@ function applyUploader(){
 		limitSize: 2 * 1024 * 1024,
 		typeFilter:{'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'},
 		onLoad: function() {
-			// console.log('loaded')
 			// MooInline.Utilities.storeRange('insertImage');
-			// console.log(MooInline.ranges.insertImage)
 			// $('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
 		},
 		onComplete: function(file, response){
-			//console.log('about to set range')
-			//console.log(args)
-			//console.log('http://localhost/siteRoller/siteroller/classes/mooinline/plugins/fancyUpload/uploads/'+args.name)
-			console.log($A(arguments))
+			// console.log($A(arguments))
 			// MooInline.Utilities.setRange('insertImage');
-			//MooInline.Utilities.exec("insertimage", "/siteRoller/siteroller/classes/mooinline/mooinline/plugins/fancyUpload/uploads/"+args.name)
 			response = JSON.decode(response);
-			console.log('response:',response)
-			if(response.result == 'success') MooInline.Utilities.exec("insertimage", response.file);
+			if(response.file) MooInline.Utilities.exec("insertimage", response.file);
 		},
 		debug: true, 		// enable logs, uses console.log
 		target: 'fuBrowse' 	// the element for the overlay (Flash 10 only).  Not used since we anyways use our own method.
@@ -527,8 +520,8 @@ function applyUploader(){
 	});
 	
 	$$('object[id^=Swiff]')[0].getParent().setStyles({position:'absolute', top:0, left:0 }).inject('fuBrowse', 'after');
-	MooInline.Buttons.fuList.init = '';
-	MooInline.Buttons.fuUploadBar.click = function(){ 
+	MooInline.Elements.fuList.init = '';
+	MooInline.Elements.fuUploadBar.click = function(){ 
 		console.log('this is:',MooInline.activeBtn);
 		$('fancyUploadSwiff').getParent().inject(MooInline.activeBtn.getParent().getParent())
 		//$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
