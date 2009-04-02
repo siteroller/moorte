@@ -1,0 +1,531 @@
+/*$Id :$ */
+.mainBg
+{
+   height:96%;
+   background-color:#E1E1E1;
+   padding:15px;
+}
+
+.innerTable
+{
+  border:0px;
+  overflow:hidden;
+  cellpadding:0;
+  cellspacing:0;
+  width:100%;
+  height:98%;
+  table-layout:fixed;
+}
+
+.mainTblA4L
+{
+	width:297mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+
+.mainTblA4
+{
+	width:210mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+.mainTblLetterL
+{
+    width:279mm;
+    margin-bottom:0px;
+    border:0px solid #000;
+}
+.mainTblLetter
+{
+	width:216mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+.mainTblLegalL
+{
+	width:356mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+
+.mainTblLegal
+{
+	width:216mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+
+.mainTblExecutiveL
+{
+	width:254mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+
+.mainTblExecutive
+{
+	width:190mm;
+	margin-bottom:0px;
+	border:0px solid #000;
+}
+
+.pageno
+{
+	color:black;
+	font-weight: normal;
+	font-family: verdana;
+	font-size:11px;
+	color: #B8B8B8;
+	text-align:center;
+}
+
+.pageBoxA4L
+{
+	height:210mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:0px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+.pageBoxA4
+{
+	height:297mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:0px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+.pageBoxLetterL
+{
+	height:216mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+
+.pageBoxLetter
+{
+	height:280mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+.pageBoxLegalL
+{
+	height:216mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+
+.pageBoxLegal
+{
+	height:356mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+.pageBoxExecutiveL
+{
+	height:190mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+
+.pageBoxExecutive
+{
+	height:254mm;
+	border:1px solid #000;
+	background-color:#FFF;
+	vertical-align:top;
+	padding-left:0px;
+	padding-right:10px;
+	padding-top:0px;
+	padding-bottom:0px;
+}
+
+.bottomShadowA4L
+{
+	background-color:#696969;
+	width :287mm;
+}
+
+.bottomShadowA4
+{
+	background-color:#696969;
+	width :205mm;
+}
+.bottomShadowLetterL
+{
+	background-color:#696969;
+	width :272mm;
+}
+
+.bottomShadowLetter
+{
+	background-color:#696969;
+	width :210mm;
+}
+.bottomShadowLegalL
+{
+	background-color:#696969;
+	width :351mm;
+}
+
+.bottomShadowLegal
+{
+	background-color:#696969;
+	width :210mm;
+}
+.bottomShadowExecutiveL
+{
+	background-color:#696969;
+	width :249mm;
+}
+.bottomShadowExecutive
+{
+	background-color:#696969;
+	width :185mm;
+}
+.rightShadowA4L
+{
+	background-color:#696969;
+	height:205mm;
+}
+
+.rightShadowA4
+{
+	background-color:#696969;
+	height:292mm;
+}
+.rightShadowLetterL
+{
+	background-color:#696969;
+	height:211mm;
+}
+
+.rightShadowLetter
+{
+	background-color:#696969;
+	height:275mm;
+}
+.rightShadowLegalL
+{
+	background-color:#696969;
+	height:210mm;
+}
+
+.rightShadowLegal
+{
+	background-color:#696969;
+	height:350mm;
+}
+.rightShadowExecutiveL
+{
+	background-color:#696969;
+	height:185mm;
+}
+
+.rightShadowExecutive
+{
+	background-color:#696969;
+	height:251mm;
+}
+
+.rightCornerShadow
+{
+	background-color:#696969;
+}
+
+.printToolbarIcon {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	float:left;
+	font-weight: normal;
+	line-height:normal;     
+	list-style: none;
+	font-color: #000;
+	padding: 3px 0px 0px 3px; 
+	margin:  0px 0px 1px 0px;
+}
+          
+
+ul.printToolbarIcon li{
+
+	float:left;
+	background: url("../images/pToolBtnLft.gif") no-repeat left top;
+	list-style: none;
+	padding: 0px 0px 0px 2px;
+	margin: 0px 0px 1px 5px
+}
+
+ul.printToolbarIcon li a {
+	display:block;
+	float:left;
+	font-size: 10px;
+	padding:3px 6px 3px 2px;
+	background: url("../images/pToolBtnRht.gif") no-repeat right top;
+	text-decoration: none;
+	color: #000;
+	font-weight: regular;
+	margin-right: 2px;
+	white-space:nowrap;font-weight:bold;
+}
+.pPrint{
+	height: 16px; 
+	width:16px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-30px -23px;
+}
+.pPDF{
+	height: 16px; 
+	width:16px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-6px -23px;
+}
+.firstPg{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-3px -44px;float:left;
+	margin-right:5px;
+	cursor:hand;
+	cursor:pointer;
+}
+.prevPg{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-28px -44px;float:left;
+	margin-right:5px;
+	cursor:hand;
+	cursor:pointer;
+}
+.nextPg{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-52px -44px;float:left;
+	margin-left:5px;
+	margin-right:5px;
+	cursor:hand;
+	cursor:pointer;
+}
+.lastPg{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-77px -44px;float:left;
+	margin-right:5px;
+	cursor:hand;
+	cursor:pointer;
+}
+
+.firstPgDis{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-3px -67px;float:left;
+	margin-right:5px;
+}
+.prevPgDis{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-28px -67px;float:left;
+	margin-right:5px;
+}
+.nextPgDis{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-52px -67px;float:left;
+	margin-left:5px;
+	margin-right:5px;
+}
+.lastPgDis{
+	height: 18px; 
+	width:18px;  
+	background-image: url('../images/picons.gif');
+	background-repeat:no-repeat;
+	background-position:-77px -67px;float:left;
+	margin-right:5px;
+}
+.pHdrText{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-color:#000;
+	font-size:10px;
+	font-weight:bold;
+}
+.goFld
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-color:#000;
+	font-size:10px;
+	font-weight:bold;
+ 	width:32px;
+	height:15px;
+	background-color:#FFF;
+	border:1px solid #7C95AF;
+	border-right:1px solid #CDD6DF;
+	border-bottom:1px solid #CDD6DF;
+}
+.goBtn
+{
+font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-color:#000;
+	font-size:10px;
+	font-weight:bold;
+	width:32px;
+	height:17px;
+	background-color:#E3E3E3;
+	border:1px solid #CDD6DF;
+	border-right:1px solid #969696;
+	border-bottom:1px solid #969696;
+}
+
+
+
+thead#mainthead
+{
+	display: table-header-group;
+}
+
+tbody#maintbody
+{
+	/* height 8in just to keep the tfoot to stay at the bottom*/
+	display: table-row-group;
+	/*height:11in;*/
+	height :100%;
+}
+
+tfoot#maintfoot {
+	display: table-footer-group;
+	/*position:fixed;
+	width:100%;
+	bottom:0;*/
+}
+
+.msg {
+   background-color:#CAE1FF;
+   color:#778899;
+   font-family:Verdana, Arial, Helvetica, sans-serif;
+   font-size:11px;
+   text-align:center;
+   font-weight:bold;
+   padding:3;
+   border: 1px outset #1E90FF;
+}
+
+img#pgbrkimg{
+   background-image:url('../images/break-page.gif');
+   background-repeat:repeat-x;
+}
+
+.pClose{
+   height: 16px;
+   width:14px;
+   background-image: url('../images/picons.gif');
+   background-repeat:no-repeat;
+   background-position:-56px -23px;
+}
+.pagebreakbr
+{
+  page-break-after:always;
+}
+#header {
+	position:relative;
+	background-color: #F8F8F8;
+       	border-bottom:1px solid #BEBEBE;
+}
+
+div.fncontainer
+{
+    vertical-align:top;
+    line-height:1.2em;
+    width :100%;
+    position:fixed;
+    color:grey;
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: normal;
+    font-style: normal;
+}
+td.fncontainer
+{
+    vertical-align:middle;
+    line-height:normal;
+    width :100%;
+    color:grey;
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: normal;
+    font-style: normal;
+}
+.efnote
+{
+   text-decoration:none;
+   color:grey;
+   font-style: normal;
+
+}
+div.encontainer
+{
+    vertical-align:middle;
+    line-height:normal;
+    width :100%;
+    position:relative;
+    bottom:0;
+    color:grey;
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: normal;
+    font-style: normal;
+}
+.footnote
+{
+   text-decoration:none;
+   color:inherit;
+}
+.endnote
+{
+   text-decoration:none;
+   color:inherit;
+}
+
