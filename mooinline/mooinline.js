@@ -24,6 +24,8 @@ var MooInline = new Class({
 	},
 	
 	initialize: function(selectors, options){
+		//console.log('called')
+		//console.log(selectors)
 		if($type(selectors)=='object'){options = selectors; selectors = null};
 		this.setOptions(options);
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
@@ -215,44 +217,22 @@ MooInline.Utilities = {
 			break; 																	//case 'object': case 'array'
 		}
 	},
-	
+	/*
 	remove: function(mi, keep){							// I plan on extending elements with remove() as well as hide() and deleting this.
 		mi = mi.hasClass('miMooInline') ? mi : mi.retrieve('bar');
 		if(!keep) mi.destroy();
 		else if(keep === true) mi.addClass('.miHide');
 		else{ MooInline.removed[keep] = mi; new Element('span').replaces(mi).destroy(); } 
 	},
-	
+	*/
 	clean: function(html, options){
+	
 	
 		options = $H({
 			xhtml:false, 
 			semantic:true, 
 			remove:''
-		}).extend(options)
-		
-		//If html is an element, process all of that element's innards.  Perhaps even offer taking the outerhtml.  If not, use a separate element to dump stuff into.
-		
-		var washer;
-		if($type(html)=='element'){
-			washer = html;
-			html = washer.get('html');
-			MooInline.Utilities.remove(washer,'washer');
-		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
-		
-		/* For washer, we can use a iframe instead of an element - may be needed for the whole body or similar.
-		var washer = ( $('washer') ? $('washer') : new IFrame({ id:'washer', 'class':'mHide' }).inject(document.body)).contentWindow.document;
-		washer.open();
-		washer.write('<html><body id="washer">'+html+'</body></html>');
-		washer.close();
-		washer = $(washer.body);
-		*/
-		
-		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
-		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
-		//$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
-		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
-		html = washer.get('html');
+		}).extend(options);
 		
 		var br = '<br'+(xhtml?'/':'')+'>';
 		var xhtml = [
@@ -276,7 +256,9 @@ MooInline.Utilities = {
 			[/([^\n])<img/ig, '$1\n<img'],    										// Move images to their own line
 			[/^\s*$/g, '']										        			// Delete empty lines in the source code (not working in opera)
 		];
-		var nonSemantic = [	[/\s*<br ?\/?>\s*<\/p>/gi, '</p>']	];					// if (!this.options.semantics) - Remove padded paragraphs
+		var nonSemantic = [	
+			[/\s*<br ?\/?>\s*<\/p>/gi, '</p>']										// if (!this.options.semantics) - Remove padded paragraphs
+		];	
 		var appleCleanup = [
 			[/<br class\="webkit-block-placeholder">/gi, "<br />"],					// Webkit cleanup - add an if(webkit) check
 			[/<span class="Apple-style-span">(.*)<\/span>/gi, '$1'],				// Webkit cleanup - should be corrected not to get messed over on nested spans - SG!!!
@@ -314,9 +296,31 @@ MooInline.Utilities = {
 			[/><br ?\/?>/gi,'>'],													// Remove useless BRs
 			[/<br ?\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],					// Remove BRs right before the end of blocks
 			//Handled with DOM:
-			[/<p>(?:\s*)<p>/g, '<p>'],												// Remove double <p> tags
+			[/<p>(?:\s*)<p>/g, '<p>'],												// Remove empty <p> tags
 		];
+				
+		/* 
+		//If html is an element, process all of that element's innards.  Perhaps even offer taking the outerhtml.  If not, use a separate element to dump stuff into.
+		For washer, we can use a iframe instead of an element - may be needed for the whole body or similar.
+		var washer = ( $('washer') ? $('washer') : new IFrame({ id:'washer', 'class':'mHide' }).inject(document.body)).contentWindow.document;
+		washer.open();
+		washer.write('<html><body id="washer">'+html+'</body></html>');
+		washer.close();
+		washer = $(washer.body);
+		*/
 		
+		var washer;
+		if($type(html)=='element'){
+			washer = html;
+			html = washer.get('html');
+			washer.mooinline('remove');
+		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
+
+		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
+		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
+		//$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
+		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
+		html = washer.get('html');
 		
 		if(xhtml)cleanup.extend(xhtml);
 		if(semantic)cleanup.extend(semantic);
@@ -328,10 +332,30 @@ MooInline.Utilities = {
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html && ++loopStop <2);
 		html = html.trim();
+		if(washer != $('washer')) washer.mooinline();
 		return html;
 	}
 }
 
+Element.implement({
+//$$('div.RTE')[0].mooinline();
+	mooinline:function(directive, options){
+		var bar = this.hasClass('miMooInline') ? this : this.retrieve('bar') || '';
+		if(!directive || (directive == 'create')){
+			if(removed = this.retrieve('removed')){
+				this.grab(removed, 'top');
+				this.store('removed','');
+			} else return bar ? this.removeClass('miHide') : new MooInline(this, options);
+		}else{
+			if(!bar) return false;
+			else switch(directive.toLowerCase()){
+				case 'hide': bar.addClass('miHide'); break;
+				case 'remove': this.store('removed', bar); new Element('span').replaces(bar).destroy();  break;
+				case 'destroy': bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); bar.destroy(); break; 
+			}
+		}
+	}
+});
 
 MooInline.Elements = new Hash({
 
@@ -380,13 +404,16 @@ MooInline.Elements = new Hash({
 					}},
 	'inserthorizontalrule':{img:'22'},	
 	'save'         :{ img:'11', onClick:function(){
-						//console.log('content:', MooInline.activeBar.retrieve('fields')); // same as this.getParent('.miMooInline').retrieve('field')
-						var it = this.getParent('.miMooInline').retrieve('fields')[0];
-						var content = MooInline.Utilities.clean(it);
+						var content = $H({ 'page': window.location.pathname });
+						this.getParent('.miMooInline').retrieve('fields').each(function(el){
+							content['content_'+(el.get('id')||'')] = MooInline.Utilities.clean(el);
+						});
+						console.log(content)
+						var savePath = new Request({url:'mooinline/plugins/save/saveFile.php'}).send(content.toQueryString()); 
+						//console.log('ready to clean')
 						//console.log('content:', content);
-						var html = $H({ 'page': window.location.pathname, 'content': content }).toQueryString()
-						var savePath = new Request({url: 'mooinline/plugins/save/saveFile.php'}).send(html); 
-						it.grab(MooInline.removed.washer, 'top')
+						//console.log('content:', MooInline.activeBar.retrieve('fields')); // same as this.getParent('.miMooInline').retrieve('field')
+						//it.grab(MooInline.removed.washer, 'top')
 						//MooInline.removed.washer.inject(it, 'top');
 						//console.log(MooInline.removed.washer);
 					}},

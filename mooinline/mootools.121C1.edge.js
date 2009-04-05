@@ -18,7 +18,7 @@ Inspiration:
 
 var MooTools = {
 	'version': '1.2.1',
-	'build': '43dd3f0d42701ec19b3fcbf903f9b444220d7956'
+	'build': '6aa6aaf893ff85325c36fe2262f7aa406c95c14a'
 };
 
 var Native = function(options){
@@ -155,8 +155,8 @@ Array.alias('forEach', 'each');
 
 function $A(iterable){
 	if (iterable.item){
-		var array = [];
-		for (var i = 0, l = iterable.length; i < l; i++) array[i] = iterable[i];
+		var l = iterable.length, array = new Array(l);
+		while (l--) array[l] = iterable[l];
 		return array;
 	}
 	return Array.prototype.slice.call(iterable);
@@ -205,13 +205,18 @@ function $lambda(value){
 };
 
 function $merge(){
-	var mix = {};
-	for (var i = 0, l = arguments.length; i < l; i++){
+	var args = Array.slice(arguments);
+	args.unshift({});
+	return $mixin.apply(null, args);
+};
+
+function $mixin(mix){
+	for (var i = 1, l = arguments.length; i < l; i++){
 		var object = arguments[i];
 		if ($type(object) != 'object') continue;
 		for (var key in object){
 			var op = object[key], mp = mix[key];
-			mix[key] = (mp && $type(op) == 'object' && $type(mp) == 'object') ? $merge(mp, op) : $unlink(op);
+			mix[key] = (mp && $type(op) == 'object' && $type(mp) == 'object') ? $mixin(mp, op) : $unlink(op);
 		}
 	}
 	return mix;
@@ -358,7 +363,7 @@ Array.implement({
 		for (var i = 0, j = array.length; i < j; i++) this.push(array[i]);
 		return this;
 	},
-
+	
 	getLast: function(){
 		return (this.length) ? this[this.length - 1] : null;
 	},
@@ -750,225 +755,6 @@ Hash.implement({
 Hash.alias({keyOf: 'indexOf', hasValue: 'contains'});
 
 /*
-Script: Class.js
-	Contains the Class Function for easily creating, extending, and implementing reusable Classes.
-
-License:
-	MIT-style license.
-*/
-
-var Class = new Native({
-
-	name: 'Class',
-
-	initialize: function(properties){
-		properties = properties || {};
-		var klass = function(){
-			for (var key in this){
-				if ($type(this[key]) != 'function') this[key] = $unlink(this[key]);
-			}
-			this.constructor = klass;
-			if (Class.prototyping) return this;
-			var instance = (this.initialize) ? this.initialize.apply(this, arguments) : this;
-			if (this.options && this.options.initialize) this.options.initialize.call(this);
-			return instance;
-		};
-
-		for (var mutator in Class.Mutators){
-			if (!properties[mutator]) continue;
-			properties = Class.Mutators[mutator](properties, properties[mutator]);
-			delete properties[mutator];
-		}
-
-		$extend(klass, this);
-		klass.constructor = Class;
-		klass.prototype = properties;
-		return klass;
-	}
-
-});
-
-Class.Mutators = {
-
-	Extends: function(self, klass){
-		Class.prototyping = klass.prototype;
-		var subclass = new klass;
-		delete subclass.parent;
-		subclass = Class.inherit(subclass, self);
-		delete Class.prototyping;
-		return subclass;
-	},
-
-	Implements: function(self, klasses){
-		$splat(klasses).each(function(klass){
-			Class.prototying = klass;
-			$extend(self, ($type(klass) == 'class') ? new klass : klass);
-			delete Class.prototyping;
-		});
-		return self;
-	}
-
-};
-
-Class.extend({
-
-	inherit: function(object, properties){
-		var caller = arguments.callee.caller && !Browser.Features.air; // caller support is broken in air 1.5
-		for (var key in properties){
-			var override = properties[key];
-			var previous = object[key];
-			var type = $type(override);
-			if (previous && type == 'function'){
-				if (override != previous){
-					if (caller){
-						override.__parent = previous;
-						object[key] = override;
-					} else {
-						Class.override(object, key, override);
-					}
-				}
-			} else if(type == 'object'){
-				object[key] = $merge(previous, override);
-			} else {
-				object[key] = override;
-			}
-		}
-
-		if (caller) object.parent = function(){
-			return arguments.callee.caller.__parent.apply(this, arguments);
-		};
-
-		return object;
-	},
-
-	override: function(object, name, method){
-		var parent = Class.prototyping;
-		if (parent && object[name] != parent[name]) parent = null;
-		var override = function(){
-			var previous = this.parent;
-			this.parent = parent ? parent[name] : object[name];
-			var value = method.apply(this, arguments);
-			this.parent = previous;
-			return value;
-		};
-		object[name] = override;
-	}
-
-});
-
-Class.implement({
-
-	implement: function(){
-		var proto = this.prototype;
-		$each(arguments, function(properties){
-			Class.inherit(proto, properties);
-		});
-		return this;
-	}
-
-});
-
-/*
-Script: Class.Extras.js
-	Contains Utility Classes that can be implemented into your own Classes to ease the execution of many common tasks.
-
-License:
-	MIT-style license.
-*/
-
-var Chain = new Class({
-
-	$chain: [],
-
-	chain: function(){
-		this.$chain.extend(Array.flatten(arguments));
-		return this;
-	},
-
-	callChain: function(){
-		return (this.$chain.length) ? this.$chain.shift().apply(this, arguments) : false;
-	},
-
-	clearChain: function(){
-		this.$chain.empty();
-		return this;
-	}
-
-});
-
-var Events = new Class({
-
-	$events: {},
-
-	addEvent: function(type, fn, internal){
-		type = Events.removeOn(type);
-		if (fn != $empty){
-			this.$events[type] = this.$events[type] || [];
-			this.$events[type].include(fn);
-			if (internal) fn.internal = true;
-		}
-		return this;
-	},
-
-	addEvents: function(events){
-		for (var type in events) this.addEvent(type, events[type]);
-		return this;
-	},
-
-	fireEvent: function(type, args, delay){
-		type = Events.removeOn(type);
-		if (!this.$events || !this.$events[type]) return this;
-		this.$events[type].each(function(fn){
-			fn.create({'bind': this, 'delay': delay, 'arguments': args})();
-		}, this);
-		return this;
-	},
-
-	removeEvent: function(type, fn){
-		type = Events.removeOn(type);
-		if (!this.$events[type]) return this;
-		if (!fn.internal) this.$events[type].erase(fn);
-		return this;
-	},
-
-	removeEvents: function(events){
-		if ($type(events) == 'object'){
-			for (var type in events) this.removeEvent(type, events[type]);
-			return this;
-		}
-		if (events) events = Events.removeOn(events);
-		for (var type in this.$events){
-			if (events && events != type) continue;
-			var fns = this.$events[type];
-			for (var i = fns.length; i--; i) this.removeEvent(type, fns[i]);
-		}
-		return this;
-	}
-
-});
-
-Events.removeOn = function(string){
-	return string.replace(/^on([A-Z])/, function(full, first) {
-		return first.toLowerCase();
-	});
-};
-
-var Options = new Class({
-
-	setOptions: function(){
-		this.options = $merge.run([this.options].extend(arguments));
-		if (!this.addEvent) return this;
-		for (var option in this.options){
-			if ($type(this.options[option]) != 'function' || !(/^on[A-Z]/).test(option)) continue;
-			this.addEvent(option, this.options[option]);
-			delete this.options[option];
-		}
-		return this;
-	}
-
-});
-
-/*
 Script: Browser.js
 	The Browser Core. Contains Browser initialization, Window and Document, and the Browser Hash.
 
@@ -1124,6 +910,535 @@ var Document = new Native({
 Document.Prototype = {$family: {name: 'document'}};
 
 new Document(document);
+
+/*
+Script: Class.js
+	Contains the Class Function for easily creating, extending, and implementing reusable Classes.
+
+License:
+	MIT-style license.
+*/
+
+function Class(params){
+	
+	if (params instanceof Function) params = {initialize: params};
+	
+	var newClass = function(){
+		Object.reset(this);
+		if (newClass._prototyping) return this;
+		this._current = $empty;
+		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
+		delete this._current; delete this.caller;
+		return value;
+	}.extend(this);
+	
+	newClass.implement(params);
+	
+	newClass.constructor = Class;
+	newClass.prototype.constructor = newClass;
+
+	return newClass;
+
+};
+
+Function.prototype.protect = function(){
+	this._protected = true;
+	return this;
+};
+
+Object.reset = function(object, key){
+		
+	if (key == null){
+		for (var p in object) Object.reset(object, p);
+		return object;
+	}
+	
+	delete object[key];
+	
+	switch ($type(object[key])){
+		case 'object':
+			var F = function(){};
+			F.prototype = object[key];
+			var i = new F;
+			object[key] = Object.reset(i);
+		break;
+		case 'array': object[key] = $unlink(object[key]); break;
+	}
+	
+	return object;
+	
+};
+
+new Native({name: 'Class', initialize: Class}).extend({
+
+	instantiate: function(F){
+		F._prototyping = true;
+		var proto = new F;
+		delete F._prototyping;
+		return proto;
+	},
+	
+	wrap: function(self, key, method){
+		method = method._origin || method;
+		
+		return function(){
+			if (method._protected && this._current == null) throw new Error('The method "' + key + '" cannot be called.');
+			var caller = this.caller, current = this._current;
+			this.caller = current; this._current = arguments.callee;
+			var result = method.apply(this, arguments);
+			this._current = current; this.caller = caller;
+			return result;
+		}.extend({_owner: self, _origin: method, _name: key});
+
+	}
+	
+});
+
+Class.implement({
+	
+	implement: function(key, value){
+		
+		if ($type(key) == 'object'){
+			for (var p in key) this.implement(p, key[p]);
+			return this;
+		}
+		
+		var mutator = Class.Mutators[key];
+		
+		if (mutator){
+			value = mutator.call(this, value);
+			if (value == null) return this;
+		}
+		
+		var proto = this.prototype;
+
+		switch ($type(value)){
+			
+			case 'function':
+				if (value._hidden) return this;
+				proto[key] = Class.wrap(this, key, value);
+			break;
+			
+			case 'object':
+				var previous = proto[key];
+				if ($type(previous) == 'object') $mixin(previous, value);
+				else proto[key] = $unlink(value);
+			break;
+			
+			case 'array':
+				proto[key] = $unlink(value);
+			break;
+			
+			default: proto[key] = value;
+
+		}
+		
+		return this;
+
+	}
+	
+});
+
+Class.Mutators = {
+	
+	Extends: function(parent){
+
+		this.parent = parent;
+		this.prototype = Class.instantiate(parent);
+
+		this.implement('parent', function(){
+			var name = this.caller._name, previous = this.caller._owner.parent.prototype[name];
+			if (!previous) throw new Error('The method "' + name + '" has no parent.');
+			return previous.apply(this, arguments);
+		}.protect());
+
+	},
+
+	Implements: function(items){
+		$splat(items).each(function(item){
+			if (item instanceof Function) item = Class.instantiate(item);
+			this.implement(item);
+		}, this);
+
+	}
+	
+};
+
+/*
+Script: Class.Extras.js
+	Contains Utility Classes that can be implemented into your own Classes to ease the execution of many common tasks.
+
+License:
+	MIT-style license.
+*/
+
+var Chain = new Class({
+
+	$chain: [],
+
+	chain: function(){
+		this.$chain.extend(Array.flatten(arguments));
+		return this;
+	},
+
+	callChain: function(){
+		return (this.$chain.length) ? this.$chain.shift().apply(this, arguments) : false;
+	},
+
+	clearChain: function(){
+		this.$chain.empty();
+		return this;
+	}
+
+});
+
+var Events = new Class({
+
+	$events: {},
+
+	addEvent: function(type, fn, internal){
+		type = Events.removeOn(type);
+		if (fn != $empty){
+			this.$events[type] = this.$events[type] || [];
+			this.$events[type].include(fn);
+			if (internal) fn.internal = true;
+		}
+		return this;
+	},
+
+	addEvents: function(events){
+		for (var type in events) this.addEvent(type, events[type]);
+		return this;
+	},
+
+	fireEvent: function(type, args, delay){
+		type = Events.removeOn(type);
+		if (!this.$events || !this.$events[type]) return this;
+		this.$events[type].each(function(fn){
+			fn.create({'bind': this, 'delay': delay, 'arguments': args})();
+		}, this);
+		return this;
+	},
+
+	removeEvent: function(type, fn){
+		type = Events.removeOn(type);
+		if (!this.$events[type]) return this;
+		if (!fn.internal) this.$events[type].erase(fn);
+		return this;
+	},
+
+	removeEvents: function(events){
+		if ($type(events) == 'object'){
+			for (var type in events) this.removeEvent(type, events[type]);
+			return this;
+		}
+		if (events) events = Events.removeOn(events);
+		for (var type in this.$events){
+			if (events && events != type) continue;
+			var fns = this.$events[type];
+			for (var i = fns.length; i--; i) this.removeEvent(type, fns[i]);
+		}
+		return this;
+	}
+
+});
+
+Events.removeOn = function(string){
+	return string.replace(/^on([A-Z])/, function(full, first) {
+		return first.toLowerCase();
+	});
+};
+
+var Options = new Class({
+
+	setOptions: function(){
+		this.options = $merge.run([this.options].extend(arguments));
+		if (!this.addEvent) return this;
+		for (var option in this.options){
+			if ($type(this.options[option]) != 'function' || !(/^on[A-Z]/).test(option)) continue;
+			this.addEvent(option, this.options[option]);
+			delete this.options[option];
+		}
+		return this;
+	}
+
+});
+
+/*
+Script: Request.js
+	Powerful all purpose Request Class. Uses XMLHTTPRequest.
+
+License:
+	MIT-style license.
+*/
+
+var Request = new Class({
+
+	Implements: [Chain, Events, Options],
+
+	options: {/*
+		onRequest: $empty,
+		onComplete: $empty,
+		onCancel: $empty,
+		onSuccess: $empty,
+		onFailure: $empty,
+		onException: $empty,*/
+		url: '',
+		data: '',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+		},
+		async: true,
+		format: false,
+		method: 'post',
+		link: 'ignore',
+		isSuccess: null,
+		emulation: true,
+		urlEncoded: true,
+		encoding: 'utf-8',
+		evalScripts: false,
+		evalResponse: false,
+		noCache: false
+	},
+
+	initialize: function(options){
+		this.xhr = new Browser.Request();
+		this.setOptions(options);
+		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
+		this.headers = new Hash(this.options.headers);
+	},
+
+	onStateChange: function(){
+		if (this.xhr.readyState != 4 || !this.running) return;
+		this.running = false;
+		this.status = 0;
+		$try(function(){
+			this.status = this.xhr.status;
+		}.bind(this));
+		if (this.options.isSuccess.call(this, this.status)){
+			this.response = {text: this.xhr.responseText, xml: this.xhr.responseXML};
+			this.success(this.response.text, this.response.xml);
+		} else {
+			this.response = {text: null, xml: null};
+			this.failure();
+		}
+		this.xhr.onreadystatechange = $empty;
+	},
+
+	isSuccess: function(){
+		return ((this.status >= 200) && (this.status < 300));
+	},
+
+	processScripts: function(text){
+		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return $exec(text);
+		return text.stripScripts(this.options.evalScripts);
+	},
+
+	success: function(text, xml){
+		this.onSuccess(this.processScripts(text), xml);
+	},
+
+	onSuccess: function(){
+		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
+	},
+
+	failure: function(){
+		this.onFailure();
+	},
+
+	onFailure: function(){
+		this.fireEvent('complete').fireEvent('failure', this.xhr);
+	},
+
+	setHeader: function(name, value){
+		this.headers.set(name, value);
+		return this;
+	},
+
+	getHeader: function(name){
+		return $try(function(){
+			return this.xhr.getResponseHeader(name);
+		}.bind(this));
+	},
+
+	check: function(){
+		if (!this.running) return true;
+		switch (this.options.link){
+			case 'cancel': this.cancel(); return true;
+			case 'chain': this.chain(this.caller.bind(this, arguments)); return false;
+		}
+		return false;
+	},
+
+	send: function(options){
+		if (!this.check(options)) return this;
+		this.running = true;
+
+		var type = $type(options);
+		if (type == 'string' || type == 'element') options = {data: options};
+
+		var old = this.options;
+		options = $extend({data: old.data, url: old.url, method: old.method}, options);
+		var data = options.data, url = options.url, method = options.method;
+
+		switch ($type(data)){
+			case 'element': data = $(data).toQueryString(); break;
+			case 'object': case 'hash': data = Hash.toQueryString(data);
+		}
+
+		if (this.options.format){
+			var format = 'format=' + this.options.format;
+			data = (data) ? format + '&' + data : format;
+		}
+
+		if (this.options.emulation && ['put', 'delete'].contains(method)){
+			var _method = '_method=' + method;
+			data = (data) ? _method + '&' + data : _method;
+			method = 'post';
+		}
+
+		if (this.options.urlEncoded && method == 'post'){
+			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
+			this.headers.set('Content-type', 'application/x-www-form-urlencoded' + encoding);
+		}
+
+		if(this.options.noCache) {
+			var noCache = "noCache=" + new Date().getTime();
+			data = (data) ? noCache + '&' + data : noCache;
+		}
+
+
+		if (data && method == 'get'){
+			url = url + (url.contains('?') ? '&' : '?') + data;
+			data = null;
+		}
+
+
+		this.xhr.open(method.toUpperCase(), url, this.options.async);
+
+		this.xhr.onreadystatechange = this.onStateChange.bind(this);
+
+		this.headers.each(function(value, key){
+			try {
+				this.xhr.setRequestHeader(key, value);
+			} catch (e){
+				this.fireEvent('exception', [key, value]);
+			}
+		}, this);
+
+		this.fireEvent('request');
+		this.xhr.send(data);
+		if (!this.options.async) this.onStateChange();
+		return this;
+	},
+
+	cancel: function(){
+		if (!this.running) return this;
+		this.running = false;
+		this.xhr.abort();
+		this.xhr.onreadystatechange = $empty;
+		this.xhr = new Browser.Request();
+		this.fireEvent('cancel');
+		return this;
+	}
+
+});
+
+(function(){
+
+var methods = {};
+['get', 'post', 'put', 'delete', 'GET', 'POST', 'PUT', 'DELETE'].each(function(method){
+	methods[method] = function(){
+		var params = Array.link(arguments, {url: String.type, data: $defined});
+		return this.send($extend(params, {method: method.toLowerCase()}));
+	};
+});
+
+Request.implement(methods);
+
+})();
+/*
+Script: JSON.js
+	JSON encoder and decoder.
+
+License:
+	MIT-style license.
+
+See Also:
+	<http://www.json.org/>
+*/
+
+var JSON = new Hash({
+
+	$specialChars: {'\b': '\\b', '\t': '\\t', '\n': '\\n', '\f': '\\f', '\r': '\\r', '"' : '\\"', '\\': '\\\\'},
+
+	$replaceChars: function(chr){
+		return JSON.$specialChars[chr] || '\\u00' + Math.floor(chr.charCodeAt() / 16).toString(16) + (chr.charCodeAt() % 16).toString(16);
+	},
+
+	encode: function(obj){
+		switch ($type(obj)){
+			case 'string':
+				return '"' + obj.replace(/[\x00-\x1f\\"]/g, JSON.$replaceChars) + '"';
+			case 'array':
+				return '[' + String(obj.map(JSON.encode).filter($defined)) + ']';
+			case 'object': case 'hash':
+				var string = [];
+				Hash.each(obj, function(value, key){
+					var json = JSON.encode(value);
+					if (json) string.push(JSON.encode(key) + ':' + json);
+				});
+				return '{' + string + '}';
+			case 'number': case 'boolean': return String(obj);
+			case false: return 'null';
+		}
+		return null;
+	},
+
+	decode: function(string, secure){
+		if ($type(string) != 'string' || !string.length) return null;
+		if (secure && !(/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, ''))) return null;
+		return eval('(' + string + ')');
+	}
+
+});
+
+Native.implement([Hash, Array, String, Number], {
+
+	toJSON: function(){
+		return JSON.encode(this);
+	}
+
+});
+
+/*
+Script: Request.JSON.js
+	Extends the basic Request Class with additional methods for sending and receiving JSON data.
+
+License:
+	MIT-style license.
+*/
+
+Request.JSON = new Class({
+
+	Extends: Request,
+
+	options: {
+		secure: true
+	},
+
+	initialize: function(options){
+		this.parent(options);
+		this.headers.extend({'Accept': 'application/json', 'X-Request': 'JSON'});
+	},
+
+	success: function(text){
+		this.response.json = JSON.decode(text, this.options.secure);
+		this.onSuccess(this.response.json, text);
+	}
+
+});
 
 /*
 Script: Element.js
@@ -1579,6 +1894,10 @@ Element.implement({
 	getParents: function(match, nocash){
 		return walk(this, 'parentNode', null, match, true, nocash);
 	},
+	
+	getSiblings: function(match, nocash) {
+		return this.getParent().getChildren(match, nocash).erase(this);
+	},
 
 	getChildren: function(match, nocash){
 		return walk(this, 'nextSibling', 'firstChild', match, true, nocash);
@@ -1798,305 +2117,6 @@ if (Browser.Engine.webkit && Browser.Engine.version < 420) Element.Properties.te
 		return text;
 	}
 };
-
-/*
-Script: Request.js
-	Powerful all purpose Request Class. Uses XMLHTTPRequest.
-
-License:
-	MIT-style license.
-*/
-
-var Request = new Class({
-
-	Implements: [Chain, Events, Options],
-
-	options: {/*
-		onRequest: $empty,
-		onComplete: $empty,
-		onCancel: $empty,
-		onSuccess: $empty,
-		onFailure: $empty,
-		onException: $empty,*/
-		url: '',
-		data: '',
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest',
-			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-		},
-		async: true,
-		format: false,
-		method: 'post',
-		link: 'ignore',
-		isSuccess: null,
-		emulation: true,
-		urlEncoded: true,
-		encoding: 'utf-8',
-		evalScripts: false,
-		evalResponse: false
-	},
-
-	initialize: function(options){
-		this.xhr = new Browser.Request();
-		this.setOptions(options);
-		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
-		this.headers = new Hash(this.options.headers);
-	},
-
-	onStateChange: function(){
-		if (this.xhr.readyState != 4 || !this.running) return;
-		this.running = false;
-		this.status = 0;
-		$try(function(){
-			this.status = this.xhr.status;
-		}.bind(this));
-		if (this.options.isSuccess.call(this, this.status)){
-			this.response = {text: this.xhr.responseText, xml: this.xhr.responseXML};
-			this.success(this.response.text, this.response.xml);
-		} else {
-			this.response = {text: null, xml: null};
-			this.failure();
-		}
-		this.xhr.onreadystatechange = $empty;
-	},
-
-	isSuccess: function(){
-		return ((this.status >= 200) && (this.status < 300));
-	},
-
-	processScripts: function(text){
-		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return $exec(text);
-		return text.stripScripts(this.options.evalScripts);
-	},
-
-	success: function(text, xml){
-		this.onSuccess(this.processScripts(text), xml);
-	},
-
-	onSuccess: function(){
-		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
-	},
-
-	failure: function(){
-		this.onFailure();
-	},
-
-	onFailure: function(){
-		this.fireEvent('complete').fireEvent('failure', this.xhr);
-	},
-
-	setHeader: function(name, value){
-		this.headers.set(name, value);
-		return this;
-	},
-
-	getHeader: function(name){
-		return $try(function(){
-			return this.xhr.getResponseHeader(name);
-		}.bind(this));
-	},
-
-	check: function(caller){
-		if (!this.running) return true;
-		switch (this.options.link){
-			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(caller.bind(this, Array.slice(arguments, 1))); return false;
-		}
-		return false;
-	},
-
-	send: function(options){
-		if (!this.check(arguments.callee, options)) return this;
-		this.running = true;
-
-		var type = $type(options);
-		if (type == 'string' || type == 'element') options = {data: options};
-
-		var old = this.options;
-		options = $extend({data: old.data, url: old.url, method: old.method}, options);
-		var data = options.data, url = options.url, method = options.method;
-
-		switch ($type(data)){
-			case 'element': data = $(data).toQueryString(); break;
-			case 'object': case 'hash': data = Hash.toQueryString(data);
-		}
-
-		if (this.options.format){
-			var format = 'format=' + this.options.format;
-			data = (data) ? format + '&' + data : format;
-		}
-
-		if (this.options.emulation && ['put', 'delete'].contains(method)){
-			var _method = '_method=' + method;
-			data = (data) ? _method + '&' + data : _method;
-			method = 'post';
-		}
-
-		if (this.options.urlEncoded && method == 'post'){
-			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
-			this.headers.set('Content-type', 'application/x-www-form-urlencoded' + encoding);
-		}
-
-		if (data && method == 'get'){
-			url = url + (url.contains('?') ? '&' : '?') + data;
-			data = null;
-		}
-
-		this.xhr.open(method.toUpperCase(), url, this.options.async);
-
-		this.xhr.onreadystatechange = this.onStateChange.bind(this);
-
-		this.headers.each(function(value, key){
-			try {
-				this.xhr.setRequestHeader(key, value);
-			} catch (e){
-				this.fireEvent('exception', [key, value]);
-			}
-		}, this);
-
-		this.fireEvent('request');
-		this.xhr.send(data);
-		if (!this.options.async) this.onStateChange();
-		return this;
-	},
-
-	cancel: function(){
-		if (!this.running) return this;
-		this.running = false;
-		this.xhr.abort();
-		this.xhr.onreadystatechange = $empty;
-		this.xhr = new Browser.Request();
-		this.fireEvent('cancel');
-		return this;
-	}
-
-});
-
-(function(){
-
-var methods = {};
-['get', 'post', 'put', 'delete', 'GET', 'POST', 'PUT', 'DELETE'].each(function(method){
-	methods[method] = function(){
-		var params = Array.link(arguments, {url: String.type, data: $defined});
-		return this.send($extend(params, {method: method.toLowerCase()}));
-	};
-});
-
-Request.implement(methods);
-
-})();
-
-Element.Properties.send = {
-
-	set: function(options){
-		var send = this.retrieve('send');
-		if (send) send.cancel();
-		return this.eliminate('send').store('send:options', $extend({
-			data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
-		}, options));
-	},
-
-	get: function(options){
-		if (options || !this.retrieve('send')){
-			if (options || !this.retrieve('send:options')) this.set('send', options);
-			this.store('send', new Request(this.retrieve('send:options')));
-		}
-		return this.retrieve('send');
-	}
-
-};
-
-Element.implement({
-
-	send: function(url){
-		var sender = this.get('send');
-		sender.send({data: this, url: url || sender.options.url});
-		return this;
-	}
-
-});
-
-/*
-Script: JSON.js
-	JSON encoder and decoder.
-
-License:
-	MIT-style license.
-
-See Also:
-	<http://www.json.org/>
-*/
-
-var JSON = new Hash({
-
-	$specialChars: {'\b': '\\b', '\t': '\\t', '\n': '\\n', '\f': '\\f', '\r': '\\r', '"' : '\\"', '\\': '\\\\'},
-
-	$replaceChars: function(chr){
-		return JSON.$specialChars[chr] || '\\u00' + Math.floor(chr.charCodeAt() / 16).toString(16) + (chr.charCodeAt() % 16).toString(16);
-	},
-
-	encode: function(obj){
-		switch ($type(obj)){
-			case 'string':
-				return '"' + obj.replace(/[\x00-\x1f\\"]/g, JSON.$replaceChars) + '"';
-			case 'array':
-				return '[' + String(obj.map(JSON.encode).filter($defined)) + ']';
-			case 'object': case 'hash':
-				var string = [];
-				Hash.each(obj, function(value, key){
-					var json = JSON.encode(value);
-					if (json) string.push(JSON.encode(key) + ':' + json);
-				});
-				return '{' + string + '}';
-			case 'number': case 'boolean': return String(obj);
-			case false: return 'null';
-		}
-		return null;
-	},
-
-	decode: function(string, secure){
-		if ($type(string) != 'string' || !string.length) return null;
-		if (secure && !(/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, ''))) return null;
-		return eval('(' + string + ')');
-	}
-
-});
-
-Native.implement([Hash, Array, String, Number], {
-
-	toJSON: function(){
-		return JSON.encode(this);
-	}
-
-});
-
-/*
-Script: Request.JSON.js
-	Extends the basic Request Class with additional methods for sending and receiving JSON data.
-
-License:
-	MIT-style license.
-*/
-
-Request.JSON = new Class({
-
-	Extends: Request,
-
-	options: {
-		secure: true
-	},
-
-	initialize: function(options){
-		this.parent(options);
-		this.headers.extend({'Accept': 'application/json', 'X-Request': 'JSON'});
-	},
-
-	success: function(text){
-		this.response.json = JSON.decode(text, this.options.secure);
-		this.onSuccess(this.response.json, text);
-	}
-
-});
 
 /*
 Script: Event.js
@@ -2422,12 +2442,13 @@ Element.implement({
 		return null;
 	},
 
-	getOffsets: function(){
+	getOffsets: function(){		
 		if (Browser.Engine.trident){
 			var bound = this.getBoundingClientRect(), html = this.getDocument().documentElement;
+			var is_fixed = styleString(this, 'position') == 'fixed';
 			return {
-				x: bound.left + html.scrollLeft - html.clientLeft,
-				y: bound.top + html.scrollTop - html.clientTop
+				x: bound.left + (is_fixed ? 0 : html.scrollLeft) - html.clientLeft,
+				y: bound.top +  (is_fixed ? 0 : html.scrollTop)  - html.clientTop
 			};
 		}
 
@@ -2647,17 +2668,17 @@ var Fx = new Class({
 		return Fx.compute(from, to, delta);
 	},
 
-	check: function(caller){
+	check: function(){
 		if (!this.timer) return true;
 		switch (this.options.link){
 			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(caller.bind(this, Array.slice(arguments, 1))); return false;
+			case 'chain': this.chain(this.caller.bind(this, arguments)); return false;
 		}
 		return false;
 	},
 
 	start: function(from, to){
-		if (!this.check(arguments.callee, from, to)) return this;
+		if (!this.check(from, to)) return this;
 		this.from = from;
 		this.to = to;
 		this.time = 0;
@@ -3023,7 +3044,7 @@ Fx.Tween = new Class({
 	},
 
 	start: function(property, from, to){
-		if (!this.check(arguments.callee, property, from, to)) return this;
+		if (!this.check(property, from, to)) return this;
 		var args = Array.flatten(arguments);
 		this.property = this.options.property || args.shift();
 		var parsed = this.prepare(this.element, this.property, args);
@@ -3166,7 +3187,7 @@ Fx.Morph = new Class({
 	},
 
 	start: function(properties){
-		if (!this.check(arguments.callee, properties)) return this;
+		if (!this.check(properties)) return this;
 		if (typeof properties == 'string') properties = this.search(properties);
 		var from = {}, to = {};
 		for (var p in properties){
@@ -3649,7 +3670,7 @@ Selectors.Pseudo = new Hash({
 	checked: function(){
 		return this.checked;
 	},
-
+	
 	empty: function(){
 		return !(this.innerText || this.textContent || '').length;
 	},
@@ -3725,6 +3746,10 @@ Selectors.Pseudo = new Hash({
 
 	odd: function(argument, local){
 		return Selectors.Pseudo['nth-child'].call(this, '2n', local);
+	},
+	
+	selected: function() {
+		return this.selected;
 	}
 
 });
@@ -3844,6 +3869,7 @@ Request.HTML = new Class({
 
 	options: {
 		update: false,
+		append: false,
 		evalScripts: true,
 		filter: false
 	},
@@ -3864,6 +3890,7 @@ Request.HTML = new Class({
 				doc = new DOMParser().parseFromString(root, 'text/xml');
 			}
 			root = doc.getElementsByTagName('root')[0];
+			if (!root) return;
 			for (var i = 0, k = root.childNodes.length; i < k; i++){
 				var child = Element.clone(root.childNodes[i], true, true);
 				if (child) container.grab(child);
@@ -3886,12 +3913,33 @@ Request.HTML = new Class({
 
 		if (options.filter) response.tree = response.elements.filter(options.filter);
 		if (options.update) $(options.update).empty().set('html', response.html);
+		else if (options.append) $(options.append).adopt(temp.getChildren());
 		if (options.evalScripts) $exec(response.javascript);
 
 		this.onSuccess(response.tree, response.elements, response.html, response.javascript);
 	}
 
 });
+
+Element.Properties.send = {
+
+	set: function(options){
+		var send = this.retrieve('send');
+		if (send) send.cancel();
+		return this.eliminate('send').store('send:options', $extend({
+			data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
+		}, options));
+	},
+
+	get: function(options){
+		if (options || !this.retrieve('send')){
+			if (options || !this.retrieve('send:options')) this.set('send', options);
+			this.store('send', new Request(this.retrieve('send:options')));
+		}
+		return this.retrieve('send');
+	}
+
+};
 
 Element.Properties.load = {
 
@@ -3912,6 +3960,12 @@ Element.Properties.load = {
 };
 
 Element.implement({
+
+	send: function(url){
+		var sender = this.get('send');
+		sender.send({data: this, url: url || sender.options.url});
+		return this;
+	},
 
 	load: function(){
 		this.get('load').send(Array.link(arguments, {data: Object.type, url: String.type}));
