@@ -24,8 +24,6 @@ var MooInline = new Class({
 	},
 	
 	initialize: function(selectors, options){
-		//console.log('called')
-		//console.log(selectors)
 		if($type(selectors)=='object'){options = selectors; selectors = null};
 		this.setOptions(options);
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
@@ -360,12 +358,12 @@ Element.implement({
 MooInline.Elements = new Hash({
 
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'Main'         :{img: '0', onLoad:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']}, onClick:'onLoad' },//console.log()//group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
+	'Main'         :{img: '0', onLoad:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
 	'File'         :{img: '9', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
 	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
 	'Justify'      :{img:'18', onClick:'Toolbar:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
 	'Lists'        :{img:'22', onClick:{Toolbar:['insertorderedlist','insertunorderedlist']} },
-	'Indents'      :{img:'16', onClick:{Toolbar:['indent','outdent']} },//, init:function(){ console.log(this); this.fireEvent('mousedown')} },
+	'Indents'      :{img:'16', onClick:{Toolbar:['indent','outdent']} },//, init:function(){ this.fireEvent('mousedown')} },
 	
 	'Toolbar'      :{element:'div'},//, 'class':'miToolbar'
 	
@@ -403,19 +401,12 @@ MooInline.Elements = new Hash({
 						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
 					}},
 	'inserthorizontalrule':{img:'22'},	
-	'save'         :{ img:'11', onClick:function(){
+	'save'         :{ img:'11', src:'mooinline/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
 						this.getParent('.miMooInline').retrieve('fields').each(function(el){
 							content['content_'+(el.get('id')||'')] = MooInline.Utilities.clean(el);
 						});
-						console.log(content)
-						var savePath = new Request({url:'mooinline/plugins/save/saveFile.php'}).send(content.toQueryString()); 
-						//console.log('ready to clean')
-						//console.log('content:', content);
-						//console.log('content:', MooInline.activeBar.retrieve('fields')); // same as this.getParent('.miMooInline').retrieve('field')
-						//it.grab(MooInline.removed.washer, 'top')
-						//MooInline.removed.washer.inject(it, 'top');
-						//console.log(MooInline.removed.washer);
+						new Request({url:MooInline.Elements.save.src}).send(content.toQueryString());
 					}},
 	'Html/Text'    :{ img:'26', onClick:['DisplayHTML']}, 
 	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
@@ -503,15 +494,5 @@ e. Invalid - (unsure of what is meant): press btn which will press key / expand 
 */
 
 /* Old Code:
-	//var bar = MooInline.activeBtn.getParent('.miRTE'), be, btn;//$chk(btn = MooInline.shortcuts.keyOf(e.key)) $chk to allow index 0, may not be needed. 
-	//var bar = MooInline.activeField.retrieve('bar'), be, btn;	
-	
-	, btn;	
-	if(e && e.control && MooInline.shortcuts.has(e.key)){	
-		e.stop();
-		//console.log(e.key, MooInline.activeBar)
-		btn = MooInline.activeBar.getElement('.mi'+MooInline.shortcuts[e.key])
-		btn.fireEvent('mousedown', btn)
-	};
-		
+
 */
