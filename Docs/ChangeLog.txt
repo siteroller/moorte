@@ -74,6 +74,16 @@ r. Expanded the 'collection' array object.
 	c) Allow it to have within it nested arrays: [['main','bold'],['italics']] where each will expand.
 		If done correctly, this should make it infinitely more flexible (and confusing?)
 
+50:
+a. Fixed - On index.html the inline bar is always showing 
+b. it does not require elements, it test for an object while initing the class. 
+c. When a string is passed to addCollection, it should wrap it in brackets, in case it is an array.  [commonly, arrays will be created without brackets].
+d. onLoad can run 'onClick'
+e. Invalid - (unsure of what is meant): press btn which will press key / expand menu, and run optional function afterwards.
+
+		
+		
+		
 Old Docs:
 *
 *	Usage: 
