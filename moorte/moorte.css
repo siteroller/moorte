@@ -2,7 +2,7 @@ div.miMooRTE{ left:0; width:100%; }
 div.miFloattrue{ position:absolute; }
 div.miFloatfalse{ position:relative;}
 div.miMooRTE div.miRTE { left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
-div.miMooRTE div.miRTE div{ position:relative; width:100%; }
+div.miMooRTE div.miRTE div.miToolbar{ position:relative; width:100%; }
 div.miMooRTE div.miRTE span{ height:18px; margin:2px; display:inline-block; }
 div.miMooRTE div.miRTE input{ height:18px; width:100px }
 div.miMooRTE div.miRTE a{ height:16px; width:16px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/i.gif)}
@@ -15,6 +15,11 @@ div.miRTE div.miR0{ border-bottom:1px #bbb solid; }
 .miTextArea{ border:1px solid #666 }
 div.miMooRTE div.miRTE a.miText{background-image:url(); min-width:38px; text-align:center; border:1px solid grey; -moz-corner-radius:2px }
 div.miMooRTE div.miRTE a.miText:hover{ margin:2px}
+
+div.miMooRTE div.miRTE div.miPopup{position:absolute; border:0; top:16px; left:-2px; width:20px; background-color:#ddd}
+a.Popup{ position:relative; overflow:hidden;}
+a.Popup:hover{overflow:visible;}
+
 .miTopDown{top:0;}
 
 div.miMooRTE div.miRTE .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }

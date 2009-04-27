@@ -357,17 +357,18 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'Main'         :{text:'Main', 'class':'miText', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
-	'File'         :{text:'File', 'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
+	'Main'         :{text:'Main',   'class':'miText', onClick:'onLoad', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
+	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
 	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar']} },
-	'View'         :{text:'Views', 'class':'miText', onClick:{Toolbar:['Html/Text']} },
-	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
-	'Justify'      :{img:'18', onClick:'Toolbar:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
-	'Lists'        :{img:'22', onClick:{Toolbar:['insertorderedlist','insertunorderedlist']} },
-	'Indents'      :{img:'16', onClick:{Toolbar:['indent','outdent']} },//, init:function(){ this.fireEvent('mousedown')} },
+	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['Html/Text']} },
 	
-	'Toolbar'      :{element:'div'},//, 'class':'miToolbar'
+	'Justify'      :{img:'18', 'class':'Popup', contains:'Popup:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
+	'Lists'        :{img:'22', 'class':'Popup', contains:'Popup:[insertorderedlist,insertunorderedlist]' },
+	'Indents'      :{img:'16', 'class':'Popup', contains:'Popup:[indent,outdent]' },
+	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
+	
+	'Toolbar'      :{element:'div'},
+	'Popup'        :{element:'div'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -437,9 +438,11 @@ MooRTE.Elements = new Hash({
 						var path = new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/fancyUpload';
 						Asset.javascript(path+'.js');
 						Asset.css(path+'.css');
-						//Asset.javascript('moorte/plugins/fancyUpload/fancyUpload.js');
-						//Asset.css('moorte/plugins/fancyUpload/fancyUpload.css');
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
-	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''}
+	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''},
+	
+	//unused:
+	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
+	'JustifyBar'   :{img:'18', onClick:'Popup:[justifyleft,justifycenter,JustifyRight,justifyfull]' }
 })
