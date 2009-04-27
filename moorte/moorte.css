@@ -16,5 +16,6 @@ div.miRTE div.miR0{ border-bottom:1px #bbb solid; }
 .miTopDown{top:0;}
 
 div.miMooRTE div.miRTE .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+.mifuUpload, .mifuClear {cursor:pointer}
 xdiv.miMooRTE div.miRTE div.miTop{ border-bottom:1px #bbb solid; height:18px; overflow:hidden; vertical-align:bottom; text-align:left; }
 xdiv.miMooRTE div.miRTE .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}

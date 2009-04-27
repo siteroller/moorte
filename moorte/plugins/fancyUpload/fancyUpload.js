@@ -486,18 +486,19 @@ function applyUploader(){
 	var swiffy = new FancyUpload2($('fuStatus'), $('fuList'), {
 		url: 'uploadHandler.php',
 		fieldName: 'photoupload',
-		path: 'mooinline/plugins/fancyUpload/Swiff.Uploader.swf',
+		path: '../moorte/plugins/fancyUpload/Swiff.Uploader.swf',
+		//path: new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/Swiff.Uploader.swf',
 		limitSize: 2 * 1024 * 1024,
 		typeFilter:{'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'},
 		onLoad: function() {
-			// MooInline.Utilities.storeRange('insertImage');
+			// MooRTE.Utilities.storeRange('insertImage');
 			// $('fuStatus').removeClass('hide');  $('demo-fallback').destroy();
 		},
 		onComplete: function(file, response){
 			// console.log($A(arguments))
-			// MooInline.Utilities.setRange('insertImage');
+			// MooRTE.Utilities.setRange('insertImage');
 			response = JSON.decode(response);
-			if(response.file) MooInline.Utilities.exec("insertimage", response.file);
+			if(response.file) MooRTE.Utilities.exec("insertimage", response.file);
 		},
 		debug: true, 		// enable logs, uses console.log
 		target: 'fuBrowse' 	// the element for the overlay (Flash 10 only).  Not used since we anyways use our own method.
@@ -520,10 +521,10 @@ function applyUploader(){
 	});
 	
 	$$('object[id^=Swiff]')[0].getParent().setStyles({position:'absolute', top:0, left:0 }).inject('fuBrowse', 'after');
-	MooInline.Elements.fuList.init = '';
-	MooInline.Elements.fuUploadBar.click = function(){ 
-		console.log('this is:',MooInline.activeBtn);
-		$('fancyUploadSwiff').getParent().inject(MooInline.activeBtn.getParent().getParent())
+	MooRTE.Elements.fuList.init = '';
+	MooRTE.Elements.fuUploadBar.click = function(){ 
+		console.log('this is:',MooRTE.activeBtn);
+		$('fancyUploadSwiff').getParent().inject(MooRTE.activeBtn.getParent().getParent()).setStyles({top:0, left:0})
 		//$$('.mifuUploadBar_toolbar')[0].inject(this.getParent().getParent().getNext());
 	}
 }

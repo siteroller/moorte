@@ -161,6 +161,7 @@ MooRTE.Utilities = {
 			
 			if(!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
+				//if(val.img && val.img.substr(0,6) == '$root/') val.img = new URI(val.img.substr(6)).toAbsolute().toString(); 
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -400,7 +401,7 @@ MooRTE.Elements = new Hash({
 						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
 					}},
 	'inserthorizontalrule':{img:'22'},	
-	'save'         :{ img:'11', src:'mooinline/plugins/save/saveFile.php', onClick:function(){
+	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
 						this.getParent('.miMooRTE').retrieve('fields').each(function(el){
 							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
@@ -431,8 +432,11 @@ MooRTE.Elements = new Hash({
 	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
 	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
 	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
-						Asset.javascript('moorte/plugins/fancyUpload/fancyUpload.js');
-						Asset.css('moorte/plugins/fancyUpload/fancyUpload.css');
+						var path = new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/fancyUpload';
+						Asset.javascript(path+'.js');
+						Asset.css(path+'.css');
+						//Asset.javascript('moorte/plugins/fancyUpload/fancyUpload.js');
+						//Asset.css('moorte/plugins/fancyUpload/fancyUpload.css');
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''}
