@@ -358,9 +358,9 @@ Element.implement({
 MooRTE.Elements = new Hash({
 
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'Main'         :{text:'Main', 'class':'miText', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Link','Lists','Indents','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
+	'Main'         :{text:'Main', 'class':'miText', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
 	'File'         :{text:'File', 'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
-	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['fuUploadBar']} },
+	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar']} },
 	'View'         :{text:'Views', 'class':'miText', onClick:{Toolbar:['Html/Text']} },
 	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
 	'Justify'      :{img:'18', onClick:'Toolbar:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
