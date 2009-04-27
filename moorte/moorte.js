@@ -13,7 +13,7 @@
 *	We really want your help!  Please join!!
 */
 
-var MooInline = new Class({
+var MooRTE = new Class({
 	
 	Implements: [Options],
 
@@ -27,7 +27,7 @@ var MooInline = new Class({
 		if($type(selectors)=='object'){options = selectors; selectors = null};
 		this.setOptions(options);
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
-		MooInline.activeField = MooInline.activeBtn = MooInline.activeBar = ''; MooInline.ranges = MooInline.shortcuts = MooInline.removed = $H({});	// = MooInline.shortcutBtns = 
+		MooRTE.activeField = MooRTE.activeBtn = MooRTE.activeBar = ''; MooRTE.ranges = MooRTE.shortcuts = MooRTE.removed = $H({});	// = MooRTE.shortcutBtns = 
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -41,25 +41,25 @@ var MooInline = new Class({
 			});
 			el.store('bar', mi).addEvents({
 			//el.addEvents({
-				'mouseup':MooInline.Utilities.updateBtns, 
-				'keyup'  :MooInline.Utilities.updateBtns, 
-				'keydown':MooInline.Utilities.shortcuts, 
-				'focus'  :function(){ MooInline.activeField = this; MooInline.activeBar = mi; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
+				'mouseup':MooRTE.Utilities.updateBtns, 
+				'keyup'  :MooRTE.Utilities.updateBtns, 
+				'keydown':MooRTE.Utilities.shortcuts, 
+				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = mi; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
 			});
 		})
 		
-		//MooInline.activeBar = (MooInline.activeField = els[0]).retrieve('bar');								//in case a button is pressed before anything is selected.
+		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');								//in case a button is pressed before anything is selected.
 		els[0].fireEvent('focus');//,els[0]
 		if(l=='t') mi.addClass('miPageTop').getFirst().addClass('miTopDown');
 		else if(l=='b') mi.addClass('miPageBottom');
 	},
 	
 	insertToolbar: function (pos){
-		var mi = new Element('div', {'class':'miRemove miMooInline '+(!pos||pos=='n'?'miHide':''), 'contentEditable':false }).adopt(
+		var mi = new Element('div', {'class':'miRemove miMooRTE '+(!pos||pos=='n'?'miHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'miRTE' })
 		).inject(document.body);
-		MooInline.activeBtn = mi.getFirst();  // not used!
-		MooInline.Utilities.addElements(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
+		MooRTE.activeBtn = mi.getFirst();  // not used!
+		MooRTE.Utilities.addElements(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
 		return mi;
 	},
 	
@@ -79,7 +79,7 @@ var MooInline = new Class({
 	}
 })
 
-MooInline.Utilities = {
+MooRTE.Utilities = {
 	exec: function(args){
 		args = $A(arguments).flatten(); 											// args can be an array (for the hash), or regular arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
@@ -91,11 +91,11 @@ MooInline.Utilities = {
 	storeRange:function(rangeName){
 		var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		if (!sel) return null;
-		MooInline.ranges[rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		MooRTE.ranges[rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
 	setRange: function(rangeName) {
-		var range = MooInline.ranges[rangeName || 1]
+		var range = MooRTE.ranges[rangeName || 1]
 		if(range.select) range.select(); 
 		else{	
 			var sel = window.getSelection ? window.getSelection() : window.document.selection;
@@ -108,9 +108,9 @@ MooInline.Utilities = {
 	
 	shortcuts: function(e){
 		var be, btn;	
-		if(e && e.control && MooInline.shortcuts.has(e.key)){	
+		if(e && e.control && MooRTE.shortcuts.has(e.key)){	
 			e.stop();
-			btn = MooInline.activeBar.getElement('.mi'+MooInline.shortcuts[e.key])
+			btn = MooRTE.activeBar.getElement('.mi'+MooRTE.shortcuts[e.key])
 			btn.fireEvent('mousedown', btn)
 		};
 	},
@@ -120,11 +120,11 @@ MooInline.Utilities = {
 		[	'bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
 			'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'
 		].each(function(prop){		
-			if (be = MooInline.activeBar.getElement('.mi'+prop))
+			if (be = MooRTE.activeBar.getElement('.mi'+prop))
 				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 		});
 		['fontSize'].each(function(prop){	
-			if (be = MooInline.activeBar.getElement('.mi'+prop))
+			if (be = MooRTE.activeBar.getElement('.mi'+prop))
 				window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 		}); 
 	},
@@ -132,7 +132,7 @@ MooInline.Utilities = {
 	addElements: function(buttons, place, relative, name, hides, invisible){
 		
 		if(!hides) hides = '';
-		if(!place) place = MooInline.activeBtn;
+		if(!place) place = MooRTE.activeBtn;
 		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img, loop; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
@@ -160,20 +160,19 @@ MooInline.Utilities = {
 			var e = parent.getElement('.'+name||'.mi'+btn);
 			
 			if(!e){
-				var bgPos = 0, val = MooInline.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				if (!isNaN(val.img)){ bgPos = val.img; img = 'mooinline/images/i.gif' };						//if number, image is assumed to be default, position is number
-			
+				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
+				
 				var properties = $H({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles:img ? {'background-image':'url('+img+')', 'background-position':(-2+-18*bgPos)+'px -2px'}:'',
+					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':(-2+-18*val.img)+'px -2px'}):'',
 					events:{
 						'mousedown': function(e){
-							MooInline.activeBtn = this;
-							MooInline.activeBar = this.getParent('.miMooInline');
-							if(!val.onClick && (!val.element || val.element == 'a')) MooInline.Utilities.exec(val.args||btn);
-							MooInline.Utilities.run(val.onClick, val.args, val.hides, parent, this, btn)
+							MooRTE.activeBtn = this;
+							MooRTE.activeBar = this.getParent('.miMooRTE');
+							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							MooRTE.Utilities.run(val.onClick, val.args, val.hides, parent, this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 							
 							this.getParent().getChildren().removeClass('miSelected');
@@ -185,12 +184,12 @@ MooInline.Utilities = {
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
 				if (btnVals) e.store('children', btnVals);
-				//if (val.shortcut){MooInline.shortcuts.include(val.shortcut); MooInline.shortcutBtns.include(btn);} 
-				if (val.shortcut){ MooInline.shortcuts[val.shortcut] = btn; } 
-				MooInline.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
-				if (btnVals) MooInline.Utilities.addElements(btnVals, e);
-				else if (val.contains) MooInline.Utilities.addElements(val.contains, e);	
-				MooInline.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
+				//if (val.shortcut){MooRTE.shortcuts.include(val.shortcut); MooRTE.shortcutBtns.include(btn);} 
+				if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
+				MooRTE.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
+				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
+				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);	
+				MooRTE.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
 				e.removeClass('miHide');
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
 			}
@@ -203,24 +202,24 @@ MooInline.Utilities = {
 		switch($type(prop)){
 			case 'function': prop.bind(caller)(args); return;
 			case 'string': 
-				'onLoad,onClick,onInit'.contains(prop) ? MooInline.Utilities.run(MooInline.Elements[name][prop], args, hides, self, caller, name)
-				: MooInline.Utilities[prop] ? MooInline.Utilities[prop].bind(self)(args) 
-				: MooInline.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 
+				'onLoad,onClick,onInit'.contains(prop) ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, hides, self, caller, name)
+				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(self)(args) 
+				: MooRTE.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 
 			break;
 			default:
 				if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
 					if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
 				})
-				MooInline.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
+				MooRTE.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
 			break; 																	//case 'object': case 'array'
 		}
 	},
 	/*
 	remove: function(mi, keep){							// I plan on extending elements with remove() as well as hide() and deleting this.
-		mi = mi.hasClass('miMooInline') ? mi : mi.retrieve('bar');
+		mi = mi.hasClass('miMooRTE') ? mi : mi.retrieve('bar');
 		if(!keep) mi.destroy();
 		else if(keep === true) mi.addClass('.miHide');
-		else{ MooInline.removed[keep] = mi; new Element('span').replaces(mi).destroy(); } 
+		else{ MooRTE.removed[keep] = mi; new Element('span').replaces(mi).destroy(); } 
 	},
 	*/
 	clean: function(html, options){
@@ -338,12 +337,12 @@ MooInline.Utilities = {
 Element.implement({
 //$$('div.RTE')[0].mooinline();
 	mooinline:function(directive, options){
-		var bar = this.hasClass('miMooInline') ? this : this.retrieve('bar') || '';
+		var bar = this.hasClass('miMooRTE') ? this : this.retrieve('bar') || '';
 		if(!directive || (directive == 'create')){
 			if(removed = this.retrieve('removed')){
 				this.grab(removed, 'top');
 				this.store('removed','');
-			} else return bar ? this.removeClass('miHide') : new MooInline(this, options);
+			} else return bar ? this.removeClass('miHide') : new MooRTE(this, options);
 		}else{
 			if(!bar) return false;
 			else switch(directive.toLowerCase()){
@@ -355,7 +354,7 @@ Element.implement({
 	}
 });
 
-MooInline.Elements = new Hash({
+MooRTE.Elements = new Hash({
 
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'Main'         :{img: '0', onLoad:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
@@ -389,9 +388,9 @@ MooInline.Elements = new Hash({
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
 	'test'         :{onClick:function(){console.log(arguments)}, args:this},
 	'l0'           :{'text':'enter the url', element:'span' },
-	'l1'           :{'type':'text',  'onClick':MooInline.Utilities.storeRange }, 
-	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-	//'l2'         :{'type':'submit', 'onClick':function(){ MooInline.Utilities.setRange(); MooInline.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
+	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
+	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+	//'l2'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
 	'nolink'       :{'text':'please select the text to be made into a link'},
 	'unlink'       :{img:'6'},
 	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
@@ -403,14 +402,14 @@ MooInline.Elements = new Hash({
 	'inserthorizontalrule':{img:'22'},	
 	'save'         :{ img:'11', src:'mooinline/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
-						this.getParent('.miMooInline').retrieve('fields').each(function(el){
-							content['content_'+(el.get('id')||'')] = MooInline.Utilities.clean(el);
+						this.getParent('.miMooRTE').retrieve('fields').each(function(el){
+							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
 						});
-						new Request({url:MooInline.Elements.save.src}).send(content.toQueryString());
+						new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
 					}},
 	'Html/Text'    :{ img:'26', onClick:['DisplayHTML']}, 
 	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-						var el=this.getParent('.miMooInline').retrieve('fields'), p = el.getParent(); 
+						var el=this.getParent('.miMooRTE').retrieve('fields'), p = el.getParent(); 
 						var size = (p.hasClass('miTextArea') ? p : el).getSize(); 
 						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 					}},
@@ -429,11 +428,11 @@ MooInline.Elements = new Hash({
 	'fu1'          :{ element:'strong', 'class':'overall-title'},
 	'fu2'          :{ element:'strong', 'class':'current-title'},
 	'fu3'          :{ element:'div',    'class':'current-text' },
-	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' },
-	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'mooinline/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
 	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
-						Asset.javascript('mooinline/plugins/fancyUpload/fancyUpload.js');
-						Asset.css('mooinline/plugins/fancyUpload/fancyUpload.css');
+						Asset.javascript('moorte/plugins/fancyUpload/fancyUpload.js');
+						Asset.css('moorte/plugins/fancyUpload/fancyUpload.css');
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''}
