@@ -20,7 +20,7 @@ var MooRTE = new Class({
 	options:{
 		floating: false,
 		location: 'elements', 											   			//[e,n,t,b,'']
-		defaults: 'Toolbar:[Main,File,Link,Justify,Lists,Indents,|,Html/Text,fuUploadBar,|,save]'
+		defaults: 'Toolbar:[Main,File,Insert,|,save]'
 	},
 	
 	initialize: function(selectors, options){
@@ -357,9 +357,11 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'Main'         :{img: '0', onLoad:{Toolbar:['bold','italic','underline','strikethrough','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
-	'File'         :{img: '9', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
+	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
+	'Main'         :{text:'Main', 'class':'miText', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Link','Lists','Indents','subscript','superscript']}, onClick:'onLoad' }, //group - 'Main','File','Link','Justify','Lists','Indents','|','Html/Text','fuUploadBar'
+	'File'         :{text:'File', 'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
+	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['fuUploadBar']} },
+	'View'         :{text:'Views', 'class':'miText', onClick:{Toolbar:['Html/Text']} },
 	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
 	'Justify'      :{img:'18', onClick:'Toolbar:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
 	'Lists'        :{img:'22', onClick:{Toolbar:['insertorderedlist','insertunorderedlist']} },
