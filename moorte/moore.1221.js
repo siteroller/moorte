@@ -1,4 +1,5 @@
 //MooTools More, <http://mootools.net/more>. Copyright (c) 2006-2009 Aaron Newton <http://clientcide.com/>, Valerio Proietti <http://mad4milk.net> & the MooTools team <http://mootools.net/developers>, MIT Style License.
+//More, log, Class.Refactor, Hash.Extras, String.Extras, String.QueryString, URI, URI.Relative, Element.Forms, Assets Color; - YUI
 
 MooTools.More={version:"1.2.2.1"};var Log=new Class({log:function(){Log.logger.call(this,arguments);}});Log.logged=[];Log.logger=function(){if(window.console&&console.log){console.log.apply(console,arguments);
 }else{Log.logged.push(arguments);}};Class.refactor=function(b,a){$each(a,function(e,d){var c=b.prototype[d];if(c&&(c=c._origin)&&typeof e=="function"){b.implement(d,function(){var f=this.previous;

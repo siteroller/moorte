@@ -52,6 +52,7 @@ var MooRTE = new Class({
 		els[0].fireEvent('focus');//,els[0]
 		if(l=='t') mi.addClass('miPageTop').getFirst().addClass('miTopDown');
 		else if(l=='b') mi.addClass('miPageBottom');
+		MooRTE.Utilities.exec('styleWithCSS');
 	},
 	
 	insertToolbar: function (pos){
@@ -84,7 +85,7 @@ MooRTE.Utilities = {
 		args = $A(arguments).flatten(); 											// args can be an array (for the hash), or regular arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
-		document.execCommand(args[0], args[2]||false, args[1]||null);				//document.execCommand('justifyRight', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
+		document.execCommand(args[0], args[2]||null, args[1]||false);				//document.execCommand('justifyRight', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
 		if(g) document.designMode = 'off';
 	},
 	
@@ -374,7 +375,7 @@ MooRTE.Elements = new Hash({
 	'bold'         :{img:'0', shortcut:'b' },
 	'italic'       :{img:'1', shortcut:'i' },
 	'underline'    :{img:'2', shortcut:'u' },
-	'strikethrough':{img:'3', shortcut:'s' },
+	'strikethrough':{img:'3'},
 	'subscript'    :{img:'4'},
 	'superscript'  :{img:'5'},
 	'indent'       :{img:'16'},
