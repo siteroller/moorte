@@ -143,17 +143,15 @@ MooRTE.Utilities = {
 			buttons = JSON.decode('['+buttons+']');
 		}
 		
-		var loopStop = 0; //remove after testing!!
-		do{
-			if(btns[0]){ buttons = btns; btns = [];}
-			$splat(buttons).each(function(item){
-				switch($type(item)){
-					case 'string': btns.push(item); break;
-					case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
-					case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
-				}
-			});
-		} while(loop && ++loopStop < 5);
+		
+		if(btns[0]){ buttons = btns; btns = [];}
+		$splat(buttons).each(function(item){
+			switch($type(item)){
+				case 'string': btns.push(item); break;
+				case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
+				case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
+			}
+		});
 		
 		btns.each(function(btn){
 			var btnVals;
@@ -162,7 +160,6 @@ MooRTE.Utilities = {
 			
 			if(!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				//if(val.img && val.img.substr(0,6) == '$root/') val.img = new URI(val.img.substr(6)).toAbsolute().toString(); 
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -216,16 +213,8 @@ MooRTE.Utilities = {
 			break; 																	//case 'object': case 'array'
 		}
 	},
-	/*
-	remove: function(mi, keep){							// I plan on extending elements with remove() as well as hide() and deleting this.
-		mi = mi.hasClass('miMooRTE') ? mi : mi.retrieve('bar');
-		if(!keep) mi.destroy();
-		else if(keep === true) mi.addClass('.miHide');
-		else{ MooRTE.removed[keep] = mi; new Element('span').replaces(mi).destroy(); } 
-	},
-	*/
-	clean: function(html, options){
 	
+	clean: function(html, options){
 	
 		options = $H({
 			xhtml:false, 
@@ -297,28 +286,16 @@ MooRTE.Utilities = {
 			//Handled with DOM:
 			[/<p>(?:\s*)<p>/g, '<p>'],												// Remove empty <p> tags
 		];
-				
-		/* 
-		//If html is an element, process all of that element's innards.  Perhaps even offer taking the outerhtml.  If not, use a separate element to dump stuff into.
-		For washer, we can use a iframe instead of an element - may be needed for the whole body or similar.
-		var washer = ( $('washer') ? $('washer') : new IFrame({ id:'washer', 'class':'mHide' }).inject(document.body)).contentWindow.document;
-		washer.open();
-		washer.write('<html><body id="washer">'+html+'</body></html>');
-		washer.close();
-		washer = $(washer.body);
-		*/
 		
 		var washer;
 		if($type(html)=='element'){
 			washer = html;
 			html = washer.get('html');
-			washer.mooinline('remove');
+			washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
 		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
-		//$$('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) $el.replaces(p)  });
-		//$$('br:last-child').each(function(el){ if(!el.nextSibling && 'h1h2h3h4h5h6lip'.contains(el.getParent().get('tag'))) el.destroy(); });		//$$('br:last-child').filter(function(el) { return !el.nextSibling; })
 		html = washer.get('html');
 		
 		if(xhtml)cleanup.extend(xhtml);
@@ -331,14 +308,14 @@ MooRTE.Utilities = {
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html && ++loopStop <2);
 		html = html.trim();
-		if(washer != $('washer')) washer.mooinline();
+		if(washer != $('washer')) washer.moorte();
 		return html;
 	}
 }
 
 Element.implement({
-//$$('div.RTE')[0].mooinline();
-	mooinline:function(directive, options){
+	//$$('div.RTE')[0].moorte();
+	moorte:function(directive, options){
 		var bar = this.hasClass('miMooRTE') ? this : this.retrieve('bar') || '';
 		if(!directive || (directive == 'create')){
 			if(removed = this.retrieve('removed')){
@@ -363,13 +340,13 @@ MooRTE.Elements = new Hash({
 	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar']} },
 	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['Html/Text']} },
 	
-	'Justify'      :{img:'18', 'class':'Popup', contains:'Popup:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
-	'Lists'        :{img:'22', 'class':'Popup', contains:'Popup:[insertorderedlist,insertunorderedlist]' },
-	'Indents'      :{img:'16', 'class':'Popup', contains:'Popup:[indent,outdent]' },
-	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']},  checkState:true},
+	'Justify'      :{img:'18', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
+	'Lists'        :{img:'22', 'class':'Flyout', contains:'Flyout:[insertorderedlist,insertunorderedlist]' },
+	'Indents'      :{img:'16', 'class':'Flyout', contains:'Flyout:[indent,outdent]' },
+	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']} },
 	
 	'Toolbar'      :{element:'div'},
-	'Popup'        :{element:'div'},
+	'Flyout'        :{element:'div'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -445,5 +422,5 @@ MooRTE.Elements = new Hash({
 	
 	//unused:
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'JustifyBar'   :{img:'18', onClick:'Popup:[justifyleft,justifycenter,JustifyRight,justifyfull]' }
+	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,JustifyRight,justifyfull]' }
 })
