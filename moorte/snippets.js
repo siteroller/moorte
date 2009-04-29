@@ -22,6 +22,7 @@ MooRTE.Utilities.remove: function(mi, keep){							// I plan on extending elemen
 },	
 
 function generic(){
+	var loop = 0;
 	do{
 	//...
 	} while(loop && ++loopStop < 5);

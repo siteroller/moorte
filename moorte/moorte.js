@@ -27,7 +27,8 @@ var MooRTE = new Class({
 		if($type(selectors)=='object'){options = selectors; selectors = null};
 		this.setOptions(options);
 		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
-		MooRTE.activeField = MooRTE.activeBtn = MooRTE.activeBar = ''; MooRTE.ranges = MooRTE.shortcuts = MooRTE.removed = $H({});	// = MooRTE.shortcutBtns = 
+		if(!MooRTE.activeField)
+			MooRTE.extend({update:{value:$H({}), state:$H({}), custom:$H({})}, ranges:$H({}), removed:$H({}), shortcuts:$H({}), activeField:'', activeBtn:'', activeBar:'' });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -40,7 +41,6 @@ var MooRTE = new Class({
 				}
 			});
 			el.store('bar', mi).addEvents({
-			//el.addEvents({
 				'mouseup':MooRTE.Utilities.updateBtns, 
 				'keyup'  :MooRTE.Utilities.updateBtns, 
 				'keydown':MooRTE.Utilities.shortcuts, 
@@ -85,7 +85,7 @@ MooRTE.Utilities = {
 		args = $A(arguments).flatten(); 											// args can be an array (for the hash), or regular arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
-		document.execCommand(args[0], args[2]||null, args[1]||false);				//document.execCommand('justifyRight', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
+		document.execCommand(args[0], args[2]||null, args[1]||false);				//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
 		if(g) document.designMode = 'off';
 	},
 	
@@ -117,24 +117,48 @@ MooRTE.Utilities = {
 	},
 	
 	updateBtns: function(e){
+		var ev;
+		
+		MooRTE.update.state.each(function(func,cmd){
+			if(func) func.apply(cmd) 
+			else if (ev = MooRTE.activeBar.getElement('.mi'+cmd))
+				window.document.queryCommandState(cmd) ? ev.addClass('miSelected') : ev.removeClass('miSelected');
+		});
+		
+		MooRTE.update.value.each(function(func,cmd){
+			if(ev = window.document.queryCommandValue(cmd)) func(cmd,ev);
+		});
+		
+		if(MooRTE.update.event) MooRTE.update.event.each(function(func,cmd){
+			func(cmd);
+		});
+		
+		
+		/*
 		var be;
-		[	'bold','italic','underline','strikethrough','subscript','superscript','justifyleft','justifycenter',
-			'JustifyRight','justifyfull','insertorderedlist','insertunorderedlist','unlink'
-		].each(function(prop){		
+		[	'strikethrough','subscript','superscript','insertorderedlist','insertunorderedlist','unlink'
+		].each(function(prop){
 			if (be = MooRTE.activeBar.getElement('.mi'+prop))
 				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 		});
-		['fontSize'].each(function(prop){	
-			if (be = MooRTE.activeBar.getElement('.mi'+prop))
-				window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
+
+		//[	'fontname','fontSize','justifyleft','backcolor','forecolor','hilitecolor']
+		//console.log('MooRTE.update:',MooRTE.update);
+		//console.log('MooRTE.removed:',MooRTE.removed);
+		MooRTE.update.value.each(function(func,cmd){
+		//	console.log(func,cmd)
+		//	console.log(cmd+':', window.document.queryCommandValue(cmd))
+		//	if (be = MooRTE.activeBar.getElement('.mi'+prop))
+		//		window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
 		}); 
+		*/
 	},
 	
 	addElements: function(buttons, place, relative, name, hides, invisible){
 		
 		if(!hides) hides = '';
 		if(!place) place = MooRTE.activeBtn;
-		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img, loop; 
+		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
@@ -159,7 +183,16 @@ MooRTE.Utilities = {
 			var e = parent.getElement('.'+name||'.mi'+btn);
 			
 			if(!e){
-				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
+				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea'), state;
+				
+				if(val.onUpdate || (state = 'bold,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+','))){ 
+					var newObj = {}; 
+					newObj[btn] = val.onUpdate || ''; 
+					MooRTE.update[
+						'fontname,fontSize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter'.contains(btn.toLowerCase()) ? 
+						'value' : (state ? 'state' : 'event')
+					].extend(newObj);		
+				}
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -179,7 +212,7 @@ MooRTE.Utilities = {
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
+				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
 				if (btnVals) e.store('children', btnVals);
@@ -302,11 +335,11 @@ MooRTE.Utilities = {
 		if(semantic)cleanup.extend(semantic);
 		if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
 
-		var loopStop = 0;
+		var loopStop = 0;  //while testing.
 		do{	
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
-		} while (cleaned != html && ++loopStop <2);
+		} while (cleaned != html && ++loopStop <3);
 		html = html.trim();
 		if(washer != $('washer')) washer.moorte();
 		return html;
@@ -332,21 +365,30 @@ Element.implement({
 		}
 	}
 });
-
+/*
+MooRTE.Update = new Hash({
+	'fontname':function(val){  },
+	'fontSize':function(val){},
+	'justifyleft':function(val){ $$('.mijustify'+val).setStyle('background-position',12); },
+	'backcolor':function(val){},
+	'forecolor':function(val){},
+	'hilitecolor':function(val){}
+})
+*/
 MooRTE.Elements = new Hash({
 
 	'Main'         :{text:'Main',   'class':'miText', onClick:'onLoad', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
-	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo']} },
-	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar']} },
+	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo','selectall','removeformat']} },
+	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar','inserthorizontalrule']} },
 	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['Html/Text']} },
 	
-	'Justify'      :{img:'18', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,JustifyRight,justifyfull]' },
+	'Justify'      :{img:'18', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'Lists'        :{img:'22', 'class':'Flyout', contains:'Flyout:[insertorderedlist,insertunorderedlist]' },
 	'Indents'      :{img:'16', 'class':'Flyout', contains:'Flyout:[indent,outdent]' },
 	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']} },
 	
 	'Toolbar'      :{element:'div'},
-	'Flyout'        :{element:'div'},
+	'Flyout'       :{element:'div'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:'0', shortcut:'b' },
@@ -357,14 +399,14 @@ MooRTE.Elements = new Hash({
 	'superscript'  :{img:'5'},
 	'indent'       :{img:'16'},
 	'outdent'      :{img:'17'},
-	'paste'        :{img:'9', title:'Paste (Ctrl+V)'},
-	'copy'         :{img:'7', title:'Copy (Ctrl+C)'},
-	'cut'          :{img:'8', title:'Cut (Ctrl+X)'},
-	'redo'         :{img:'13', shortcut:'Y' },
-	'undo'         :{img:'12', shortcut:'Z' },
-	'justifyleft'  :{img:'20', title:'Justify Left'  },
+	'paste'        :{img:'9',  title:'Paste (Ctrl+V)'},
+	'copy'         :{img:'7',  title:'Copy (Ctrl+C)'},
+	'cut'          :{img:'8',  title:'Cut (Ctrl+X)'},
+	'redo'         :{img:'13', title:'Redo (Ctrl+Y)' },
+	'undo'         :{img:'12', title:'Undo (Ctrl + Z)' },
+	'justifyleft'  :{img:'20', title:'Justify Left', onUpdate:function(val){/*console.log(val)*/}  },
 	'justifycenter':{img:'18', title:'Justify Center'},
-	'JustifyRight' :{img:'21', title:'Justify Right' },
+	'justifyright' :{img:'21', title:'Justify Right' },
 	'justifyfull'  :{img:'19', title:'Justify Full'  },
 	'insertorderedlist'  :{img:'22', title:'Numbered List'},
 	'insertunorderedlist':{img:'23', title:'Bulleted List'},
@@ -420,7 +462,14 @@ MooRTE.Elements = new Hash({
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''},
 	
+	//untested:
+	'decreasefontsize':{img:'27'},
+	'increasefontsize':{img:'27'},
+	'inserthorizontalrule':{img:'27'},
+	'removeformat' :{img:'27'},
+	'selectall'    :{img:'27', title:'Select All (Ctrl + A)'},
+	
 	//unused:
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,JustifyRight,justifyfull]' }
+	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
 })
