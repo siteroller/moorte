@@ -20,7 +20,8 @@ var MooRTE = new Class({
 	options:{
 		floating: false,
 		location: 'elements', 											   			//[e,n,t,b,'']
-		defaults: 'Menu:[Main,File,Insert,save]'
+		defaults: 'Menu:[Main,File,Insert,save]',
+		skin: 'rteDefault'
 	},
 	
 	initialize: function(selectors, options){
@@ -32,7 +33,7 @@ var MooRTE = new Class({
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
-			if(l=='e' || !rte) rte = self.insertToolbar(l);  							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
+			if(l=='e' || !rte) rte = self.insertToolbar(l);  						//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
 			if(l=='b' || l=='t' || !l) el.set('contentEditable', true).focus();		//[L]ocation == page[t]op, page[b]ottom, none[] 
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
@@ -56,8 +57,9 @@ var MooRTE = new Class({
 	},
 	
 	insertToolbar: function (pos){
+		self = this; console.log(name, 'addClass')
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
-			 new Element('div', {'class':'RTE' })
+			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
 		MooRTE.activeBtn = rte.getFirst();  // not used!
 		MooRTE.Utilities.addElements(this.options.defaults, rte.getFirst(), 'bottom', '', [], 0)

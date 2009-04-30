@@ -1,40 +1,52 @@
-div.MooRTE{ left:0; width:100%; }
+/*  position to top/bottom of page, the hide/show class  */
 div.rteFloattrue{ position:absolute; }
 div.rteFloatfalse{ position:relative;}
-div.MooRTE div.RTE { left:0; bottom:0; width:100%; background-color:#B9D2F8; xbackground-color:#C2D8F9; color:#222; font: 12px Arial; }
-div.MooRTE div.RTE span{ height:18px; margin:2px; display:inline-block; }
-div.MooRTE div.RTE input{ height:18px; width:100px; }
-
-div.MooRTE div.RTE div.rteToolbar{ position:relative; width:100%; background-image:url(images/bg.gif) }
-div.MooRTE div.RTE div.rteToolbar a{ height:20px; width:20px; margin:1px; display:inline-block; text-decoration:none; vertical-align:top; background-image:url(images/i3.gif)}
-div.MooRTE div.RTE div.rteToolbar a:hover{ border:1px solid black; margin:0; background-color:#FFB874 }
-div.MooRTE div.RTE div.rteToolbar a.rteSelected{background-color:white}
-
-div.MooRTE div.RTE span.rtestart{background-image:url(images/start.gif); height:25px; width:7px; margin:0}
-
-div.MooRTE div.RTE div.rteMenu a{margin:2px; display:inline-block; text-decoration:none; vertical-align:top; }
-div.MooRTE div.RTE div.rteMenu a.rteText{font: 12px black Arial; color:black; }
-
+div.MooRTE{ left:0; width:100%; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
-div.RTE div.rteR0{ border-bottom:1px #bbb solid; }
 .rteHide{ display:none; }
 .rteTextArea{ border:1px solid #666 }
-div.MooRTE div.RTE a.rteText{background-image:url(); rten-width:38px; text-align:center; }
-div.MooRTE div.RTE a.rteText:hover{ margin:1px; border:1px solid black; background-color:#FFB874;}
-
-div.MooRTE div.RTE div.rteFlyout{position:absolute; border:0; top:20px; left:-1px; width:22px; background-color:#ddd}
-a.Flyout{ position:relative; overflow:hidden;}
-a.Flyout:hover{overflow:visible;}
 .rteTopDown{top:0;}
-div.MooRTE div.RTE .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
-.rtefuUpload, .rtefuClear {cursor:pointer}
 
-xdiv.MooRTE div.RTE div.rteTop{ border-bottom:1px #bbb solid; height:18px; overflow:hidden; vertical-align:bottom; text-align:left; }
-xdiv.MooRTE div.RTE .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
-xdiv.MooRTE div.RTE a{ height:16px; width:16px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/i.gif)}
-xdiv.MooRTE div.RTE a:hover{ border:2px solid red; margin:0; }
-xdiv.MooRTE div.RTE div.rteFlyout{position:absolute; border:0; top:16px; left:-2px; width:20px; background-color:#ddd}
-xdiv.MooRTE div.RTE { left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
-xdiv.MooRTE div.RTE a.rteText{background-image:url(); min-width:38px; text-align:center; border:1px solid grey; -moz-corner-radius:2px }
+/* the rteDefault skin, for better or worse :)  */
+div.MooRTE div.rteDefault { left:0; bottom:0; width:100%; background-color:#B9D2F8; color:#222; font: 12px Arial; }
+div.MooRTE div.rteDefault    span{ height:20px; margin:1px; display:inline-block; }
+div.MooRTE div.rteDefault    input{ height:20px; width:100px; }
+div.MooRTE div.rteDefault    div.rteToolbar{ position:relative; width:100%; background-image:url(images/bg.gif) }
+div.MooRTE div.rteDefault    div.rteToolbar a{ height:20px; width:20px; margin:1px; display:inline-block; text-decoration:none; vertical-align:top; background-image:url(images/i3.gif)}
+div.MooRTE div.rteDefault    div.rteToolbar a:hover{ border:1px solid black; margin:0; background-color:#FFB874 }
+div.MooRTE div.rteDefault    div.rteToolbar a.rteSelected{background-color:white}
+div.MooRTE div.rteDefault    div.rteMenu a{margin:2px; display:inline-block; text-decoration:none; vertical-align:top; }
+div.MooRTE div.rteDefault    div.rteMenu a.rteText{font: 12px black Arial; color:black; }
+div.MooRTE div.rteDefault    span.rtestart{background-image:url(images/start.gif); height:25px; width:7px; margin:0}
+div.MooRTE div.rteDefault    a.rteText{background-image:url(); min-width:38px; text-align:center; }
+div.MooRTE div.rteDefault    a.rteText:hover{ margin:1px; border:1px solid black; background-color:#FFB874;}
+div.MooRTE div.rteDefault    div.rteFlyout{position:absolute; border:0; top:20px; left:-1px; width:22px; background-color:#ddd}
+div.MooRTE div.rteDefault    a.Flyout{ position:relative; overflow:hidden;}
+div.MooRTE div.rteDefault    a.Flyout:hover{overflow:visible;}
+div.MooRTE div.rteDefault   .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
 
+/* the rteGrey skin  */
+div.MooRTE div.rteGrey { left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
+div.MooRTE div.rteGrey           span{ height:20px; margin:1px; display:inline-block; }
+div.MooRTE div.rteGrey           input{ height:20px; width:100px; }
+div.MooRTE div.rteGrey           div.rteTop{ border-bottom:1px #bbb solid; height:18px; overflow:hidden; vertical-align:bottom; text-align:left; }
+div.MooRTE div.rteGrey           .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
+div.MooRTE div.rteGrey           div.rteToolbar{ position:relative; width:100%; }
+div.MooRTE div.rteGrey           div.rteToolbar a{ height:20px; width:20px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/i3.gif)}
+div.MooRTE div.rteGrey           div.rteToolbar a:hover{ border:2px solid black; margin:0; }
+div.MooRTE div.rteGrey           div.rteToolbar a.rteSelected{ background-color:white }
+div.MooRTE div.rteGrey           a.rteText{ height:16px; min-width:38px; margin:2px; display:inline-block; text-align:center; text-decoration:none; border:1px solid grey; -moz-corner-radius:2px }
+div.MooRTE div.rteGrey           a.rteText:hover{ margin:2px; background-color:#eee}
+div.MooRTE div.rteGrey           div.rteFlyout{ position:absolute; border:0; top:20px; left:-2px; width:24px; background-color:#ddd }
+div.MooRTE div.rteGrey           a.Flyout{ position:relative; overflow:hidden;}
+div.MooRTE div.rteGrey           a.Flyout:hover{ overflow:visible }
+div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+
+/* Plugins */
+.rtefuUpload, .rtefuClear { cursor:pointer }
+
+/* Old */
+xdiv.RTE div.rteR0{ border-bottom:1px #bbb solid; }
+xa:hover{ border:2px solid red; margin:0; }
+xa{ height:16px; width:16px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/i.gif)}
