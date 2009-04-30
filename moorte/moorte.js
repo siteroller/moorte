@@ -26,56 +26,56 @@ var MooRTE = new Class({
 	initialize: function(selectors, options){
 		if($type(selectors)=='object'){options = selectors; selectors = null};
 		this.setOptions(options);
-		var self = this, mi, els = $$(selectors||'textarea, .RTE'), l = this.options.location.substr(4,1).toLowerCase();
+		var self = this, rte, els = $$(selectors||'textarea, .rte'), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField)
 			MooRTE.extend({update:{value:$H({}), state:$H({}), custom:$H({})}, ranges:$H({}), removed:$H({}), shortcuts:$H({}), activeField:'', activeBtn:'', activeBar:'' });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
-			if(l=='e' || !mi) mi = self.insertToolbar(l);  							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
+			if(l=='e' || !rte) rte = self.insertToolbar(l);  							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
 			if(l=='b' || l=='t' || !l) el.set('contentEditable', true).focus();		//[L]ocation == page[t]op, page[b]ottom, none[] 
-			else l=='e' ? self.positionToolbar(el,mi) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
-				'click': function(){ self.positionToolbar(el, mi); },
+			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
+				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
-					mi.addClass('miHide'); this.set('contentEditable', false);	
+					rte.addClass('rteHide'); this.set('contentEditable', false);	
 				}
 			});
-			el.store('bar', mi).addEvents({
+			el.store('bar', rte).addEvents({
 				'mouseup':MooRTE.Utilities.updateBtns, 
 				'keyup'  :MooRTE.Utilities.updateBtns, 
 				'keydown':MooRTE.Utilities.shortcuts, 
-				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = mi; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
+				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
 			});
 		})
 		
 		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');								//in case a button is pressed before anything is selected.
 		els[0].fireEvent('focus');//,els[0]
-		if(l=='t') mi.addClass('miPageTop').getFirst().addClass('miTopDown');
-		else if(l=='b') mi.addClass('miPageBottom');
+		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
+		else if(l=='b') rte.addClass('rtePageBottom');
 		MooRTE.Utilities.exec('styleWithCSS');
 	},
 	
 	insertToolbar: function (pos){
-		var mi = new Element('div', {'class':'miRemove miMooRTE '+(!pos||pos=='n'?'miHide':''), 'contentEditable':false }).adopt(
-			 new Element('div', {'class':'miRTE' })
+		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
+			 new Element('div', {'class':'RTE' })
 		).inject(document.body);
-		MooRTE.activeBtn = mi.getFirst();  // not used!
-		MooRTE.Utilities.addElements(this.options.defaults, mi.getFirst(), 'bottom', '', [], 0)
-		return mi;
+		MooRTE.activeBtn = rte.getFirst();  // not used!
+		MooRTE.Utilities.addElements(this.options.defaults, rte.getFirst(), 'bottom', '', [], 0)
+		return rte;
 	},
 	
-	positionToolbar: function (el, mi){												//function is sloppy.  Clean!
+	positionToolbar: function (el, rte){												//function is sloppy.  Clean!
 		el.set('contentEditable', true).focus();
 		var elSize = el.getCoordinates(), f=this.options.floating;
-		mi.removeClass('miHide').setStyle('width',elSize.width).store('fields', mi.retrieve('fields', []).include(el));
-		if(f) mi.setStyles({ 'left':elSize.left, 'top':(elSize.top - mi.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('miFloat').getFirst().addClass('miFloat');
-		else mi.inject((el.getParent().hasClass('miTextArea')?el.getParent():el),'top'); //'before'
+		rte.removeClass('rteHide').setStyle('width',elSize.width).store('fields', rte.retrieve('fields', []).include(el));
+		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
+		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top'); //'before'
 	},
 	
 	textArea: function (el){
 		var div = new Element('div', {text:el.get('value')});
-		new Element('div', {'class':'miTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
-		el.addClass('miHide');
+		new Element('div', {'class':'rteTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
+		el.addClass('rteHide');
 		return div;
 	}
 })
@@ -111,7 +111,7 @@ MooRTE.Utilities = {
 		var be, btn;	
 		if(e && e.control && MooRTE.shortcuts.has(e.key)){	
 			e.stop();
-			btn = MooRTE.activeBar.getElement('.mi'+MooRTE.shortcuts[e.key])
+			btn = MooRTE.activeBar.getElement('.rte'+MooRTE.shortcuts[e.key])
 			btn.fireEvent('mousedown', btn)
 		};
 	},
@@ -120,9 +120,10 @@ MooRTE.Utilities = {
 		var ev;
 		
 		MooRTE.update.state.each(function(func,cmd){
-			if(func) func.apply(cmd) 
-			else if (ev = MooRTE.activeBar.getElement('.mi'+cmd))
-				window.document.queryCommandState(cmd) ? ev.addClass('miSelected') : ev.removeClass('miSelected');
+			console.log(cmd);
+			if(func) func.apply(cmd);
+			else if (ev = MooRTE.activeBar.getElement('.rte'+cmd))
+				window.document.queryCommandState(cmd) ? ev.addClass('rteSelected') : ev.removeClass('rteSelected');
 		});
 		
 		MooRTE.update.value.each(function(func,cmd){
@@ -138,7 +139,7 @@ MooRTE.Utilities = {
 		
 		if(!hides) hides = '';
 		if(!place) place = MooRTE.activeBtn;
-		var parent = place.hasClass('miRTE') ? place : place.getParent('.miRTE'), self = this, btns = [], img; 
+		var parent = place.hasClass('RTE') ? place : place.getParent('.RTE'), self = this, btns = [], img; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
@@ -160,7 +161,9 @@ MooRTE.Utilities = {
 		btns.each(function(btn){
 			var btnVals;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			var e = parent.getElement('.'+name||'.mi'+btn);
+			[btn,klass] = btn.split('.');
+			console.log("the class for ",btn," is ", klass);
+			var e = parent.getElement('.'+name||'.rte'+btn);
 			
 			if(!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea'), state;
@@ -183,18 +186,18 @@ MooRTE.Utilities = {
 					events:{
 						'mousedown': function(e){
 							MooRTE.activeBtn = this;
-							MooRTE.activeBar = this.getParent('.miMooRTE');
+							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							MooRTE.Utilities.run(val.onClick, val.args, val.hides, parent, this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 							
-							this.getParent().getChildren().removeClass('miSelected');
-							if(!val.ignoreState)this.addClass('miSelected');
+							this.getParent().getChildren().removeClass('rteSelected');
+							if(!val.ignoreState)this.addClass('rteSelected');
 						}
 					}
 				}).extend(val);
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
+				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+(val.title||btn) + (klass ? ' rte'+klass : ''));
 				
 				if (btnVals) e.store('children', btnVals);
 				if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
@@ -202,10 +205,10 @@ MooRTE.Utilities = {
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);	
 				MooRTE.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
-				e.removeClass('miHide');
-				//if (collection.getCoordinates().top < 0)toolbar.addClass('miTopDown'); //untested!!
+				e.removeClass('rteHide');
+				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
-			e.removeClass('miHide')
+			e.removeClass('rteHide')
 		})
 	},
 	
@@ -216,13 +219,13 @@ MooRTE.Utilities = {
 			case 'string': 
 				'onLoad,onClick,onInit'.contains(prop) ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, hides, self, caller, name)
 				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(self)(args) 
-				: MooRTE.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 
+				: MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 
 			break;
 			default:
 				if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
-					if(el = self.getElement('.miGroup_'+clas)) el.addClass('miHide')
+					if(el = self.getElement('.rteGroup_'+clas)) el.addClass('rteHide')
 				})
-				MooRTE.Utilities.addElements(prop, self, 'bottom', 'miGroup_'+name, hides, 0); 				
+				MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 				
 			break; 																	//case 'object': case 'array'
 		}
 	},
@@ -329,16 +332,16 @@ MooRTE.Utilities = {
 Element.implement({
 	//$$('div.RTE')[0].moorte();
 	moorte:function(directive, options){
-		var bar = this.hasClass('miMooRTE') ? this : this.retrieve('bar') || '';
+		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		if(!directive || (directive == 'create')){
 			if(removed = this.retrieve('removed')){
 				this.grab(removed, 'top');
 				this.store('removed','');
-			} else return bar ? this.removeClass('miHide') : new MooRTE(this, options);
+			} else return bar ? this.removeClass('rteHide') : new MooRTE(this, options);
 		}else{
 			if(!bar) return false;
 			else switch(directive.toLowerCase()){
-				case 'hide': bar.addClass('miHide'); break;
+				case 'hide': bar.addClass('rteHide'); break;
 				case 'remove': this.store('removed', bar); new Element('span').replaces(bar).destroy();  break;
 				case 'destroy': bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); bar.destroy(); break; 
 			}
@@ -348,20 +351,20 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Main'         :{text:'Main',   'class':'miText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
-	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
-	'Font'         :{text:'Font',   'class':'miText', onClick:{Toolbar:['start','fontSize']} },
-	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']} },
-	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['start','Html/Text']} },
+	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
+	'File'         :{text:'File',   'class':'rteText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
+	'Font'         :{text:'Font',   'class':'rteText', onClick:{Toolbar:['start','fontSize']} },
+	'Insert'       :{text:'Insert', 'class':'rteText', onClick:{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']} },
+	'View'         :{text:'Views',  'class':'rteText', onClick:{Toolbar:['start','Html/Text']} },
 	
-	'Justify'      :{img:'37', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'Lists'        :{img:'41', 'class':'Flyout', contains:'Flyout:[insertorderedlist,insertunorderedlist]' },
-	'Indents'      :{img:'40', 'class':'Flyout', contains:'Flyout:[indent,outdent]' },
+	'Justify'      :{img:'37', 'class':'Flyout', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+	'Lists'        :{img:'41', 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
+	'Indents'      :{img:'40', 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
 	'Link'         :{img: '8', onClick:{Toolbar:['l0','l1','l2','unlink']} },
 	
-	'Toolbar'      :{element:'div'},
-	'Flyout'       :{element:'div'},
-	'Menu'         :{element:'div'},
+	'div'          :{element:'div'},
+	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
+	'Toolbar'      :{element:'div'},  // ''
 	'start'        :{element:'span'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
@@ -398,15 +401,15 @@ MooRTE.Elements = new Hash({
 					}},
 	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
-						this.getParent('.miMooRTE').retrieve('fields').each(function(el){
+						this.getParent('.MooRTE').retrieve('fields').each(function(el){
 							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
 						});
 						new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
 					}},
 	'Html/Text'    :{ img:'26', onClick:['DisplayHTML']}, 
 	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-						var el=this.getParent('.miMooRTE').retrieve('fields'), p = el.getParent(); 
-						var size = (p.hasClass('miTextArea') ? p : el).getSize(); 
+						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
+						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
 						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 					}},
 	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
@@ -432,7 +435,7 @@ MooRTE.Elements = new Hash({
 						Asset.css(path+'.css');
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
-	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''},
+	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
 	
 	//untested:
 	'decreasefontsize':{img:'29'},
