@@ -20,7 +20,7 @@ var MooRTE = new Class({
 	options:{
 		floating: false,
 		location: 'elements', 											   			//[e,n,t,b,'']
-		defaults: 'Toolbar:[Main,File,Insert,|,save]'
+		defaults: 'Menu:[Main,File,Insert,save]'
 	},
 	
 	initialize: function(selectors, options){
@@ -132,26 +132,6 @@ MooRTE.Utilities = {
 		if(MooRTE.update.event) MooRTE.update.event.each(function(func,cmd){
 			func(cmd);
 		});
-		
-		
-		/*
-		var be;
-		[	'strikethrough','subscript','superscript','insertorderedlist','insertunorderedlist','unlink'
-		].each(function(prop){
-			if (be = MooRTE.activeBar.getElement('.mi'+prop))
-				window.document.queryCommandState(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-		});
-
-		//[	'fontname','fontSize','justifyleft','backcolor','forecolor','hilitecolor']
-		//console.log('MooRTE.update:',MooRTE.update);
-		//console.log('MooRTE.removed:',MooRTE.removed);
-		MooRTE.update.value.each(function(func,cmd){
-		//	console.log(func,cmd)
-		//	console.log(cmd+':', window.document.queryCommandValue(cmd))
-		//	if (be = MooRTE.activeBar.getElement('.mi'+prop))
-		//		window.document.queryCommandValue(prop) ? be.addClass('miSelected') : be.removeClass('miSelected');
-		}); 
-		*/
 	},
 	
 	addElements: function(buttons, place, relative, name, hides, invisible){
@@ -185,7 +165,7 @@ MooRTE.Utilities = {
 			if(!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea'), state;
 				
-				if(val.onUpdate || (state = 'bold,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+','))){ 
+				if(val.onUpdate || (state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+','))){ 
 					var newObj = {}; 
 					newObj[btn] = val.onUpdate || ''; 
 					MooRTE.update[
@@ -198,7 +178,8 @@ MooRTE.Utilities = {
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':(-2+-18*val.img)+'px -2px'}):'',
+					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
+					//styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':(-2+-18*val.img)+'px -2px'}):'',
 					events:{
 						'mousedown': function(e){
 							MooRTE.activeBtn = this;
@@ -216,7 +197,6 @@ MooRTE.Utilities = {
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' mi'+(val.title||btn));
 				
 				if (btnVals) e.store('children', btnVals);
-				//if (val.shortcut){MooRTE.shortcuts.include(val.shortcut); MooRTE.shortcutBtns.include(btn);} 
 				if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
 				MooRTE.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
@@ -365,56 +345,49 @@ Element.implement({
 		}
 	}
 });
-/*
-MooRTE.Update = new Hash({
-	'fontname':function(val){  },
-	'fontSize':function(val){},
-	'justifyleft':function(val){ $$('.mijustify'+val).setStyle('background-position',12); },
-	'backcolor':function(val){},
-	'forecolor':function(val){},
-	'hilitecolor':function(val){}
-})
-*/
+
 MooRTE.Elements = new Hash({
 
-	'Main'         :{text:'Main',   'class':'miText', onClick:'onLoad', onLoad:{Toolbar:['bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
-	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['paste','copy','cut','redo','undo','selectall','removeformat']} },
-	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['Link','fuUploadBar','inserthorizontalrule']} },
-	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['Html/Text']} },
+	'Main'         :{text:'Main',   'class':'miText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
+	'File'         :{text:'File',   'class':'miText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
+	'Font'         :{text:'Font',   'class':'miText', onClick:{Toolbar:['start','fontSize']} },
+	'Insert'       :{text:'Insert', 'class':'miText', onClick:{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']} },
+	'View'         :{text:'Views',  'class':'miText', onClick:{Toolbar:['start','Html/Text']} },
 	
-	'Justify'      :{img:'18', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'Lists'        :{img:'22', 'class':'Flyout', contains:'Flyout:[insertorderedlist,insertunorderedlist]' },
-	'Indents'      :{img:'16', 'class':'Flyout', contains:'Flyout:[indent,outdent]' },
-	'Link'         :{img: '6', onClick:{Toolbar:['l0','l1','l2','unlink']} },
+	'Justify'      :{img:'37', 'class':'Flyout', contains:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+	'Lists'        :{img:'41', 'class':'Flyout', contains:'Flyout:[insertorderedlist,insertunorderedlist]' },
+	'Indents'      :{img:'40', 'class':'Flyout', contains:'Flyout:[indent,outdent]' },
+	'Link'         :{img: '8', onClick:{Toolbar:['l0','l1','l2','unlink']} },
 	
 	'Toolbar'      :{element:'div'},
 	'Flyout'       :{element:'div'},
+	'Menu'         :{element:'div'},
+	'start'        :{element:'span'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
-	'bold'         :{img:'0', shortcut:'b' },
-	'italic'       :{img:'1', shortcut:'i' },
-	'underline'    :{img:'2', shortcut:'u' },
-	'strikethrough':{img:'3'},
-	'subscript'    :{img:'4'},
-	'superscript'  :{img:'5'},
-	'indent'       :{img:'16'},
-	'outdent'      :{img:'17'},
+	'bold'         :{img:'1', shortcut:'b' },
+	'italic'       :{img:'33', shortcut:'i' },
+	'underline'    :{img:'32', shortcut:'u' },
+	'strikethrough':{img:'34'},
+	'subscript'    :{img:'43'},
+	'superscript'  :{img:'44'},
+	'indent'       :{img:'40'},
+	'outdent'      :{img:'39'},
 	'paste'        :{img:'9',  title:'Paste (Ctrl+V)'},
-	'copy'         :{img:'7',  title:'Copy (Ctrl+C)'},
-	'cut'          :{img:'8',  title:'Cut (Ctrl+X)'},
-	'redo'         :{img:'13', title:'Redo (Ctrl+Y)' },
-	'undo'         :{img:'12', title:'Undo (Ctrl + Z)' },
-	'justifyleft'  :{img:'20', title:'Justify Left', onUpdate:function(val){/*console.log(val)*/}  },
-	'justifycenter':{img:'18', title:'Justify Center'},
-	'justifyright' :{img:'21', title:'Justify Right' },
-	'justifyfull'  :{img:'19', title:'Justify Full'  },
-	'insertorderedlist'  :{img:'22', title:'Numbered List'},
-	'insertunorderedlist':{img:'23', title:'Bulleted List'},
+	'copy'         :{img:'4',  title:'Copy (Ctrl+C)'},
+	'cut'          :{img:'5',  title:'Cut (Ctrl+X)'},
+	'redo'         :{img:'12', title:'Redo (Ctrl+Y)' },
+	'undo'         :{img:'11', title:'Undo (Ctrl + Z)' },
+	'justifyleft'  :{img:'35', title:'Justify Left', onUpdate:function(val){/*console.log(val)*/}  },
+	'justifycenter':{img:'37', title:'Justify Center'},
+	'justifyright' :{img:'38', title:'Justify Right' },
+	'justifyfull'  :{img:'36', title:'Justify Full'  },
+	'insertorderedlist'  :{img:'41', title:'Numbered List'},
+	'insertunorderedlist':{img:'42', title:'Bulleted List'},
 	'test'         :{onClick:function(){console.log(arguments)}, args:this},
 	'l0'           :{'text':'enter the url', element:'span' },
 	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
 	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-	//'l2'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
 	'nolink'       :{'text':'please select the text to be made into a link'},
 	'unlink'       :{img:'6'},
 	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
@@ -423,7 +396,6 @@ MooRTE.Elements = new Hash({
 	'insertimage'  :{onClick:function(args, classRef){ 
 						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
 					}},
-	'inserthorizontalrule':{img:'22'},	
 	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
 						this.getParent('.miMooRTE').retrieve('fields').each(function(el){
@@ -444,7 +416,7 @@ MooRTE.Elements = new Hash({
 						c[1] = -(c[2] - 255*saturation);
 						var hex = c.rgbToHex();
 					}},
-	'fuUploadBar'  :{ title:'Upload Image', img:25, onClick:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
+	'fuUploadBar'  :{ title:'Upload Image', img:15, onClick:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
 	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
 	'fuUpload'     :{ id:"fuUpload", onClick:'', element:'span', text:'Upload Files', title:''},
 	'fuClear'      :{ id:"fuClear", element:'span', text:'Clear List' ,title:''},	
@@ -463,13 +435,14 @@ MooRTE.Elements = new Hash({
 	'loading..'    :{ 'class':'miLoading', 	element:'span', text:'loading...',title:''},
 	
 	//untested:
-	'decreasefontsize':{img:'27'},
-	'increasefontsize':{img:'27'},
-	'inserthorizontalrule':{img:'27'},
-	'removeformat' :{img:'27'},
+	'decreasefontsize':{img:'29'},
+	'increasefontsize':{img:'29'},
+	'inserthorizontalrule':{img:'30'},
+	'removeformat' :{img:'26', title:'Clear Formatting'},
 	'selectall'    :{img:'27', title:'Select All (Ctrl + A)'},
 	
 	//unused:
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
+	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+	'l2old'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' }
 })

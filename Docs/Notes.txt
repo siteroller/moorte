@@ -27,6 +27,9 @@ p) Should each passed in element of an object be checked if it exists?  If yes, 
 q) in index.htm it put the toolbar bottom left when floating.  should adjust for centering and for margins while floating.
 r) should it prevent text from being inserted before it while inline?
 s) pageTop & bottom should be inserted inline if float is false.
+t) All hashes are now global, which means that no two instances of the class can have the same button doing different things.
+Perhaps they should be namespaced so that buttons can be modified, and the buttons/updates will match whatever was set for that instance.
+u)
 
 Design Decisions:
 a) Logic of button check:
