@@ -21,13 +21,13 @@ var MooRTE = new Class({
 		floating: false,
 		location: 'elements', 											   			//[e,n,t,b,'']
 		defaults: 'Menu:[Main,File,Insert,save]',
-		skin: 'rteDefault'
+		skin: 'Word03',
+		selectors: 'textarea, .rte'
 	},
 	
-	initialize: function(selectors, options){
-		if($type(selectors)=='object'){options = selectors; selectors = null};
+	initialize: function(options){
 		this.setOptions(options);
-		var self = this, rte, els = $$(selectors||'textarea, .rte'), l = this.options.location.substr(4,1).toLowerCase();
+		var self = this, rte, els = $$(this.options.selectors), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField)
 			MooRTE.extend({update:{value:$H({}), state:$H({}), custom:$H({})}, ranges:$H({}), removed:$H({}), shortcuts:$H({}), activeField:'', activeBtn:'', activeBar:'' });
 		
@@ -57,7 +57,7 @@ var MooRTE = new Class({
 	},
 	
 	insertToolbar: function (pos){
-		self = this; console.log(name, 'addClass')
+		self = this;
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
@@ -122,8 +122,7 @@ MooRTE.Utilities = {
 		var ev;
 		
 		MooRTE.update.state.each(function(func,cmd){
-			console.log(cmd);
-			if(func) func.apply(cmd);
+			if(func) func(cmd);
 			else if (ev = MooRTE.activeBar.getElement('.rte'+cmd))
 				window.document.queryCommandState(cmd) ? ev.addClass('rteSelected') : ev.removeClass('rteSelected');
 		});
@@ -132,7 +131,7 @@ MooRTE.Utilities = {
 			if(ev = window.document.queryCommandValue(cmd)) func(cmd,ev);
 		});
 		
-		if(MooRTE.update.event) MooRTE.update.event.each(function(func,cmd){
+		if(MooRTE.update.custom) MooRTE.update.custom.each(function(func,cmd){
 			func(cmd);
 		});
 	},
@@ -163,19 +162,18 @@ MooRTE.Utilities = {
 		btns.each(function(btn){
 			var btnVals;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			[btn,klass] = btn.split('.');
-			console.log("the class for ",btn," is ", klass);
+			[btn,btnClass] = btn.split('.');
 			var e = parent.getElement('.'+name||'.rte'+btn);
 			
 			if(!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea'), state;
 				
-				if(val.onUpdate || (state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+','))){ 
+				if((state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')) || val.onUpdate){ 
 					var newObj = {}; 
 					newObj[btn] = val.onUpdate || ''; 
 					MooRTE.update[
-						'fontname,fontSize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter'.contains(btn.toLowerCase()) ? 
-						'value' : (state ? 'state' : 'event')
+						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
+						'value' : (state ? 'state' : 'custom')
 					].extend(newObj);		
 				}
 				
@@ -184,22 +182,19 @@ MooRTE.Utilities = {
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
-					//styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':(-2+-18*val.img)+'px -2px'}):'',
 					events:{
 						'mousedown': function(e){
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							this.getParent().getChildren('.rteDo').removeClass('rteSelected');
 							MooRTE.Utilities.run(val.onClick, val.args, val.hides, parent, this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
-							
-							this.getParent().getChildren().removeClass('rteSelected');
-							if(!val.ignoreState)this.addClass('rteSelected');
 						}
 					}
 				}).extend(val);
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+(val.title||btn) + (klass ? ' rte'+klass : ''));
+				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 				
 				if (btnVals) e.store('children', btnVals);
 				if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
@@ -216,17 +211,19 @@ MooRTE.Utilities = {
 	
 	run: function(prop, args, hides, self, caller, name, el){						//el is not passed, it is being declared.
 		if(!prop) return;
+		
 		switch($type(prop)){
 			case 'function': prop.bind(caller)(args); return;
 			case 'string': 
 				'onLoad,onClick,onInit'.contains(prop) ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, hides, self, caller, name)
 				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(self)(args) 
-				: MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 
+				: caller.addClass('rteDo rteSelected') && MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 
 			break;
 			default:
 				if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
 					if(el = self.getElement('.rteGroup_'+clas)) el.addClass('rteHide')
-				})
+				});
+				caller.addClass('rteDo rteSelected');
 				MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 				
 			break; 																	//case 'object': case 'array'
 		}
@@ -359,7 +356,7 @@ MooRTE.Elements = new Hash({
 	'Insert'       :{text:'Insert', 'class':'rteText', onClick:{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']} },
 	'View'         :{text:'Views',  'class':'rteText', onClick:{Toolbar:['start','Html/Text']} },
 	
-	'Justify'      :{img:'37', 'class':'Flyout', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+	'Justify'      :{img:'36', 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'Lists'        :{img:'41', 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
 	'Indents'      :{img:'40', 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
 	'Link'         :{img: '8', onClick:{Toolbar:['l0','l1','l2','unlink']} },
@@ -383,12 +380,12 @@ MooRTE.Elements = new Hash({
 	'cut'          :{img:'5',  title:'Cut (Ctrl+X)'},
 	'redo'         :{img:'12', title:'Redo (Ctrl+Y)' },
 	'undo'         :{img:'11', title:'Undo (Ctrl + Z)' },
-	'justifyleft'  :{img:'35', title:'Justify Left', onUpdate:function(val){/*console.log(val)*/}  },
+	'justifyleft'  :{img:'35', title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
 	'justifycenter':{img:'37', title:'Justify Center'},
 	'justifyright' :{img:'38', title:'Justify Right' },
 	'justifyfull'  :{img:'36', title:'Justify Full'  },
-	'insertorderedlist'  :{img:'41', title:'Numbered List'},
-	'insertunorderedlist':{img:'42', title:'Bulleted List'},
+	'insertorderedlist'  :{img:'41', title:'Numbered List' },
+	'insertunorderedlist':{img:'42', title:'Bulleted List' },
 	'test'         :{onClick:function(){console.log(arguments)}, args:this},
 	'l0'           :{'text':'enter the url', element:'span' },
 	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 

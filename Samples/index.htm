@@ -17,8 +17,10 @@
 			litterarum formas humanitatis per seacula quarta decima et quinta decima. Eodem modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.
 			<p>hello there <p>some ps</p></p><p> </p>
 		</div>
+		<button id="btn">Toggle Skin</button> 
 		<script>
-			new MooRTE({skin:'rteGrey'});
+			new MooRTE();
+			$('btn').addEvent('click', function(){ $$('.RTE').toggleClass('Word03').toggleClass('rteGrey'); })
 			//new MooInline('',{location:'    N', defaults:'bold:[strikethrough], italic, underline'});
 			//This is the same as: new MooInline('textarea, .RTE', {floating:'false', location:'elements', defaults:'Defaults'}) 
 		</script>
