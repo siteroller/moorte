@@ -187,7 +187,6 @@ MooRTE.Utilities = {
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							this.getParent().getChildren('.rteDo').removeClass('rteSelected');
 							MooRTE.Utilities.run(val.onClick, val.args, val.hides, parent, this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
@@ -196,13 +195,12 @@ MooRTE.Utilities = {
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 				
-				if (btnVals) e.store('children', btnVals);
+				//if (btnVals) e.store('children', btnVals); - I think this is only used for the depracated menu system.
 				if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
 				MooRTE.Utilities.run(val.onInit, val.args, val.hides, parent, e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);	
 				MooRTE.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
-				e.removeClass('rteHide');
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
 			e.removeClass('rteHide')
@@ -215,18 +213,21 @@ MooRTE.Utilities = {
 		switch($type(prop)){
 			case 'function': prop.bind(caller)(args); return;
 			case 'string': 
-				'onLoad,onClick,onInit'.contains(prop) ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, hides, self, caller, name)
+				'onLoad,onClick,onInit,'.contains(prop+',') ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, hides, self, caller, name)
 				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(self)(args) 
-				: caller.addClass('rteDo rteSelected') && MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 
+				: makeElement(); 
 			break;
-			default:
-				if(hides = (hides || caller.getParent().retrieve('children'))) hides.each(function(clas){
-					if(el = self.getElement('.rteGroup_'+clas)) el.addClass('rteHide')
-				});
-				caller.addClass('rteDo rteSelected');
-				MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 				
-			break; 																	//case 'object': case 'array'
+			default: makeElement(); break;											//case 'object': case 'array', which will be made into a new toolbar!
 		}
+		
+		function makeElement(){
+			(hides||caller.getSiblings('*[class*=rteDo]')).each(function(el){ 
+				el.removeClass('rteSelected');
+				self.getFirst('.rteGroup_'+(el.get('class').match(/rteDo([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteDo]').  Unfortunately, Moo does not support this!
+			});
+			caller.addClass('rteSelected rteDo'+name);
+			MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, hides, 0); 
+		}	
 	},
 	
 	clean: function(html, options){
@@ -348,7 +349,7 @@ Element.implement({
 	}
 });
 
-MooRTE.Elements = new Hash({
+MooRTE.Elements = {
 
 	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
 	'File'         :{text:'File',   'class':'rteText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
@@ -447,4 +448,4 @@ MooRTE.Elements = new Hash({
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'l2old'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' }
-})
+}
