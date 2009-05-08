@@ -61,10 +61,8 @@ var MooRTE = new Class({
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
-		MooRTE.activeBar = rte;//.getFirst();  // not used!
+		MooRTE.activeBar = rte; // not used!
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto')
-		//MooRTE.Utilities.addElements(this.options.buttons, rte, 'bottom', [], 0)
-		//MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', '', [], 0)
 		return rte;
 	},
 	
@@ -112,13 +110,9 @@ MooRTE.Utilities = {
  	},
 	
 	shortcuts: function(e){
-		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');
-		console.log(MooRTE.activeBar)
-		console.log(MooRTE.activeBar.retrieve('shortcuts'))
-		
+		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');	
 		if(e && e.control && shorts.has(e.key)){
 			e.stop();
-			console.log(e.key)
 			btn = MooRTE.activeBar.getElement('.rte'+shorts[e.key]);
 			btn.fireEvent('mousedown', btn);
 		};
