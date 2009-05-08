@@ -61,8 +61,10 @@ var MooRTE = new Class({
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
-		MooRTE.activeBtn = rte.getFirst();  // not used!
-		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', '', [], 0)
+		MooRTE.activeBar = rte;//.getFirst();  // not used!
+		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto')
+		//MooRTE.Utilities.addElements(this.options.buttons, rte, 'bottom', [], 0)
+		//MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', '', [], 0)
 		return rte;
 	},
 	
@@ -111,9 +113,12 @@ MooRTE.Utilities = {
 	
 	shortcuts: function(e){
 		var be, btn;	
-		if(e && e.control && MooRTE.shortcuts.has(e.key)){	
+		console.log(MooRTE.activeBar);
+		console.log(MooRTE.activeBar.retrieve('shortcuts'));
+		if(e && e.control && MooRTE.activeBar.retrieve('shortcuts').has(e.key)){	//,$H({})
 			e.stop();
 			btn = MooRTE.activeBar.getElement('.rte'+MooRTE.shortcuts[e.key])
+			console.log(e.key)
 			btn.fireEvent('mousedown', btn)
 		};
 	},
@@ -136,11 +141,13 @@ MooRTE.Utilities = {
 		});
 	},
 	
-	addElements: function(buttons, place, relative, name, hides, invisible){
+	addElements: function(buttons, place, relative, name){
 		
-		if(!hides) hides = '';
-		if(!place) place = MooRTE.activeBtn;
-		var parent = place.hasClass('RTE') ? place : place.getParent('.RTE'), self = this, btns = [], img; 
+		//if(!place) place = MooRTE.activeBtn;
+		if(!place) place = MooRTE.activeBar.getFirst();
+		console.log('place:',place);
+		//var parent = place.hasClass('RTE') ? place : place.getParent('.RTE'), self = this, btns = []; 
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
@@ -149,7 +156,7 @@ MooRTE.Utilities = {
 			buttons = JSON.decode('['+buttons+']');
 		}
 		
-		
+		//the following should be a loop.  When was the loop removed and why?!
 		if(btns[0]){ buttons = btns; btns = [];}
 		$splat(buttons).each(function(item){
 			switch($type(item)){
@@ -166,9 +173,10 @@ MooRTE.Utilities = {
 			var btnVals;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
 			[btn,btnClass] = btn.split('.');
-			var e = parent.getElement('.'+name||'.rte'+btn);
-			
+			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
+			console.log('e:', e, 'btn:', btn, 'name:',name,'place',place,'relative',relative);
 			if(!e){
+			//console.log('indeed, not  e');
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
@@ -176,7 +184,7 @@ MooRTE.Utilities = {
 					MooRTE.update[
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
 						'value' : (state ? 'state' : 'custom')
-					].extend($H({}).set(btn, val.onUpdate || ''));
+					].extend(Hash.set({},btn, val.onUpdate || ''));
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -188,7 +196,7 @@ MooRTE.Utilities = {
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							MooRTE.Utilities.run(val, 'onClick', parent, this, btn)
+							MooRTE.Utilities.run(val, 'onClick', this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
@@ -197,9 +205,10 @@ MooRTE.Utilities = {
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 				
 				//if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
+				//var superParent = parent;
 				if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
 				//MooRTE.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
-				MooRTE.Utilities.run(val, 'onLoad', parent, e, btn);
+				MooRTE.Utilities.run(val, 'onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
 				//if (btnVals) e.store('children', btnVals); - I think this is only used for the depracated menu system.
@@ -210,31 +219,35 @@ MooRTE.Utilities = {
 	},
 	
 	//run: function(prop, args, hides, self, caller, name, el){						//el is not passed, it is being declared.
-	run: function(val, prop, self, caller, name){
+	run: function(val, prop, caller, name){
+		var parent = caller.getParent('.RTE');
 		if(!(prop = val[prop])) return;
-		
+			console.log('this should be as we get ready to run the onLoad in the main bar')
 		var args = val['args']; //Deprecated!
 		switch($type(prop)){
 			case 'function': prop.bind(caller)(args); return;
 			case 'string': 
 				'onLoad,onClick,onInit,'.contains(prop+',') ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, val['hides'], self, caller, name)
-				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(self)(args)			//case 'exec, clean'
-				: MooRTE.Utilities.add(val, prop, self, caller, name); 													//case 'toolbar:[bold]'
+				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(caller)(args)			//case 'exec, clean'
+				: MooRTE.Utilities.add(val, prop, caller, name); 													//case 'toolbar:[bold]'
 			break;
-			default: MooRTE.Utilities.add(val, prop, self, caller, name); break;											//case 'object': case 'array', which will be made into a new toolbar!
+			default: MooRTE.Utilities.add(val, prop, caller, name); break;											//case 'object': case 'array', which will be made into a new toolbar!
 		}
 	},
 	
-	add: function(val, prop, self, caller, name){
-	var el;
-		(val.hides||caller.getSiblings('*[class*=rteDo]')).each(function(el){ 
+	add: function(val, prop, caller, name){
+		var el, parent = caller.getParent('.RTE');;
+		(val.hides||caller.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
-			self.getFirst('.rteGroup_'+(el.get('class').match(/rteDo([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteDo]').  Unfortunately, Moo does not support this!
-			MooRTE.Utilities.run(val, 'onHide',self, caller, name);
+			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
+			MooRTE.Utilities.run(val, 'onHide', caller, name);
 		});
-		caller.addClass('rteSelected rteDo'+name);
-		MooRTE.Utilities.addElements(prop, self, 'bottom', 'rteGroup_'+name, val.hides, 0);
-		MooRTE.Utilities.run(val, 'onShow',self, caller, name);	
+		caller.addClass('rteSelected rteAdd'+name);
+			console.log('about to call addElements with', prop, caller, caller.getParent('[class*=rteGroup_]'), 'squiget');
+		MooRTE.Utilities.addElements(prop, caller.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
+		//MooRTE.Utilities.addElements(prop, self.getParent('[class*=rteGroup_]'), 'bottom', 'rteGroup_'+name);
+		console.log('how now');
+		MooRTE.Utilities.run(val,'onShow',caller, name);	
 	},
 	
 	clean: function(html, options){
