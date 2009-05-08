@@ -112,14 +112,15 @@ MooRTE.Utilities = {
  	},
 	
 	shortcuts: function(e){
-		var be, btn;	
-		console.log(MooRTE.activeBar);
-		console.log(MooRTE.activeBar.retrieve('shortcuts'));
-		if(e && e.control && MooRTE.activeBar.retrieve('shortcuts').has(e.key)){	//,$H({})
+		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');
+		console.log(MooRTE.activeBar)
+		console.log(MooRTE.activeBar.retrieve('shortcuts'))
+		
+		if(e && e.control && shorts.has(e.key)){
 			e.stop();
-			btn = MooRTE.activeBar.getElement('.rte'+MooRTE.shortcuts[e.key])
 			console.log(e.key)
-			btn.fireEvent('mousedown', btn)
+			btn = MooRTE.activeBar.getElement('.rte'+shorts[e.key]);
+			btn.fireEvent('mousedown', btn);
 		};
 	},
 	
@@ -143,10 +144,7 @@ MooRTE.Utilities = {
 	
 	addElements: function(buttons, place, relative, name){
 		
-		//if(!place) place = MooRTE.activeBtn;
 		if(!place) place = MooRTE.activeBar.getFirst();
-		console.log('place:',place);
-		//var parent = place.hasClass('RTE') ? place : place.getParent('.RTE'), self = this, btns = []; 
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
@@ -162,10 +160,7 @@ MooRTE.Utilities = {
 			switch($type(item)){
 				case 'string': btns.push(item); break;
 				case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
-				//case 'object': Hash.each(item, function(val,key){var newObj = {}; newObj[key] = val; btns.push(newObj)}); break;			
 				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
-				//case 'object': Hash.each(item, function(val,key){ btns.push($H({}).set(key,val) }); break;			
-				//case 'object': Hash.each(item, btns.set); break; //should work, but the key and value would be inverted.			
 			}
 		});
 		
@@ -174,9 +169,8 @@ MooRTE.Utilities = {
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
 			[btn,btnClass] = btn.split('.');
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
-			console.log('e:', e, 'btn:', btn, 'name:',name,'place',place,'relative',relative);
+			
 			if(!e){
-			//console.log('indeed, not  e');
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
@@ -204,34 +198,28 @@ MooRTE.Utilities = {
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 				
-				//if (val.shortcut){ MooRTE.shortcuts[val.shortcut] = btn; } 
-				//var superParent = parent;
 				if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
-				//MooRTE.Utilities.run(val.onLoad, val.args, val.hides, parent, e, btn);
 				MooRTE.Utilities.run(val, 'onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
-				//if (btnVals) e.store('children', btnVals); - I think this is only used for the depracated menu system.
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
 			e.removeClass('rteHide')
 		})
 	},
 	
-	//run: function(prop, args, hides, self, caller, name, el){						//el is not passed, it is being declared.
 	run: function(val, prop, caller, name){
 		var parent = caller.getParent('.RTE');
 		if(!(prop = val[prop])) return;
-			console.log('this should be as we get ready to run the onLoad in the main bar')
 		var args = val['args']; //Deprecated!
 		switch($type(prop)){
 			case 'function': prop.bind(caller)(args); return;
 			case 'string': 
-				'onLoad,onClick,onInit,'.contains(prop+',') ? MooRTE.Utilities.run(MooRTE.Elements[name][prop], args, val['hides'], self, caller, name)
+				'onLoad,onClick,onInit,'.contains(prop+',') ? MooRTE.Utilities.run(val, prop, caller, name)
 				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(caller)(args)			//case 'exec, clean'
-				: MooRTE.Utilities.add(val, prop, caller, name); 													//case 'toolbar:[bold]'
+				: MooRTE.Utilities.add(val, prop, caller, name); 								//case 'toolbar:[bold]'
 			break;
-			default: MooRTE.Utilities.add(val, prop, caller, name); break;											//case 'object': case 'array', which will be made into a new toolbar!
+			default: MooRTE.Utilities.add(val, prop, caller, name); break;						//case 'object': case 'array', which will be made into a new toolbar!
 		}
 	},
 	
@@ -243,10 +231,7 @@ MooRTE.Utilities = {
 			MooRTE.Utilities.run(val, 'onHide', caller, name);
 		});
 		caller.addClass('rteSelected rteAdd'+name);
-			console.log('about to call addElements with', prop, caller, caller.getParent('[class*=rteGroup_]'), 'squiget');
 		MooRTE.Utilities.addElements(prop, caller.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
-		//MooRTE.Utilities.addElements(prop, self.getParent('[class*=rteGroup_]'), 'bottom', 'rteGroup_'+name);
-		console.log('how now');
 		MooRTE.Utilities.run(val,'onShow',caller, name);	
 	},
 	
