@@ -119,21 +119,18 @@ MooRTE.Utilities = {
 	},
 	
 	updateBtns: function(e){
-		var ev;
-		
-		MooRTE.update.state.each(function(func,cmd){
-			if(func) func(cmd);
-			else if (ev = MooRTE.activeBar.getElement('.rte'+cmd))
-				window.document.queryCommandState(cmd) ? ev.addClass('rteSelected') : ev.removeClass('rteSelected');
+		var val, update = MooRTE.activeBar.retrieve('update'); //vals[command, element, function]
+
+		update.state.each(function(vals){ 
+			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
+			else window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
 		});
-		
-		MooRTE.update.value.each(function(func,cmd){
-			if(ev = window.document.queryCommandValue(cmd)) func(cmd,ev);
-		});
-		
-		if(MooRTE.update.custom) MooRTE.update.custom.each(function(func,cmd){
-			func(cmd);
-		});
+		update.value.each(function(vals){
+			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
+		})
+		update.custom.each(function(){
+			vals[2].bind(vals[1])(vals[0]);
+		})
 	},
 	
 	addElements: function(buttons, place, relative, name){
@@ -168,12 +165,6 @@ MooRTE.Utilities = {
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
-				if(val.onUpdate || state) 
-					MooRTE.update[
-						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
-						'value' : (state ? 'state' : 'custom')
-					].extend(Hash.set({},btn, val.onUpdate || ''));
-				
 				var properties = $H({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
@@ -191,7 +182,13 @@ MooRTE.Utilities = {
 				}).extend(val);
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
-				
+					
+				if(val.onUpdate || state) 
+					parent.retrieve('update', $H({'value':[], 'state':[], 'custom':[] }))[
+						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
+						'value' : (state ? 'state' : 'custom')
+					].push([btn, e, val.onUpdate]);
+			
 				if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
 				MooRTE.Utilities.run(val, 'onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
@@ -203,7 +200,6 @@ MooRTE.Utilities = {
 	},
 	
 	run: function(val, prop, caller, name){
-		var parent = caller.getParent('.RTE');
 		if(!(prop = val[prop])) return;
 		var args = val['args']; //Deprecated!
 		switch($type(prop)){
@@ -348,7 +344,7 @@ Element.implement({
 	}
 });
 
-MooRTE.Elements = {
+MooRTE.Elements = new Hash({
 
 	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
 	'File'         :{text:'File',   'class':'rteText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
@@ -447,4 +443,4 @@ MooRTE.Elements = {
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'l2old'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' }
-}
+});
