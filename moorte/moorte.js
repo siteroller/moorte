@@ -29,7 +29,7 @@ var MooRTE = new Class({
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField)
-			MooRTE.extend({update:{value:$H({}), state:$H({}), custom:$H({})}, ranges:$H({}), removed:$H({}), shortcuts:$H({}), activeField:'', activeBtn:'', activeBar:'' });
+			MooRTE.extend({ranges:$H({}), activeField:'', activeBtn:'', activeBar:'' });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -175,7 +175,7 @@ MooRTE.Utilities = {
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							MooRTE.Utilities.run(val, 'onClick', this, btn)
+							MooRTE.Utilities.eventHandler('onClick', this, btn)
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
@@ -189,8 +189,9 @@ MooRTE.Utilities = {
 						'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 			
-				if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
-				MooRTE.Utilities.run(val, 'onLoad', e, btn);
+				//if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
+				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn); //Can this be shortened? 
+				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
@@ -199,30 +200,25 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	run: function(val, prop, caller, name){
-		if(!(prop = val[prop])) return;
-		var args = val['args']; //Deprecated!
-		switch($type(prop)){
-			case 'function': prop.bind(caller)(args); return;
-			case 'string': 
-				'onLoad,onClick,onInit,'.contains(prop+',') ? MooRTE.Utilities.run(val, prop, caller, name)
-				: MooRTE.Utilities[prop] ? MooRTE.Utilities[prop].bind(caller)(args)			//case 'exec, clean'
-				: MooRTE.Utilities.add(val, prop, caller, name); 								//case 'toolbar:[bold]'
-			break;
-			default: MooRTE.Utilities.add(val, prop, caller, name); break;						//case 'object': case 'array', which will be made into a new toolbar!
+	eventHandler: function(event, caller, name){
+		if(!(event = $unlink(MooRTE.Elements[name][event]))) return;
+		switch($type(event)){
+			case 'function': event.bind(caller)(args); break;
+			case 'string': MooRTE.Utilities.eventHandler(event, caller, name); break;
+			case 'array': MooRTE.Utilities[event.shift()].bind(caller)(name,event); break;
 		}
 	},
 	
-	add: function(val, prop, caller, name){
-		var el, parent = caller.getParent('.RTE');;
-		(val.hides||caller.getSiblings('*[class*=rteAdd]')).each(function(el){ 
+	tab: function(name, elements){
+		var self = this, parent = this.getParent('.RTE');
+		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
-			MooRTE.Utilities.run(val, 'onHide', caller, name);
+			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
-		caller.addClass('rteSelected rteAdd'+name);
-		MooRTE.Utilities.addElements(prop, caller.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
-		MooRTE.Utilities.run(val,'onShow',caller, name);	
+		this.addClass('rteSelected rteAdd'+name);
+		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
+		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
 	clean: function(html, options){
@@ -346,11 +342,11 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']} },
-	'File'         :{text:'File',   'class':'rteText', onClick:{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']} },
-	'Font'         :{text:'Font',   'class':'rteText', onClick:{Toolbar:['start','fontSize']} },
-	'Insert'       :{text:'Insert', 'class':'rteText', onClick:{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']} },
-	'View'         :{text:'Views',  'class':'rteText', onClick:{Toolbar:['start','Html/Text']} },
+	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['tab',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
+	'File'         :{text:'File',   'class':'rteText', onClick:['tab',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
+	'Font'         :{text:'Font',   'class':'rteText', onClick:['tab',{Toolbar:['start','fontSize']}] },
+	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['tab',{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']}] },
+	'View'         :{text:'Views',  'class':'rteText', onClick:['tab',{Toolbar:['start','Html/Text']}] },
 	
 	'Justify'      :{img:'36', 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'Lists'        :{img:'41', 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },

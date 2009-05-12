@@ -27,3 +27,9 @@ function generic(){
 	//...
 	} while(loop && ++loopStop < 5);
 }
+
+function eventHandler(){
+	var func = prop.split(/^([^\(]+)(\((.*)\))?/);
+	var event = if (args.test(/^on[A-Z]/)); 
+	//case 'object': case 'array', which will be made into a new toolbar!
+}
