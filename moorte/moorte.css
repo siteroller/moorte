@@ -46,6 +46,26 @@ div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid
 /* Plugins */
 .rtefuUpload, .rtefuClear { cursor:pointer }
 
+#xrtePopup {position:fixed; background:#fff; z-index:1001; top:50%; left:50%  }
+#rteModal { position:fixed; top:0; left:0; height:100%; width:100%; z-index:1000; background-color:#333; opacity: 0.7; filter: alpha(opacity = 70);}
+#rtePopup{ position:fixed; top:50%; left:50%; background-color:#fff; z-index:1001; overflow:hidden; color:#3F3F3F; font:12px/18px Arial,Helvetica,sans-serif; 
+	box-shadow: 3px 3px 3px #888; -moz-box-shadow: 3px 3px 3px #888; -webkit-box-shadow: 3px 3px 3px #888; filter:progid:DXImageTransform.Microsoft.DropShadow(sProperties); 
+	-moz-border-radius:8px; -webkit-border-radius:8px; }
+#rtePopup #popHead { height: 25px; background-color:#E5E5E5; -moz-border-radius:8px 8px 0 0; }
+#rtePopup #popHead h3 { font:bold 12px/15px Arial; margin:5px 10px 4px 12px; color:#141414; float:left;}
+#rtePopup #popHead div{ font:bold 8px Tahoma; cursor:pointer; -moz-border-radius:10px; background-color:#fff; text-align:center;  height:14px; width:14px; float:right; margin:6px 6px 0 0; padding:1px;}
+#rtePopup #popMid { overflow:auto; font-size:12px; border:solid #DADADA; border-width:1px 0;}
+#rtePopup #popMid #popCont{ padding:10px 40px; }
+#rtePopup #popMid #popCont>span{ display:inline-block; width:90px; }
+#rtePopup #popMid #popCont>input{ width:134px; margin:2px 0; }
+#rtePopup #popMid #popCont div.radio input{ width:4px; }
+#rtePopup #popMid #popCont div.radio { text-align:right; }
+#rtePopup #popMid #popCont div.btns{ text-align:center; padding-top:12px; }
+#rtePopup #popMid #popCont>#rem{ font:10px tahoma; text-align:right; }
+#rtePopup #popMid #popCont>#rem>input{ vertical-align:middle; height:10px; }
+#rtePopup #popFoot{ height: 25px; text-align:right; background-color:#E5E5E5; -moz-border-radius:0 0 8px 8px;}
+#rtePopup #popFoot a{ text-decoration:none; font:7px Tahoma; color:#000; float:right; margin:5px 10px; }
+
 /* Old */
 xdiv.RTE div.rteR0{ border-bottom:1px #bbb solid; }
 xa:hover{ border:2px solid red; margin:0; }

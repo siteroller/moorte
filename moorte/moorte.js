@@ -6,11 +6,13 @@
 *		Mark Kohen
 *		T. Anolik
 *	Credits:
-*	Entirely based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
+*	Based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
 *	Ideas and inspiration: Guillerr, MooEditable
 *	Icons from OpenWysiwyg - http://www.openwebware.com
-*	Many of the cleanup regexs from CheeAun and Ryan's work on MooEditable
+*	Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
 *	We really want your help!  Please join!!
+*	Notes:
+*	The syntax myFunction.bind(myObj)(args) is used instead of myFunction.run(args,myObj) due to debugging problems in Firebug with the latter syntax!
 */
 
 var MooRTE = new Class({
@@ -28,8 +30,7 @@ var MooRTE = new Class({
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField)
-			MooRTE.extend({ranges:$H({}), activeField:'', activeBtn:'', activeBar:'' });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:$H({}), activeField:'', activeBtn:'', activeBar:'' });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -49,7 +50,7 @@ var MooRTE = new Class({
 			});
 		})
 		
-		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');								//in case a button is pressed before anything is selected.
+		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');									//in case a button is pressed before anything is selected.
 		els[0].fireEvent('focus');//,els[0]
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
@@ -84,10 +85,10 @@ var MooRTE = new Class({
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten(); 											// args can be an array (for the hash), or regular arguments(elsewhere).
-		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));	//Fix for FF3 bug for justify, in&outdent
+		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
+		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase())); //Fix for FF3 bug for justify, in&outdent
 		if(g) document.designMode = 'on';
-		document.execCommand(args[0], args[2]||null, args[1]||false);				//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
+		document.execCommand(args[0], args[2]||null, args[1]||false);					//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
 		if(g) document.designMode = 'off';
 	},
 	
@@ -100,12 +101,9 @@ MooRTE.Utilities = {
 	setRange: function(rangeName) {
 		var range = MooRTE.ranges[rangeName || 1]
 		if(range.select) range.select(); 
-		else{	
+		else{
 			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			if (sel.addRange){
-				sel.removeAllRanges();
-				sel.addRange(range);
-			}
+			if (sel.addRange) sel.removeAllRanges().addRange(range);
 		}
  	},
 	
@@ -123,7 +121,7 @@ MooRTE.Utilities = {
 
 		update.state.each(function(vals){ 
 			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
-			else window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
+			else {console.log(vals);window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
 		});
 		update.value.each(function(vals){
 			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
@@ -138,7 +136,7 @@ MooRTE.Utilities = {
 		if(!place) place = MooRTE.activeBar.getFirst();
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
-			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes.  Convert double to single quoutes. 
+			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
@@ -175,13 +173,13 @@ MooRTE.Utilities = {
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
 							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							MooRTE.Utilities.eventHandler('onClick', this, btn)
+							else MooRTE.Utilities.eventHandler('onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
 				}).extend(val);
 				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative||'bottom').addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
+				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
 				if(val.onUpdate || state) 
 					parent.retrieve('update', $H({'value':[], 'state':[], 'custom':[] }))[
@@ -189,8 +187,7 @@ MooRTE.Utilities = {
 						'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 			
-				//if (val.shortcut) parent.store('shortcuts', parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn)); //Can this be shortened? 
-				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn); //Can this be shortened? 
+				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
@@ -219,6 +216,47 @@ MooRTE.Utilities = {
 		this.addClass('rteSelected rteAdd'+name);
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
+	},
+	
+	popup: function(instance, content, title){
+		var modalPopup = new Element('div', {id:'modalPopup'}).inject(document.body);
+		var modal = ( $('rteModal') ? $('rteModal') : new IFrame({ id:'rteModal', events:{'mouseenter':function(){ console.log('c'); }, 'focus':function(){console.log('d');} } }).inject(modalPopup, 'top')).contentWindow.document;
+		modal.open();
+		modal.write('<html><body>&nbsp;</body></html>');
+		if(console)console.log('Fixing FireBugs!')
+		$('rteModal').contentWindow.document.close(); //modal.close();
+		/*
+		var pop = new Element('form', {id:'rtePopup'}).adopt(
+				new Element(div) 
+		).inject(modalPopup);
+		*/
+		var pop = '<form id="rtePopup'+instance+'" action="">  <div id="popHead"><h3>'+title+'</h3><div id="pop1">X</div></div> <div id="popMid"><div id="popCont">'
+			+content+'</div></div>  <div id="popFoot"><a href="http://www.siteroller.net"></a></div></form>';
+		var popup = new Element('form', {'id':'rtePopup', 'html':pop}).inject(modalPopup);
+		var d = popup.getSize();
+		//popup.getElement('')
+		
+		return popup.setStyle('margin', d.y/-2+' '+d.x/-2);
+	},
+	
+	popupURL: function(){
+		var pop = $('popupURL');
+		if(pop) pop.removeClass('rteHidden');
+		else{
+			var html = "<span>Text of Link:</span><input type='text' id='popURL'/><br/>\
+				<span>Link to:</span><input type='text' id='popURL'/><br/>\
+				<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
+				<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
+			
+			pop = MooRTE.Utilities.popup('popupURL', html, 'Edit Link');
+			console.log('pop', pop)
+			pop.getElement('#purlOK').addEvent('click', function(){
+				
+			})
+			pop.getElement('#purlCancel').addEvent('click', function(){
+				
+			})
+		}	
 	},
 	
 	clean: function(html, options){
@@ -342,7 +380,7 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['tab',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
+	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['tab',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript','popupURL']}] },
 	'File'         :{text:'File',   'class':'rteText', onClick:['tab',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
 	'Font'         :{text:'Font',   'class':'rteText', onClick:['tab',{Toolbar:['start','fontSize']}] },
 	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['tab',{Toolbar:['start','Link','fuUploadBar','inserthorizontalrule']}] },
@@ -427,6 +465,7 @@ MooRTE.Elements = new Hash({
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
+	'popupURL'     :{ onClick:['popupURL'] },
 	
 	//untested:
 	'decreasefontsize':{img:'29'},
@@ -438,5 +477,7 @@ MooRTE.Elements = new Hash({
 	//unused:
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'l2old'         :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' }
-});
+	'l2old'        :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
+	'popup'        :{onClick:['popup',"<span>Username:</span><input type='text' name='user' class='validate-alphanum'/><br/><span>Password:</span><input type='password' name='pass'\
+						class='validate-alphanum'/><div id='rem'><input type='checkbox'/>Remember me!</div><div id='log'><input type='submit' value='log in'/></div>"]}
+	});
