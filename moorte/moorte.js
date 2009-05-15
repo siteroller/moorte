@@ -30,7 +30,7 @@ var MooRTE = new Class({
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'' });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -203,16 +203,17 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	eventHandler: function(event, caller, name){
-		if(!(event = $unlink(MooRTE.Elements[name][event]))) return;
+	eventHandler: function(onEvent, caller, name){
+		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
-			case 'function': event.bind(caller)(name); break;
+			case 'function': event.bind(caller)(name,onEvent); break;
 			case 'string': MooRTE.Utilities.eventHandler(event, caller, name); break;
-			case 'array': MooRTE.Utilities[event.shift()].bind(caller)(name,event); break;
+			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
 		}
 	},
 	
-	tab: function(name, elements){
+	group: function(elements, name){
+		console.log(arguments)
 		var self = this, parent = this.getParent('.RTE');
 		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
@@ -236,11 +237,11 @@ MooRTE.Utilities = {
 			
 			pop = new Popup('popupURL', html, 'Edit Link');
 			pop.getElement('#purlOK').addEvent('click', function(e){
-				MooRTE.Utilities.setRange();
-				MooRTE.Utilities.exec('createlink', pop.getElementById('popURL').get('value')); 
+				MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
+				var value = pop.getElementById('popURL').get('value');
+				MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
 				$('pop').addClass('popHide'); e.stop();
 				e.stop(); 
-				//MooRTE.activeBar.retrieve('ranges').set();
 			})
 			pop.getElement('#purlCancel').addEvent('click', function(e){
 				$('pop').addClass('popHide'); e.stop();
@@ -248,6 +249,18 @@ MooRTE.Utilities = {
 		}
 		$('popTXT').set('value',MooRTE.ranges.a1);
 		
+	},
+	
+	assetLoader:function(folder,js,css,key,event){
+		console.log(arguments)
+		var path = MooRTE.path+folder;
+		$splat(js).each(function(){
+			Asset.javascript(path+js);			
+		})
+		$splat(css).each(function(){
+			Asset.css(path+css);			
+		})
+		Hash.erase(MooRTE.Elements[key],event);
 	},
 	
 	clean: function(html, options){
@@ -371,11 +384,11 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['tab',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
-	'File'         :{text:'File',   'class':'rteText', onClick:['tab',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
-	'Font'         :{text:'Font',   'class':'rteText', onClick:['tab',{Toolbar:['start','fontSize']}] },
-	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['tab',{Toolbar:['start','popupURL','fuUploadBar','inserthorizontalrule']}] },
-	'View'         :{text:'Views',  'class':'rteText', onClick:['tab',{Toolbar:['start','Html/Text']}] },
+	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
+	'File'         :{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
+	'Font'         :{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
+	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','fuUploadBar','inserthorizontalrule']}] },
+	'View'         :{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 	
 	'Justify'      :{img:'36', 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'Lists'        :{img:'41', 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
@@ -456,7 +469,8 @@ MooRTE.Elements = new Hash({
 					}},
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
-	'popupURL'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
+	//'popupURL'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
+	'popupURL'     :{ img:'8', onLoad:['assetLoader','plugins/Popup/','Popup.js','Popup.css'], onClick:MooRTE.Utilities.popupURL },
 	
 	//untested:
 	'decreasefontsize':{img:'29'},
@@ -472,81 +486,3 @@ MooRTE.Elements = new Hash({
 	'popup'        :{onClick:['popup',"<span>Username:</span><input type='text' name='user' class='validate-alphanum'/><br/><span>Password:</span><input type='password' name='pass'\
 						class='validate-alphanum'/><div id='rem'><input type='checkbox'/>Remember me!</div><div id='log'><input type='submit' value='log in'/></div>"]}
 	});
-	
-	
-	var Popup = new Class({
-		
-		Implements: [Options],
-
-		options:{
-			modal: true,
-			clickHide: false,
-			location: 'center center', 	
-			id: '',
-			footer:'',
-			update:false
-		},
-		
-		initialize: function(id,content,title,options){
-			function $El(tag,props){ return new Element(tag,props); };
-			
-			var self = this.setOptions(options), pop;
-			if(!$('pop')){				
-				pop = $El('div',{id:'pop'}).inject(document.body).adopt(
-					new IFrame({id:'popModal'}),
-					$El('form', {id:'popPrototype','class':'popup popHide'}).adopt(
-						$El('div',{'class':'popHead'}).adopt(
-							$El('h3',{'class':'popTitle'}), 
-							$El('div',{'class':'popClose','text':'X'}) 
-						),
-						$El('div',{'class':'popMid'}).adopt(
-							$El('div',{'class':'popContent'})
-						),
-						$El('div',{'class':'popFooter'})
-					)
-				);
-				
-				var modal = $('popModal').contentWindow.document;
-				modal.open();
-				modal.write('<html><body>&nbsp;</body></html>');
-				modal.close();				
-			
-			} 
-			this.show();
-			if(!(popup = $(id))){
-				popup = $('popPrototype').clone().set('id',id).inject('pop');
-				popup.getElement('.popClose').addEvent('click',self.hide);
-				popup.getElement('.popTitle').set('html',title);
-				popup.getElement('.popContent').set('html',content);
-				popup.getElement('.popFooter').set('html',self.footer);
-			}
-			popup.removeClass('popHide');
-			var d = popup.getSize();
-			return popup.setStyle('margin', d.y/-2+' '+d.x/-2);	
-			
-			/*var format = self.location.split(/\s+/);
-			while(++i<2){
-				var num = ['top','center','bottom'].indexOf(format[0]);
-				if(num > -1){
-					margin.push(d[i]/-num);
-					background-position:
-			}
-			switch(format[1]){
-				case 'center' : ['50%', -2]; break;
-				case 'bottom': ['100%', -1]; break;
-				case 'top': [0,0]
-			[0,d.y,d.y/2]
-			var y = 'center,bottom,top'.contains(format[1]).contains('px') ? 
-			*/
-		},
-		
-		hide:function(){
-			$('pop').addClass('popHide');
-		},
-		
-		show: function(){
-		console.log('show')
-			$('pop').removeClass('popHide');
-		}
-	
-	})

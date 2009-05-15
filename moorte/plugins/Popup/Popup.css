@@ -1,0 +1,12 @@
+#popModal { position:fixed; top:0; left:0; height:100%; width:100%; z-index:1000; background-color:#333; opacity: 0.7; filter: alpha(opacity = 70);}
+.popup{ position:fixed; top:50%; left:50%; background-color:#fff; z-index:1001; overflow:hidden; color:#3F3F3F; font:12px/18px Arial,Helvetica,sans-serif; 
+	box-shadow: 3px 3px 3px #888; -moz-box-shadow: 3px 3px 3px #888; -webkit-box-shadow: 3px 3px 3px #888; filter:progid:DXImageTransform.Microsoft.DropShadow(sProperties); 
+	-moz-border-radius:8px; -webkit-border-radius:8px; }
+.popup .popHead { height: 25px; background-color:#E5E5E5; -moz-border-radius:8px 8px 0 0; }
+.popup .popHead h3 { font:bold 12px/15px Arial; margin:5px 10px 4px 12px; color:#141414; float:left;}
+.popup .popHead div{ font:bold 8px Tahoma; cursor:pointer; -moz-border-radius:10px; background-color:#fff; text-align:center;  height:14px; width:14px; float:right; margin:6px 6px 0 0; padding:1px;}
+.popup .popMid { overflow:auto; font-size:12px; border:solid #DADADA; border-width:1px 0;}
+.popup .popMid .popContent{ padding:10px 40px; }
+.popup .popFooter{ height: 25px; text-align:right; background-color:#E5E5E5; -moz-border-radius:0 0 8px 8px;}
+.popup .popFooter a{ text-decoration:none; font:7px Tahoma; color:#000; float:right; margin:5px 10px; }
+.popHide{ display:none }
