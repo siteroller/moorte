@@ -29,12 +29,13 @@ var MooRTE = new Class({
 	
 	initialize: function(options){
 		this.setOptions(options);
+		
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
-			if(l=='e' || !rte) rte = self.insertToolbar(l);  						//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
+			if(l=='e' || !rte) rte = self.insertToolbar(l);  					//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
 			if(l=='b' || l=='t' || !l) el.set('contentEditable', true).focus();		//[L]ocation == page[t]op, page[b]ottom, none[] 
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
@@ -58,12 +59,12 @@ var MooRTE = new Class({
 	},
 	
 	insertToolbar: function (pos){
-		self = this;
+		var self = this;
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
 		MooRTE.activeBar = rte; // not used!
-		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto')
+		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto');
 		return rte;
 	},
 	
@@ -81,7 +82,7 @@ var MooRTE = new Class({
 		el.addClass('rteHide');
 		return div;
 	}
-})
+});
 
 MooRTE.Utilities = {
 	exec: function(args){
@@ -97,7 +98,6 @@ MooRTE.Utilities = {
 		if (!sel) return null;
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 		MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-		console.log(MooRTE.ranges)
 	},
 	
 	setRange: function(rangeName) {
@@ -105,7 +105,6 @@ MooRTE.Utilities = {
 		if(range.select) range.select(); 
 		else{
 			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			console.log(sel)
 			if (sel.removeAllRanges){ 
 				sel.removeAllRanges();
 				sel.addRange(range);
@@ -127,7 +126,7 @@ MooRTE.Utilities = {
 
 		update.state.each(function(vals){ 
 			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
-			else {console.log(vals);window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
+			else { window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
 		});
 		update.value.each(function(vals){
 			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
@@ -148,7 +147,7 @@ MooRTE.Utilities = {
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
 			buttons = JSON.decode('['+buttons+']');
 		}
-		
+	
 		//the following should be a loop.  When was the loop removed and why?!
 		if(btns[0]){ buttons = btns; btns = [];}
 		$splat(buttons).each(function(item){
@@ -160,9 +159,11 @@ MooRTE.Utilities = {
 		});
 		
 		btns.each(function(btn){
-			var btnVals;
+			var btnVals,btnClass;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			[btn,btnClass] = btn.split('.');
+			//[btn,btnClass] = btn.split('.');
+			btnClass = btn.split('.');
+			btn=btnClass.shift();
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
 			
 			if(!e){
@@ -192,7 +193,6 @@ MooRTE.Utilities = {
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
 						'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
-			
 				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
@@ -201,9 +201,11 @@ MooRTE.Utilities = {
 			}
 			e.removeClass('rteHide')
 		})
+			
 	},
 	
 	eventHandler: function(onEvent, caller, name){
+		var event;
 		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
@@ -213,7 +215,6 @@ MooRTE.Utilities = {
 	},
 	
 	group: function(elements, name){
-		console.log(arguments)
 		var self = this, parent = this.getParent('.RTE');
 		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
@@ -252,7 +253,6 @@ MooRTE.Utilities = {
 	},
 	
 	assetLoader:function(folder,js,css,key,event){
-		console.log(arguments)
 		var path = MooRTE.path+folder;
 		$splat(js).each(function(){
 			Asset.javascript(path+js);			
