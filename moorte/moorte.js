@@ -55,7 +55,9 @@ var MooRTE = new Class({
 		els[0].fireEvent('focus');//,els[0]
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
-		MooRTE.Utilities.exec('styleWithCSS');
+		
+		if(Browser.Engine.gecko) MooRTE.Utilities.exec('styleWithCSS');
+		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
 	},
 	
 	insertToolbar: function (pos){
@@ -83,12 +85,12 @@ var MooRTE = new Class({
 		return div;
 	}
 });
-
+var k = 0;
 MooRTE.Utilities = {
 	exec: function(args){
 		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase())); //Fix for FF3 bug for justify, in&outdent
-		if(g) document.designMode = 'on';
+		if(g) document.designMode = 'on';//alert(args);
 		document.execCommand(args[0], args[2]||null, args[1]||false);					//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
 		if(g) document.designMode = 'off';
 	},
@@ -226,41 +228,17 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
-	popupURL: function(){
-		MooRTE.Utilities.storeRange();
-		var pop = $('pop');
-		if(pop) pop.removeClass('popHide');
-		else{
-			var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
-				<span>Link to:</span><input type='text' id='popURL'/><br/>\
-				<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
-				<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
-			
-			pop = new Popup('popupURL', html, 'Edit Link');
-			pop.getElement('#purlOK').addEvent('click', function(e){
-				MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
-				var value = pop.getElementById('popURL').get('value');
-				MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-				$('pop').addClass('popHide'); e.stop();
-				e.stop(); 
-			})
-			pop.getElement('#purlCancel').addEvent('click', function(e){
-				$('pop').addClass('popHide'); e.stop();
-			})
-		}
-		$('popTXT').set('value',MooRTE.ranges.a1);
+	assetLoader:function(clas,folder,js,css,key,event){
+		Hash.erase(MooRTE.Elements[key],event);
+		if(window[clas]) return;
 		
-	},
-	
-	assetLoader:function(folder,js,css,key,event){
 		var path = MooRTE.path+folder;
 		$splat(js).each(function(){
 			Asset.javascript(path+js);			
 		})
 		$splat(css).each(function(){
 			Asset.css(path+css);			
-		})
-		Hash.erase(MooRTE.Elements[key],event);
+		})		
 	},
 	
 	clean: function(html, options){
@@ -409,9 +387,23 @@ MooRTE.Elements = new Hash({
 	'superscript'  :{img:'44'},
 	'indent'       :{img:'40'},
 	'outdent'      :{img:'39'},
-	'paste'        :{img:'9',  title:'Paste (Ctrl+V)'},
-	'copy'         :{img:'4',  title:'Copy (Ctrl+C)'},
-	'cut'          :{img:'5',  title:'Cut (Ctrl+X)'},
+	'cut'          :{img:'5',  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css'], onClick:function(action){	
+							if (Browser.Engine.gecko){
+								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
+								else{
+									var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+												(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+												If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
+												<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
+									new Popup('popupCutCopy', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+										$$('#pop,#popupCutCopy').addClass('popHide'); e.stop();
+									})
+								}
+							} else MooRTE.Utilities.exec(action); 
+						}
+					},
+	'copy'         :{img:'4',  title:'Copy (Ctrl+C)', onClick:function(){ MooRTE.Elements.cut.onClick('copy'); }},
+	'paste'        :{img:'9',  title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
 	'redo'         :{img:'12', title:'Redo (Ctrl+Y)' },
 	'undo'         :{img:'11', title:'Undo (Ctrl + Z)' },
 	'justifyleft'  :{img:'35', title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
@@ -470,7 +462,31 @@ MooRTE.Elements = new Hash({
 	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
 	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
 	//'popupURL'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
-	'popupURL'     :{ img:'8', onLoad:['assetLoader','plugins/Popup/','Popup.js','Popup.css'], onClick:MooRTE.Utilities.popupURL },
+	'popupURL'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css'], onClick:function(){
+							MooRTE.Utilities.storeRange();
+							var pop = $('pop');
+							if(pop) pop.removeClass('popHide');
+							else{
+								var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
+									<span>Link to:</span><input type='text' id='popURL'/><br/>\
+									<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
+									<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
+								
+								pop = new Popup('popupURL', html, 'Edit Link');
+								pop.getElement('#purlOK').addEvent('click', function(e){
+									MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
+									var value = pop.getElementById('popURL').get('value');
+									MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+									$('pop').addClass('popHide'); e.stop();
+									e.stop(); 
+								})
+								pop.getElement('#purlCancel').addEvent('click', function(e){
+									$('pop').addClass('popHide'); e.stop();
+								})
+							}
+							$('popTXT').set('value',MooRTE.ranges.a1);
+						} 
+					},
 	
 	//untested:
 	'decreasefontsize':{img:'29'},
