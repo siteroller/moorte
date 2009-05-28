@@ -382,67 +382,43 @@ var upload;
 
 MooRTE.Elements = new Hash({
 
+	// Groups (Toolbars) - All groups should be created dynamically by the download builder.
 	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
 	'File'         :{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
 	'Font'         :{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','Upload Photo','inserthorizontalrule']}] },//'fuUploadBar'
+	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule']}] },//'Upload Photo','inserthorizontalrule']}] 
 	'View'         :{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 	
+	// Groups (Flyouts) - All groups should be created dynamically by the download builder.
 	'Justify'      :{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'Lists'        :{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
 	'Indents'      :{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
-	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
-	
+	                
+	// Buttons
 	'div'          :{element:'div'},
-	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
-	'Toolbar'      :{element:'div'},  // ''
-	'start'        :{element:'span'},
-	
-	'|'            :{text:'|', title:'', element:'span'},
 	'bold'         :{img:1, shortcut:'b' },
 	'italic'       :{img:2, shortcut:'i' },
 	'underline'    :{img:3, shortcut:'u' },
 	'strikethrough':{img:4},
-	'subscript'    :{img:18},
-	'superscript'  :{img:17},
-	'outdent'      :{img:11},
-	'indent'       :{img:12},
-	'cut'          :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
-							if (Browser.Engine.gecko){
-								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
-								else{
-									var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-												(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-												If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
-												<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
-									new Popup('popupCutCopy', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
-										$$('#pop,#popupCutCopy').addClass('popHide'); e.stop();
-									})
-								}
-							} else MooRTE.Utilities.exec(action); 
-						}
-					},
-	'copy'         :{img:21,  title:'Copy (Ctrl+C)', onClick:function(){ MooRTE.Elements.cut.onClick('copy'); }},
-	'paste'        :{img:22,  title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
-	'redo'         :{img:32, title:'Redo (Ctrl+Y)' },
-	'undo'         :{img:31, title:'Undo (Ctrl + Z)' },
 	'justifyleft'  :{img:6, title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
 	'justifyfull'  :{img:7, title:'Justify Full'  },
 	'justifycenter':{img:8, title:'Justify Center'},
 	'justifyright' :{img:9, title:'Justify Right' },
+	'subscript'    :{img:18},
+	'superscript'  :{img:17},
+	'outdent'      :{img:11},
+	'indent'       :{img:12},
 	'insertorderedlist'  :{img:14, title:'Numbered List' },
 	'insertunorderedlist':{img:15, title:'Bulleted List' },
-	'l0'           :{'text':'enter the url', element:'span' },
-	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
-	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-	'nolink'       :{'text':'please select the text to be made into a link'},
-	'unlink'       :{img:'6'},
-	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
-	'imgSelect'    :{element:'span', text:'URL of image' },
-	'imgInput'     :{type:'text' },
-	'insertimage'  :{onClick:function(args, classRef){ 
-						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
-					}},
+	'copy'         :{img:21, title:'Copy (Ctrl+C)',  onClick:function(){ MooRTE.Elements.cut.onClick('copy');  }},
+	'paste'        :{img:22, title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
+	'selectall'    :{img:25, title:'Select All (Ctrl + A)'},
+	'removeformat' :{img:26, title:'Clear Formatting'},
+	'undo'         :{img:31, img:'11', title:'Undo (Ctrl + Z)' },
+	'redo'         :{img:32, title:'Redo (Ctrl+Y)' },
+	'decreasefontsize':{img:42},
+	'increasefontsize':{img:41},	
+	'inserthorizontalrule':{img:30},
 	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
 						this.getParent('.MooRTE').retrieve('fields').each(function(el){
@@ -463,7 +439,119 @@ MooRTE.Elements = new Hash({
 						c[1] = -(c[2] - 255*saturation);
 						var hex = c.rgbToHex();
 					}},
-	'popupURL'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
+	'cut'          :{img:'5',  title:'Cut (Ctrl+X)', 
+						onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
+						onLoad:function(){ 
+							if (Browser.Engine.gecko) 
+								new Loader({
+									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
+									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
+									onComplete:function(){
+										var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+													(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+													If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
+													<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
+										new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+											$$('#pop,#clipboardPopup').addClass('popHide'); e.stop();
+										});
+										$$('#pop,#clipboardPopup').addClass('popHide');
+									} 
+								});
+						}
+					},
+	'popupURL'     :{ img:'8',
+						onClick:function(){
+							MooRTE.Utilities.storeRange();
+							$$('#pop,#popupURL').removeClass('popHide');
+							$('popTXT').set('value',MooRTE.ranges.a1);
+						},
+						onLoad:function(){
+							new Loader({
+								scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
+								styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
+								onComplete:function(){
+									var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
+										<span>Link to:</span><input type='text' id='popURL'/><br/>\
+										<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
+										<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
+									var pop = new Popup('popupURL', html, 'Edit Link');
+									pop.getElement('#purlCancel').addEvent('click', function(e){
+										$$('#pop,#popupURL').addClass('popHide'); e.stop();
+									});
+									pop.getElement('#purlOK').addEvent('click', function(e){
+										MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
+										var value = pop.getElementById('popURL').get('value');
+										MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+										$$('#pop,#popupURL').addClass('popHide'); e.stop();
+										e.stop(); 
+									})
+									$$('#pop,#popupURL').addClass('popHide');
+								} 
+							})
+						}
+					},
+	'Upload Photo' :{ img:15, 
+						onLoad:function(){
+							new Loader({
+								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
+								styles: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
+								onComplete:function(){
+									var uploader = new Swiff.Uploader({ //verbose: true, 
+										target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
+										typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
+										path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
+										url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
+										onButtonDown :function(){ MooRTE.Utilities.setRange() },
+										onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
+										onFileProgress: function(val){  },//self.set('text',val);
+										onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
+									});
+									this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
+								}
+							})
+						}							
+					},
+
+//depracated
+	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
+	'Toolbar'      :{element:'div'},  // ''
+	'unlink'       :{img:'6'},
+	'start'        :{element:'span'},
+	'|'            :{text:'|', title:'', element:'span'},
+	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
+	'l0'           :{'text':'enter the url', element:'span' },
+	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
+	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+	'nolink'       :{'text':'please select the text to be made into a link'},
+	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
+	'imgSelect'    :{element:'span', text:'URL of image' },
+	'imgInput'     :{type:'text' },
+	'insertimage'  :{onClick:function(args, classRef){ 
+						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
+					}},
+	'cut-old'          :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
+							if (Browser.Engine.gecko){
+								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
+								else{
+									var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+												(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+												If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
+												<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
+									new Popup('popupCutCopy', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+										$$('#pop,#popupCutCopy').addClass('popHide'); e.stop();
+									})
+								}
+							} else MooRTE.Utilities.exec(action); 
+						}
+					},
+	'save-old'     :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
+						var content = $H({ 'page': window.location.pathname });
+						this.getParent('.MooRTE').retrieve('fields').each(function(el){
+							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
+						});
+						new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
+					}},
+	'popupURL-old'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
 							MooRTE.Utilities.storeRange();
 							var pop = $('pop');
 							if(pop) pop.removeClass('popHide');
@@ -488,7 +576,7 @@ MooRTE.Elements = new Hash({
 							$('popTXT').set('value',MooRTE.ranges.a1);
 						} 
 					},
-	'Upload Photo' :{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
+	'Upload Photo-old' :{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
 						onLoad:['assetLoader','Swiff.Uploader','../../fancyupload/fancyupload/source/', 'Swiff.Uploader.js','Swiff.Uploader.css', function(){
 							uploader = new Swiff.Uploader({ 
 								verbose: true, target:this, queued: false, multiple: false, instantStart: true, 
@@ -498,39 +586,7 @@ MooRTE.Elements = new Hash({
 								fileProgress: function(val){ this.set('txt',val); } 
 							});
 						}]
-					},
+					}
 	
-	//untested:
-	'decreasefontsize':{img:42},
-	'increasefontsize':{img:41},
-	'inserthorizontalrule':{img:30},
-	'removeformat' :{img:26, title:'Clear Formatting'},
-	'selectall'    :{img:25, title:'Select All (Ctrl + A)'},
 	
-	//unused:
-	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
-	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'l2old'        :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
-	'popup'        :{onClick:['popup',"<span>Username:</span><input type='text' name='user' class='validate-alphanum'/><br/><span>Password:</span><input type='password' name='pass'\
-						class='validate-alphanum'/><div id='rem'><input type='checkbox'/>Remember me!</div><div id='log'><input type='submit' value='log in'/></div>"]},
-	'fuUploadBar'  :{ title:'Upload Image', img:15, onClick:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
-	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
-	'fuUpload'     :{ id:"fuUpload", onClick:'', element:'span', text:'Upload Files', title:''},
-	'fuClear'      :{ id:"fuClear", element:'span', text:'Clear List' ,title:''},	
-	'fuStatus'     :{ element:'span', id:'fuStatus', contains:'[fu1,fu2,fu3,fu4,fu5]'},
-	'fu1'          :{ element:'strong', 'class':'overall-title'},
-	'fu2'          :{ element:'strong', 'class':'current-title'},
-	'fu3'          :{ element:'div',    'class':'current-text' },
-	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
-	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
-	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
-						var path = new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/fancyUpload';
-						Asset.javascript(path+'.js');
-						Asset.css(path+'.css');
-					}},
-	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
-	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
-	'popupURLold'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
-	'test'         :{onClick:function(){console.log(arguments)}, args:this}
-
 });
