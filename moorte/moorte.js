@@ -28,8 +28,8 @@ var MooRTE = new Class({
 	},
 	
 	initialize: function(options){
+		//if($type(options)!='object')options={elements:options}
 		this.setOptions(options);
-		
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') });
 		
@@ -66,7 +66,8 @@ var MooRTE = new Class({
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
 		MooRTE.activeBar = rte; // not used!
-		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto');
+		console.log('insertToolbar');
+		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); //Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	},
 	
@@ -85,7 +86,7 @@ var MooRTE = new Class({
 		return div;
 	}
 });
-var k = 0;
+//var k = 0;
 MooRTE.Utilities = {
 	exec: function(args){
 		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
@@ -139,17 +140,23 @@ MooRTE.Utilities = {
 	},
 	
 	addElements: function(buttons, place, relative, name){
-		
 		if(!place) place = MooRTE.activeBar.getFirst();
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
+		console.log('buttons #0', buttons);	
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
+console.log('buttons #1', buttons);	
+	buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
+			console.log('buttons #2', buttons);	
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
+			console.log('buttons #3', buttons);	
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
+			console.log('buttons #4', buttons);	
 			buttons = JSON.decode('['+buttons+']');
+			console.log('buttons #5', buttons);	
 		}
-	
+	console.log('addElements:buttons', buttons)
+		
 		//the following should be a loop.  When was the loop removed and why?!
 		if(btns[0]){ buttons = btns; btns = [];}
 		$splat(buttons).each(function(item){
@@ -159,16 +166,17 @@ MooRTE.Utilities = {
 				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
 			}
 		});
-		
+		console.log('addElements:btns', btns)
 		btns.each(function(btn){
 			var btnVals,btnClass;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			//[btn,btnClass] = btn.split('.');
-			btnClass = btn.split('.');
+			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn=btnClass.shift();
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
+			console.log('eaching. Now up to ',btn,name,e)
 			
-			if(!e){
+			if(!e || name == 'rteGroup_Auto'){
+				console.log('eaching. Now up to !e ',btn)
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
@@ -197,6 +205,7 @@ MooRTE.Utilities = {
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
+				//console.log('btnVals:',btnVals,'val.contains:',val.contains);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
@@ -208,6 +217,7 @@ MooRTE.Utilities = {
 	
 	eventHandler: function(onEvent, caller, name){
 		var event;
+		console.log(onEvent, 'onEvent')
 		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
@@ -217,6 +227,7 @@ MooRTE.Utilities = {
 	},
 	
 	group: function(elements, name){
+		console.log('element',elements)
 		var self = this, parent = this.getParent('.RTE');
 		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
@@ -228,16 +239,18 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
-	assetLoader:function(clas,folder,js,css,key,event){
+	assetLoader:function(clas,folder,js,css,onload,key,event){
+	//console.log(js)
 		Hash.erase(MooRTE.Elements[key],event);
 		if(window[clas]) return;
 		
 		var path = MooRTE.path+folder;
-		$splat(js).each(function(){
-			Asset.javascript(path+js);			
+		$splat(css).each(function(file){
+			Asset.css(path+file);			
 		})
-		$splat(css).each(function(){
-			Asset.css(path+css);			
+		$splat(js).each(function(file){
+			//console.log(js, $splat(js), $splat(js).getLast(), key, onload)
+			Asset.javascript(path+file,{'onload':onload});	//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
 		})		
 	},
 	
@@ -341,15 +354,20 @@ MooRTE.Utilities = {
 }
 
 Element.implement({
-	//$$('div.RTE')[0].moorte();
 	moorte:function(directive, options){
 		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		if($type(directive)=='object'){options = directive; directive = ''} 
 		if(!directive || (directive == 'create')){
-			if(removed = this.retrieve('removed')){
-				this.grab(removed, 'top');
-				this.store('removed','');
-			} else return bar ? this.removeClass('rteHide') : new MooRTE(this, options);
+			/*
+				console.log(options);	
+				if(removed = this.retrieve('removed')){
+					this.grab(removed, 'top');
+					this.store('removed','');
+				} else
+			*/			
+			return bar ? this.removeClass('rteHide') : new MooRTE($extend(options,{'elements':this}));
 		}else{
+			console.log('dire',directive,bar);
 			if(!bar) return false;
 			else switch(directive.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
@@ -360,18 +378,20 @@ Element.implement({
 	}
 });
 
+var upload;
+
 MooRTE.Elements = new Hash({
 
 	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
-	'File'         :{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
+	'File'         :{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
 	'Font'         :{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','fuUploadBar','inserthorizontalrule']}] },
+	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','Upload Photo','inserthorizontalrule']}] },//'fuUploadBar'
 	'View'         :{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 	
-	'Justify'      :{img:'36', 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'Lists'        :{img:'41', 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
-	'Indents'      :{img:'40', 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
-	'Link'         :{img: '8', onClick:{Toolbar:['l0','l1','l2','unlink']} },
+	'Justify'      :{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+	'Lists'        :{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
+	'Indents'      :{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
+	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
 	
 	'div'          :{element:'div'},
 	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
@@ -379,15 +399,15 @@ MooRTE.Elements = new Hash({
 	'start'        :{element:'span'},
 	
 	'|'            :{text:'|', title:'', element:'span'},
-	'bold'         :{img:'1', shortcut:'b' },
-	'italic'       :{img:'33', shortcut:'i' },
-	'underline'    :{img:'32', shortcut:'u' },
-	'strikethrough':{img:'34'},
-	'subscript'    :{img:'43'},
-	'superscript'  :{img:'44'},
-	'indent'       :{img:'40'},
-	'outdent'      :{img:'39'},
-	'cut'          :{img:'5',  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css'], onClick:function(action){	
+	'bold'         :{img:1, shortcut:'b' },
+	'italic'       :{img:2, shortcut:'i' },
+	'underline'    :{img:3, shortcut:'u' },
+	'strikethrough':{img:4},
+	'subscript'    :{img:18},
+	'superscript'  :{img:17},
+	'outdent'      :{img:11},
+	'indent'       :{img:12},
+	'cut'          :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
 							if (Browser.Engine.gecko){
 								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
 								else{
@@ -402,17 +422,16 @@ MooRTE.Elements = new Hash({
 							} else MooRTE.Utilities.exec(action); 
 						}
 					},
-	'copy'         :{img:'4',  title:'Copy (Ctrl+C)', onClick:function(){ MooRTE.Elements.cut.onClick('copy'); }},
-	'paste'        :{img:'9',  title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
-	'redo'         :{img:'12', title:'Redo (Ctrl+Y)' },
-	'undo'         :{img:'11', title:'Undo (Ctrl + Z)' },
-	'justifyleft'  :{img:'35', title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
-	'justifycenter':{img:'37', title:'Justify Center'},
-	'justifyright' :{img:'38', title:'Justify Right' },
-	'justifyfull'  :{img:'36', title:'Justify Full'  },
-	'insertorderedlist'  :{img:'41', title:'Numbered List' },
-	'insertunorderedlist':{img:'42', title:'Bulleted List' },
-	'test'         :{onClick:function(){console.log(arguments)}, args:this},
+	'copy'         :{img:21,  title:'Copy (Ctrl+C)', onClick:function(){ MooRTE.Elements.cut.onClick('copy'); }},
+	'paste'        :{img:22,  title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
+	'redo'         :{img:32, title:'Redo (Ctrl+Y)' },
+	'undo'         :{img:31, title:'Undo (Ctrl + Z)' },
+	'justifyleft'  :{img:6, title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
+	'justifyfull'  :{img:7, title:'Justify Full'  },
+	'justifycenter':{img:8, title:'Justify Center'},
+	'justifyright' :{img:9, title:'Justify Right' },
+	'insertorderedlist'  :{img:14, title:'Numbered List' },
+	'insertunorderedlist':{img:15, title:'Bulleted List' },
 	'l0'           :{'text':'enter the url', element:'span' },
 	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
 	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
@@ -444,25 +463,7 @@ MooRTE.Elements = new Hash({
 						c[1] = -(c[2] - 255*saturation);
 						var hex = c.rgbToHex();
 					}},
-	'fuUploadBar'  :{ title:'Upload Image', img:15, onClick:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
-	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
-	'fuUpload'     :{ id:"fuUpload", onClick:'', element:'span', text:'Upload Files', title:''},
-	'fuClear'      :{ id:"fuClear", element:'span', text:'Clear List' ,title:''},	
-	'fuStatus'     :{ element:'span', id:'fuStatus', contains:'[fu1,fu2,fu3,fu4,fu5]'},
-	'fu1'          :{ element:'strong', 'class':'overall-title'},
-	'fu2'          :{ element:'strong', 'class':'current-title'},
-	'fu3'          :{ element:'div',    'class':'current-text' },
-	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
-	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
-	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
-						var path = new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/fancyUpload';
-						Asset.javascript(path+'.js');
-						Asset.css(path+'.css');
-					}},
-	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
-	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
-	//'popupURL'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
-	'popupURL'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css'], onClick:function(){
+	'popupURL'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
 							MooRTE.Utilities.storeRange();
 							var pop = $('pop');
 							if(pop) pop.removeClass('popHide');
@@ -487,18 +488,49 @@ MooRTE.Elements = new Hash({
 							$('popTXT').set('value',MooRTE.ranges.a1);
 						} 
 					},
+	'Upload Photo' :{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
+						onLoad:['assetLoader','Swiff.Uploader','../../fancyupload/fancyupload/source/', 'Swiff.Uploader.js','Swiff.Uploader.css', function(){
+							uploader = new Swiff.Uploader({ 
+								verbose: true, target:this, queued: false, multiple: false, instantStart: true, 
+								typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
+								path: '../../fancyupload/fancyupload/source/Swiff.Uploader.swf',
+								url: '/siteRoller/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
+								fileProgress: function(val){ this.set('txt',val); } 
+							});
+						}]
+					},
 	
 	//untested:
-	'decreasefontsize':{img:'29'},
-	'increasefontsize':{img:'29'},
-	'inserthorizontalrule':{img:'30'},
-	'removeformat' :{img:'26', title:'Clear Formatting'},
-	'selectall'    :{img:'27', title:'Select All (Ctrl + A)'},
+	'decreasefontsize':{img:42},
+	'increasefontsize':{img:41},
+	'inserthorizontalrule':{img:30},
+	'removeformat' :{img:26, title:'Clear Formatting'},
+	'selectall'    :{img:25, title:'Select All (Ctrl + A)'},
 	
 	//unused:
 	'Defaults'     :{onLoad:{Toolbar:['Main','File','Link','Lists','Indents','|','Html/Text','fuUploadBar']}},	//group - defaults
 	'JustifyBar'   :{img:'18', onClick:'Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
 	'l2old'        :{'type':'submit', 'onClick':function(){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value'))}, 'value':'add link' },
 	'popup'        :{onClick:['popup',"<span>Username:</span><input type='text' name='user' class='validate-alphanum'/><br/><span>Password:</span><input type='password' name='pass'\
-						class='validate-alphanum'/><div id='rem'><input type='checkbox'/>Remember me!</div><div id='log'><input type='submit' value='log in'/></div>"]}
-	});
+						class='validate-alphanum'/><div id='rem'><input type='checkbox'/>Remember me!</div><div id='log'><input type='submit' value='log in'/></div>"]},
+	'fuUploadBar'  :{ title:'Upload Image', img:15, onClick:'Toolbar:[fuBrowse,fuUpload,fuClear,fuStatus,fuList]'},
+	'fuBrowse'     :{ id:"fuBrowse", element:'span', text:'Browse Files', title:''},
+	'fuUpload'     :{ id:"fuUpload", onClick:'', element:'span', text:'Upload Files', title:''},
+	'fuClear'      :{ id:"fuClear", element:'span', text:'Clear List' ,title:''},	
+	'fuStatus'     :{ element:'span', id:'fuStatus', contains:'[fu1,fu2,fu3,fu4,fu5]'},
+	'fu1'          :{ element:'strong', 'class':'overall-title'},
+	'fu2'          :{ element:'strong', 'class':'current-title'},
+	'fu3'          :{ element:'div',    'class':'current-text' },
+	'fu4'          :{ element:'img',    'class':'progress overall-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fu5'          :{ element:'img',    'class':'progress current-progress', src:'moorte/plugins/fancyUpload/assets/progress-bar/bar.gif' },
+	'fuList'       :{ id:'fuList', style:'display:none', onInit:function(){
+						var path = new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory')+'plugins/fancyUpload/fancyUpload';
+						Asset.javascript(path+'.js');
+						Asset.css(path+'.css');
+					}},
+	'fuPhotoUpload':{ id:'demo-photoupload', element:'input', type:'file', name:'photoupload' },
+	'loading..'    :{ 'class':'rteLoading', 	element:'span', text:'loading...',title:''},
+	'popupURLold'     :{ img:'8', onClick:MooRTE.Utilities.popupURL },
+	'test'         :{onClick:function(){console.log(arguments)}, args:this}
+
+});
