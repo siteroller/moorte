@@ -28,7 +28,6 @@ var MooRTE = new Class({
 	},
 	
 	initialize: function(options){
-		//if($type(options)!='object')options={elements:options}
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
 		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') });
@@ -66,7 +65,6 @@ var MooRTE = new Class({
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
 		MooRTE.activeBar = rte; // not used!
-		console.log('insertToolbar');
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); //Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	},
@@ -86,7 +84,7 @@ var MooRTE = new Class({
 		return div;
 	}
 });
-//var k = 0;
+
 MooRTE.Utilities = {
 	exec: function(args){
 		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
@@ -100,7 +98,7 @@ MooRTE.Utilities = {
 		var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		if (!sel) return null;
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-		MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		return MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
 	setRange: function(rangeName) {
@@ -113,6 +111,7 @@ MooRTE.Utilities = {
 				sel.addRange(range);
 			}
 		}
+		return MooRTE.Utilities;
  	},
 	
 	shortcuts: function(e){
@@ -143,19 +142,14 @@ MooRTE.Utilities = {
 		if(!place) place = MooRTE.activeBar.getFirst();
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
-		console.log('buttons #0', buttons);	
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
 console.log('buttons #1', buttons);	
 	buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
-			console.log('buttons #2', buttons);	
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
-			console.log('buttons #3', buttons);	
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
-			console.log('buttons #4', buttons);	
 			buttons = JSON.decode('['+buttons+']');
-			console.log('buttons #5', buttons);	
 		}
-	console.log('addElements:buttons', buttons)
+	
 		
 		//the following should be a loop.  When was the loop removed and why?!
 		if(btns[0]){ buttons = btns; btns = [];}
@@ -173,10 +167,8 @@ console.log('buttons #1', buttons);
 			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn=btnClass.shift();
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
-			console.log('eaching. Now up to ',btn,name,e)
 			
 			if(!e || name == 'rteGroup_Auto'){
-				console.log('eaching. Now up to !e ',btn)
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
@@ -205,7 +197,6 @@ console.log('buttons #1', buttons);
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
-				//console.log('btnVals:',btnVals,'val.contains:',val.contains);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
@@ -217,7 +208,6 @@ console.log('buttons #1', buttons);
 	
 	eventHandler: function(onEvent, caller, name){
 		var event;
-		console.log(onEvent, 'onEvent')
 		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
@@ -227,7 +217,6 @@ console.log('buttons #1', buttons);
 	},
 	
 	group: function(elements, name){
-		console.log('element',elements)
 		var self = this, parent = this.getParent('.RTE');
 		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
@@ -240,18 +229,35 @@ console.log('buttons #1', buttons);
 	},
 	
 	assetLoader:function(clas,folder,js,css,onload,key,event){
-	//console.log(js)
+		
 		Hash.erase(MooRTE.Elements[key],event);
-		if(window[clas]) return;
+		//if(window[clas]) return;
 		
 		var path = MooRTE.path+folder;
+		new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
+		
+		/*
+		var self = this, path = MooRTE.path+folder;
 		$splat(css).each(function(file){
-			Asset.css(path+file);			
+			//Asset.css(path+file);			
 		})
 		$splat(js).each(function(file){
-			//console.log(js, $splat(js), $splat(js).getLast(), key, onload)
-			Asset.javascript(path+file,{'onload':onload});	//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
-		})		
+			Asset.javascript(path+file,{'onload':onload.bind(self)}	);//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
+		})
+		*/
+	},
+	
+	clipboardPopup:function(command){
+		if($('clipboardPopup')) $$('#pop,#clipboardPopup').removeClass('popHide');
+		else{
+			var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+						If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
+						<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
+			new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+				$$('#pop,#clipboardPopup').addClass('popHide'); e.stop();
+			})
+		}
 	},
 	
 	clean: function(html, options){
@@ -367,7 +373,6 @@ Element.implement({
 			*/			
 			return bar ? this.removeClass('rteHide') : new MooRTE($extend(options,{'elements':this}));
 		}else{
-			console.log('dire',directive,bar);
 			if(!bar) return false;
 			else switch(directive.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
