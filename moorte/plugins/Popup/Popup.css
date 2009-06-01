@@ -1,4 +1,7 @@
-#popModal { position:fixed; top:0; left:0; height:100%; width:100%; z-index:1000; background-color:#333; opacity: 0.7; filter: alpha(opacity = 70);}
+#pop { position:fixed;  top:0; left:0; height:100%; width:100%; z-index:1000; _position:absolute; _top:expression(eval(document.body.scrollTop));}
+#popModal { position:absolute;  top:0; left:0; height:100%; width:100%; background-color:#333; opacity: 0.7; filter: alpha(opacity = 70);
+_position:absolute; _top:expression(eval(document.body.scrollTop)); }
+
 .popup{ position:fixed; top:50%; left:50%; background-color:#fff; z-index:1001; overflow:hidden; color:#3F3F3F; font:12px/18px Arial,Helvetica,sans-serif; 
 	box-shadow: 3px 3px 3px #888; -moz-box-shadow: 3px 3px 3px #888; -webkit-box-shadow: 3px 3px 3px #888; filter:progid:DXImageTransform.Microsoft.DropShadow(sProperties); 
 	-moz-border-radius:8px; -webkit-border-radius:8px; }
@@ -10,3 +13,16 @@
 .popup .popFooter{ height: 25px; text-align:right; background-color:#E5E5E5; -moz-border-radius:0 0 8px 8px;}
 .popup .popFooter a{ text-decoration:none; font:7px Tahoma; color:#000; float:right; margin:5px 10px; }
 .popHide{ display:none }
+
+
+/* 
+
+if you want to emulate bottom:0;, use this:
+h1{
+position:fixed;
+_position:absolute;
+bottom:0;
+_top:expression(document.body.scrollTop+document.body.clientHeight-this.clientHeight);
+background:red;
+*/
+}

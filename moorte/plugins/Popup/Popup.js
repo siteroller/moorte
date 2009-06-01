@@ -1,3 +1,6 @@
+//alert('Popup loading');
+if(!$('debugger'))new Element('div', {id:'debugger'}).inject(document.body);
+$('debugger').set('text','popup Loaded, r1 - begin');
 var Popup = new Class({
 		
 	Implements: [Options],
@@ -10,7 +13,6 @@ var Popup = new Class({
 		footer:'',
 		update:false
 	},
-	
 	initialize: function(id,content,title,options){
 		function $El(tag,props){ return new Element(tag,props); };
 		
@@ -38,7 +40,7 @@ var Popup = new Class({
 		this.show();
 		if(!(popup = $(id))){
 			popup = $('popPrototype').clone().set('id',id).inject('pop');
-			popup.getElement('.popClose').addEvent('click',self.hide);
+			popup.getElement('.popClose').addEvent('click',Popup.hide);
 			popup.getElement('.popTitle').set('html',title);
 			popup.getElement('.popContent').set('html',content);
 			popup.getElement('.popFooter').set('html',self.footer);
@@ -63,13 +65,17 @@ var Popup = new Class({
 		*/
 	},
 	
-	hide:function(){
-		$('pop').addClass('popHide');
+	/*hide:function(){
+		Popup.hide();
+		//$('pop').addClass('popHide');
 	},
-	
+	*/
 	show: function(){
-	console.log('show')
 		$('pop').removeClass('popHide');
 	}
 
-})
+});
+Popup.hide = function(){
+	$$('#pop, #pop>form').addClass('popHide');
+}
+$('debugger').set('text','popup Loaded, end');
