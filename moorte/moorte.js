@@ -143,8 +143,7 @@ MooRTE.Utilities = {
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
-console.log('buttons #1', buttons);	
-	buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
+			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
 			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
 			buttons = JSON.decode('['+buttons+']');
@@ -160,7 +159,7 @@ console.log('buttons #1', buttons);
 				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
 			}
 		});
-		console.log('addElements:btns', btns)
+
 		btns.each(function(btn){
 			var btnVals,btnClass;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
@@ -419,11 +418,11 @@ MooRTE.Elements = new Hash({
 	'paste'        :{img:22, title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
 	'selectall'    :{img:25, title:'Select All (Ctrl + A)'},
 	'removeformat' :{img:26, title:'Clear Formatting'},
-	'undo'         :{img:31, img:'11', title:'Undo (Ctrl + Z)' },
+	'undo'         :{img:31, title:'Undo (Ctrl + Z)' },
 	'redo'         :{img:32, title:'Redo (Ctrl+Y)' },
 	'decreasefontsize':{img:42},
 	'increasefontsize':{img:41},	
-	'inserthorizontalrule':{img:30},
+	'inserthorizontalrule':{img:30, title:'Insert Horizontal Line' },
 	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 						var content = $H({ 'page': window.location.pathname });
 						this.getParent('.MooRTE').retrieve('fields').each(function(el){
@@ -439,32 +438,36 @@ MooRTE.Elements = new Hash({
 					}},
 	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
 						//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
-						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
-						for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-						c[1] = -(c[2] - 255*saturation);
-						var hex = c.rgbToHex();
+						//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+						//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
+						//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
+						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
+						for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+						var hex = [c[0],c[2],c[1]].rgbToHex();
 					}},
-	'cut'          :{img:'5',  title:'Cut (Ctrl+X)', 
+	'cut'          :{img:20,  title:'Cut (Ctrl+X)', 
 						onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
 						onLoad:function(){ 
 							if (Browser.Engine.gecko) 
+								console.log('cut func called');
 								new Loader({
 									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
 									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
 									onComplete:function(){
+										console.log('cut OnComplete called');
 										var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 													(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
 													If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
 													<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
 										new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
-											$$('#pop,#clipboardPopup').addClass('popHide'); e.stop();
+											Popup.hide(); e.stop();
 										});
-										$$('#pop,#clipboardPopup').addClass('popHide');
+										Popup.hide(); 
 									} 
 								});
 						}
 					},
-	'popupURL'     :{ img:'8',
+	'popupURL'     :{ img:46, title:'Create hyperlink', 
 						onClick:function(){
 							MooRTE.Utilities.storeRange();
 							$$('#pop,#popupURL').removeClass('popHide');
@@ -481,16 +484,16 @@ MooRTE.Elements = new Hash({
 										<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
 									var pop = new Popup('popupURL', html, 'Edit Link');
 									pop.getElement('#purlCancel').addEvent('click', function(e){
-										$$('#pop,#popupURL').addClass('popHide'); e.stop();
+										Popup.hide(); e.stop();
 									});
 									pop.getElement('#purlOK').addEvent('click', function(e){
 										MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
 										var value = pop.getElementById('popURL').get('value');
 										MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-										$$('#pop,#popupURL').addClass('popHide'); e.stop();
+										Popup.hide();
 										e.stop(); 
-									})
-									$$('#pop,#popupURL').addClass('popHide');
+									});
+									Popup.hide();
 								} 
 							})
 						}
