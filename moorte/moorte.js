@@ -70,7 +70,7 @@ var MooRTE = new Class({
 	},
 	
 	positionToolbar: function (el, rte){												//function is sloppy.  Clean!
-		el.set('contentEditable', true).focus();
+		el.set('contentEditable', true).addClass('rteShow').focus();
 		var elSize = el.getCoordinates(), f=this.options.floating;
 		rte.removeClass('rteHide').setStyle('width',elSize.width).store('fields', rte.retrieve('fields', []).include(el));
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');

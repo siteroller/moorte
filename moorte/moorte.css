@@ -5,6 +5,7 @@ div.MooRTE{ left:0; width:100%; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteHide{ display:none; }
+.rteShow{ border:2px groove #000; }
 .rteTextArea{ border:1px solid #666 }
 .rteTopDown{top:0;}
 
@@ -43,6 +44,10 @@ div.MooRTE div.rteGrey           a.Flyout{ position:relative; overflow:hidden;}
 div.MooRTE div.rteGrey           a.Flyout:hover{ overflow:visible }
 div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
 
+div.MooRTE div.Tango 		div.rteToolbar {background-color:brown; height:24px}
+div.MooRTE div.Tango 		a{ height:20px; width:20px; margin:2px; background-color:white; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/Tango.gif) }
+div.MooRTE div.Tango 		a:hover{ border:2px solid black; margin:0; }
+div.MooRTE div.Tango 		.rteSelected{ background-color:#bbb }
 /* Plugins */
 .rtefuUpload, .rtefuClear { cursor:pointer }
 .popup .popMid .popContent>span{ display:inline-block; width:90px; }
