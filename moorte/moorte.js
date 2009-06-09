@@ -39,7 +39,7 @@ var MooRTE = new Class({
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
-					rte.addClass('rteHide'); this.set('contentEditable', false);	
+					rte.addClass('rteHide'); this.set('contentEditable', false).removeClass('rteShow');	
 				}
 			});
 			el.store('bar', rte).addEvents({
@@ -246,6 +246,27 @@ MooRTE.Utilities = {
 		*/
 	},
 	
+	rangeOverwrite: function(node, range){
+		if(!range) range = MooRTE.Utilities.storeRange();
+		if (Browser.Engine.trident){
+			var id = editWindow.document.uniqueID;
+			var html = "<span id='" + id + "'></span>";
+			range.pasteHTML(html);
+			var marker = $(id);
+			marker.appendChild(node);
+			marker.removeNode(); // removes node but not children
+		} else {
+			range.deleteContents();
+			if (range.startContainer.nodeType==3) {
+				var refNode = range.startContainer.splitText(range.startOffset);
+				refNode.parentNode.insertBefore(node, refNode);
+			} else {
+				var refNode = range.startContainer.childNodes[range.startOffset];
+				range.startContainer.insertBefore(node, refNode);
+			}	
+		}
+	},
+	
 	clipboardPopup:function(command){
 		if($('clipboardPopup')) $$('#pop,#clipboardPopup').removeClass('popHide');
 		else{
@@ -386,158 +407,165 @@ var upload;
 
 MooRTE.Elements = new Hash({
 
-	// Groups (Toolbars) - All groups should be created dynamically by the download builder.
-	'Main'         :{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
-	'File'         :{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
-	'Font'         :{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-	'Insert'       :{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule']}] },//'Upload Photo','inserthorizontalrule']}] 
-	'View'         :{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
-	
-	// Groups (Flyouts) - All groups should be created dynamically by the download builder.
-	'Justify'      :{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-	'Lists'        :{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
-	'Indents'      :{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
+/*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
+/*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//, 'blockquote'
+/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
+/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
+/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule']}] },//'Upload Photo','inserthorizontalrule']}] 
+/*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
+
+/*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
+/*#*/	Justify			:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
+/*#*/	Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
+/*#*/	Indents			:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
 	                
-	// Buttons
-	'div'          :{element:'div'},
-	'bold'         :{img:1, shortcut:'b' },
-	'italic'       :{img:2, shortcut:'i' },
-	'underline'    :{img:3, shortcut:'u' },
-	'strikethrough':{img:4},
-	'justifyleft'  :{img:6, title:'Justify Left', onUpdate:function(cmd,val){var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))  } },
-	'justifyfull'  :{img:7, title:'Justify Full'  },
-	'justifycenter':{img:8, title:'Justify Center'},
-	'justifyright' :{img:9, title:'Justify Right' },
-	'subscript'    :{img:18},
-	'superscript'  :{img:17},
-	'outdent'      :{img:11},
-	'indent'       :{img:12},
-	'insertorderedlist'  :{img:14, title:'Numbered List' },
-	'insertunorderedlist':{img:15, title:'Bulleted List' },
-	'copy'         :{img:21, title:'Copy (Ctrl+C)',  onClick:function(){ MooRTE.Elements.cut.onClick('copy');  }},
-	'paste'        :{img:22, title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
-	'selectall'    :{img:25, title:'Select All (Ctrl + A)'},
-	'removeformat' :{img:26, title:'Clear Formatting'},
-	'undo'         :{img:31, title:'Undo (Ctrl + Z)' },
-	'redo'         :{img:32, title:'Redo (Ctrl+Y)' },
-	'decreasefontsize':{img:42},
-	'increasefontsize':{img:41},	
-	'inserthorizontalrule':{img:30, title:'Insert Horizontal Line' },
-	'save'         :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
-						var content = $H({ 'page': window.location.pathname });
-						this.getParent('.MooRTE').retrieve('fields').each(function(el){
-							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
-						});
-						new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
-					}},
-	'Html/Text'    :{ img:'26', onClick:['DisplayHTML']}, 
-	'DisplayHTML'  :{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
-						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
-					}},
-	'colorpicker'  :{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
-						//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
-						//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-						//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
-						//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
-						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
-						for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-						var hex = [c[0],c[2],c[1]].rgbToHex();
-					}},
-	'cut'          :{img:20,  title:'Cut (Ctrl+X)', 
-						onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
-						onLoad:function(){ 
-							if (Browser.Engine.gecko) 
-								console.log('cut func called');
+/*#*///	Buttons
+/*#*/	div			 	:{element:'div'},
+/*#*/	bold		 	:{img:1, shortcut:'b' },
+/*#*/	italic		 	:{img:2, shortcut:'i' },
+/*#*/	underline	 	:{img:3, shortcut:'u' },
+/*#*/	strikethrough	:{img:4},
+/*#*/	justifyleft	 	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
+							var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
+							t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))
+						}},
+/*#*/	justifyfull	 	:{img:7, title:'Justify Full'  },
+/*#*/	justifycenter	:{img:8, title:'Justify Center'},
+/*#*/	justifyright	:{img:9, title:'Justify Right' },
+/*#*/	subscript		:{img:18},
+/*#*/	superscript		:{img:17},
+/*#*/	outdent			:{img:11},
+/*#*/	indent			:{img:12},
+/*#*/	insertorderedlist  :{img:14, title:'Numbered List' },
+/*#*/	insertunorderedlist:{img:15, title:'Bulleted List' },
+/*#*/	copy        	:{img:21, title:'Copy (Ctrl+C)',  onClick:function(){ MooRTE.Elements.cut.onClick('copy');  }},
+/*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
+/*#*/	selectall   	:{img:25, title:'Select All (Ctrl + A)'},
+/*#*/	removeformat	:{img:26, title:'Clear Formatting'},
+/*#*/	undo        	:{img:31, title:'Undo (Ctrl + Z)' },
+/*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
+/*#*/	decreasefontsize:{img:42},
+/*#*/	increasefontsize:{img:41},	
+/*#*/	inserthorizontalrule:{img:30, title:'Insert Horizontal Line' },
+/*#*/	save			:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
+							var content = $H({ 'page': window.location.pathname });
+							this.getParent('.MooRTE').retrieve('fields').each(function(el){
+								content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
+							});
+							new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
+						}},
+/*#*/	'Html/Text'		:{ img:'26', onClick:['DisplayHTML']}, 
+/*#*/	DisplayHTML		:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
+/*#*/						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
+/*#*/						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
+/*#*/						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+						}},
+/*#*/	colorpicker		:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
+							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
+							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
+							//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
+							var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
+							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+							var hex = [c[0],c[2],c[1]].rgbToHex();
+						}},
+/*#*/	cut				:{img:20,  title:'Cut (Ctrl+X)', 
+							onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
+							onLoad:function(){ 
+								if (Browser.Engine.gecko) 
+									new Loader({
+										scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
+										styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
+										onComplete:function(){
+											var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+														(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+														If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
+														<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
+											new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+												Popup.hide(); e.stop();
+											});
+											Popup.hide(); 
+										} 
+									});
+							}
+						},
+/*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
+							onClick:function(){
+								MooRTE.Utilities.storeRange();
+								$$('#pop,#popupURL').removeClass('popHide');
+								$('popTXT').set('value',MooRTE.ranges.a1);
+							},
+							onLoad:function(){
 								new Loader({
 									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
 									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
 									onComplete:function(){
-										console.log('cut OnComplete called');
-										var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-													(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-													If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
-													<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
-										new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
+										var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
+											<span>Link to:</span><input type='text' id='popURL'/><br/>\
+											<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
+											<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
+										var pop = new Popup('popupURL', html, 'Edit Link');
+										pop.getElement('#purlCancel').addEvent('click', function(e){
 											Popup.hide(); e.stop();
 										});
-										Popup.hide(); 
-									} 
-								});
-						}
-					},
-	'popupURL'     :{ img:46, title:'Create hyperlink', 
-						onClick:function(){
-							MooRTE.Utilities.storeRange();
-							$$('#pop,#popupURL').removeClass('popHide');
-							$('popTXT').set('value',MooRTE.ranges.a1);
-						},
-						onLoad:function(){
-							new Loader({
-								scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
-								styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
-								onComplete:function(){
-									var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
-										<span>Link to:</span><input type='text' id='popURL'/><br/>\
-										<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
-										<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
-									var pop = new Popup('popupURL', html, 'Edit Link');
-									pop.getElement('#purlCancel').addEvent('click', function(e){
-										Popup.hide(); e.stop();
-									});
-									pop.getElement('#purlOK').addEvent('click', function(e){
-										MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
-										var value = pop.getElementById('popURL').get('value');
-										MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+										pop.getElement('#purlOK').addEvent('click', function(e){
+											MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
+											var value = pop.getElementById('popURL').get('value');
+											MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+											Popup.hide();
+											e.stop(); 
+										});
 										Popup.hide();
-										e.stop(); 
-									});
-									Popup.hide();
-								} 
-							})
-						}
-					},
-	'Upload Photo' :{ img:15, 
-						onLoad:function(){
-							new Loader({
-								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
-								styles: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
-								onComplete:function(){
-									var uploader = new Swiff.Uploader({ //verbose: true, 
-										target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
-										typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
-										path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
-										url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
-										onButtonDown :function(){ MooRTE.Utilities.setRange() },
-										onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
-										onFileProgress: function(val){  },//self.set('text',val);
-										onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
-									});
-									this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
-								}
-							})
-						}							
-					},
+									} 
+								})
+							}
+						},
+/*#*/	'Upload Photo' :{ img:15, 
+							onLoad:function(){
+								new Loader({
+									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
+									styles: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
+									onComplete:function(){
+										var uploader = new Swiff.Uploader({ //verbose: true, 
+											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
+											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
+											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
+											url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
+											onButtonDown :function(){ MooRTE.Utilities.setRange() },
+											onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
+											onFileProgress: function(val){  },//self.set('text',val);
+											onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
+										});
+										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
+									}
+								})
+							}							
+						},
+/*#*/	blockquote		:{	onClick:function(){
+								var range = MooRTE.Utilities.storeRange();
+								var block = new Element('blockquote').set('html', range);
+								MooRTE.Utilities.rangeOverwrite(block, range);
+							}
+						}, 
 
-//depracated
-	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
-	'Toolbar'      :{element:'div'},  // ''
-	'unlink'       :{img:'6'},
-	'start'        :{element:'span'},
-	'|'            :{text:'|', title:'', element:'span'},
-	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
-	'l0'           :{'text':'enter the url', element:'span' },
-	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
-	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-	'nolink'       :{'text':'please select the text to be made into a link'},
-	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
-	'imgSelect'    :{element:'span', text:'URL of image' },
-	'imgInput'     :{type:'text' },
-	'insertimage'  :{onClick:function(args, classRef){ 
+/*#*///	depracated
+/*#*/	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
+/*#*/	'Toolbar'      :{element:'div'},  // ''
+/*#*/	'unlink'       :{img:'6'},
+/*#*/	'start'        :{element:'span'},
+/*#*/	'|'            :{text:'|', title:'', element:'span'},
+/*#*/	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
+/*#*/	'l0'           :{'text':'enter the url', element:'span' },
+/*#*/	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
+/*#*/	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+/*#*/	'nolink'       :{'text':'please select the text to be made into a link'},
+/*#*/	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
+/*#*/	'imgSelect'    :{element:'span', text:'URL of image' },
+/*#*/	'imgInput'     :{type:'text' },
+/*#*/	'insertimage'  :{onClick:function(args, classRef){ 
 						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
-					}},
-	'cut-old'          :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
+						}},
+/*#*/	'cut-old'      :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
 							if (Browser.Engine.gecko){
 								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
 								else{
@@ -552,14 +580,14 @@ MooRTE.Elements = new Hash({
 							} else MooRTE.Utilities.exec(action); 
 						}
 					},
-	'save-old'     :{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
-						var content = $H({ 'page': window.location.pathname });
-						this.getParent('.MooRTE').retrieve('fields').each(function(el){
-							content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
-						});
-						new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
-					}},
-	'popupURL-old'     :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
+/*#*/	'save-old' 		:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
+							var content = $H({ 'page': window.location.pathname });
+							this.getParent('.MooRTE').retrieve('fields').each(function(el){
+								content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
+							});
+							new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
+						}},
+/*#*/	'popupURL-old' :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
 							MooRTE.Utilities.storeRange();
 							var pop = $('pop');
 							if(pop) pop.removeClass('popHide');
@@ -584,7 +612,7 @@ MooRTE.Elements = new Hash({
 							$('popTXT').set('value',MooRTE.ranges.a1);
 						} 
 					},
-	'Upload Photo-old' :{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
+/*#*/	'Upload Photo-old':{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
 						onLoad:['assetLoader','Swiff.Uploader','../../fancyupload/fancyupload/source/', 'Swiff.Uploader.js','Swiff.Uploader.css', function(){
 							uploader = new Swiff.Uploader({ 
 								verbose: true, target:this, queued: false, multiple: false, instantStart: true, 
@@ -595,6 +623,4 @@ MooRTE.Elements = new Hash({
 							});
 						}]
 					}
-	
-	
 });

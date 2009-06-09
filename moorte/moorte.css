@@ -1,6 +1,6 @@
 /*  position to top/bottom of page, the hide/show class  */
-div.rteFloattrue{ position:absolute; }
-div.rteFloatfalse{ position:relative;}
+/* Begin General */
+div.rteFloat{ position:absolute; }
 div.MooRTE{ left:0; width:100%; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
@@ -8,8 +8,9 @@ div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteShow{ border:2px groove #000; }
 .rteTextArea{ border:1px solid #666 }
 .rteTopDown{top:0;}
+/* End General*/
 
-/* the Word03 skin, for better or worse :)  */
+/* Begin Word03 skin */
 div.MooRTE div.Word03 { left:0; bottom:0; width:100%; background-color:#B9D2F8; color:#222; font: 12px Arial; }
 div.MooRTE div.Word03    span{ height:20px; margin:1px; display:inline-block; }
 div.MooRTE div.Word03    input{ height:20px; width:100px; }
@@ -26,8 +27,9 @@ div.MooRTE div.Word03    div.rteFlyout{position:absolute; border:0; top:20px; le
 div.MooRTE div.Word03    a.Flyout{ position:relative; overflow:hidden;}
 div.MooRTE div.Word03    a.Flyout:hover{overflow:visible;}
 div.MooRTE div.Word03   .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+/* End Word03 */
 
-/* the rteGrey skin  */
+/* Begin rteGrey skin*/
 div.MooRTE div.rteGrey { left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
 div.MooRTE div.rteGrey           span{ height:20px; margin:1px; display:inline-block; }
 div.MooRTE div.rteGrey           input{ height:20px; width:100px; }
@@ -43,12 +45,16 @@ div.MooRTE div.rteGrey           div.rteFlyout{ position:absolute; border:0; top
 div.MooRTE div.rteGrey           a.Flyout{ position:relative; overflow:hidden;}
 div.MooRTE div.rteGrey           a.Flyout:hover{ overflow:visible }
 div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+/* End rteGrey */
 
+/* Begin Tango skin */
 div.MooRTE div.Tango 		div.rteToolbar {background-color:brown; height:24px}
 div.MooRTE div.Tango 		a{ height:20px; width:20px; margin:2px; background-color:white; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/Tango.gif) }
 div.MooRTE div.Tango 		a:hover{ border:2px solid black; margin:0; }
 div.MooRTE div.Tango 		.rteSelected{ background-color:#bbb }
-/* Plugins */
+/* End Tango */
+
+/* Begin Plugins */
 .rtefuUpload, .rtefuClear { cursor:pointer }
 .popup .popMid .popContent>span{ display:inline-block; width:90px; }
 .popup .popMid .popContent>input{ width:134px; margin:2px 0; }
@@ -57,7 +63,11 @@ div.MooRTE div.Tango 		.rteSelected{ background-color:#bbb }
 .popup .popMid .popContent div.btns{ text-align:center; padding-top:12px; }
 .popup .popMid .popContent>#rem{ font:10px tahoma; text-align:right; }
 .popup .popMid .popContent>#rem>input{ vertical-align:middle; height:10px; }
+/* End Plugins */
+
 /* Old */
 xdiv.RTE div.rteR0{ border-bottom:1px #bbb solid; }
 xa:hover{ border:2px solid red; margin:0; }
 xa{ height:16px; width:16px; margin:2px; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/i.gif)}
+div.rteFloatfalse{ position:relative;}
+div.rteFloattrue{ position:absolute;}
