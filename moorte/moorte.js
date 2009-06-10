@@ -85,24 +85,16 @@ var MooRTE = new Class({
 	}
 });
 
-MooRTE.Utilities = {
-	exec: function(args){
-		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
-		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase())); //Fix for FF3 bug for justify, in&outdent
-		if(g) document.designMode = 'on';//alert(args);
-		document.execCommand(args[0], args[2]||null, args[1]||false);					//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
-		if(g) document.designMode = 'off';
-	},
-	
-	storeRange:function(rangeName){
+MooRTE.Range = {
+	create: function(range){
 		var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		if (!sel) return null;
+		return MooRTE.ranges[range || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-		return MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
-	setRange: function(rangeName) {
-		var range = MooRTE.ranges[rangeName || 'a1']
+	set:function(rangeName){
+		var range = MooRTE.ranges[rangeName || 'a1'];
 		if(range.select) range.select(); 
 		else{
 			var sel = window.getSelection ? window.getSelection() : window.document.selection;
@@ -111,8 +103,52 @@ MooRTE.Utilities = {
 				sel.addRange(range);
 			}
 		}
-		return MooRTE.Utilities;
- 	},
+		return MooRTE.Range;
+	},
+	
+	get: function(what, range){
+		if(!range) range = MooRTE.Range.create();
+		return !Browser.Engine.trident ? range.toString() :
+			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
+	},
+	
+	wrap:function(element, options, range){
+		if(!range) range = MooRTE.Range.create();
+		var El = new Element(element, options);
+		Browser.Engine.trident ?
+			range.pasteHTML(El.set('html', range.htmlText).outerHTML) : 
+			range.surroundContents(El);
+		return El;
+	},
+	
+	overwrite:function(node, range){
+		if(!range) range = MooRTE.Range.create();
+		if (Browser.Engine.trident){
+			var id = document.uniqueID;
+			range.pasteHTML("<span id='" + id + "'></span>");
+			node.replaces($(id));
+		} else {
+			MooRTE.Utilities.exec('inserthtml', node); return;
+			range.deleteContents();  //compare the following method (Olav's) with using the insertHTML execommand.
+			if (range.startContainer.nodeType==3) {
+				var refNode = range.startContainer.splitText(range.startOffset);
+				refNode.parentNode.insertBefore(node, refNode);
+			} else {
+				var refNode = range.startContainer.childNodes[range.startOffset];
+				range.startContainer.insertBefore(node, refNode);
+			}	
+		}
+	}
+}
+
+MooRTE.Utilities = {
+	exec: function(args){
+		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
+		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase())); //Fix for FF3 bug for justify, in&outdent
+		if(g) document.designMode = 'on';//alert(args);
+		document.execCommand(args[0], args[2]||null, args[1]||false);					//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
+		if(g) document.designMode = 'off';
+	},
 	
 	shortcuts: function(e){
 		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');	
@@ -244,27 +280,6 @@ MooRTE.Utilities = {
 			Asset.javascript(path+file,{'onload':onload.bind(self)}	);//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
 		})
 		*/
-	},
-	
-	rangeOverwrite: function(node, range){
-		if(!range) range = MooRTE.Utilities.storeRange();
-		if (Browser.Engine.trident){
-			var id = editWindow.document.uniqueID;
-			var html = "<span id='" + id + "'></span>";
-			range.pasteHTML(html);
-			var marker = $(id);
-			marker.appendChild(node);
-			marker.removeNode(); // removes node but not children
-		} else {
-			range.deleteContents();
-			if (range.startContainer.nodeType==3) {
-				var refNode = range.startContainer.splitText(range.startOffset);
-				refNode.parentNode.insertBefore(node, refNode);
-			} else {
-				var refNode = range.startContainer.childNodes[range.startOffset];
-				range.startContainer.insertBefore(node, refNode);
-			}	
-		}
 	},
 	
 	clipboardPopup:function(command){
@@ -408,10 +423,10 @@ var upload;
 MooRTE.Elements = new Hash({
 
 /*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
-/*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//, 'blockquote'
+/*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule']}] },//'Upload Photo','inserthorizontalrule']}] 
+/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule', 'blockquote']}] },//'Upload Photo','inserthorizontalrule']}] 
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
 /*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
@@ -491,7 +506,8 @@ MooRTE.Elements = new Hash({
 						},
 /*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
-								MooRTE.Utilities.storeRange();
+								//MooRTE.Utilities.storeRange();
+								MooRTE.Range.create();
 								$$('#pop,#popupURL').removeClass('popHide');
 								$('popTXT').set('value',MooRTE.ranges.a1);
 							},
@@ -509,7 +525,8 @@ MooRTE.Elements = new Hash({
 											Popup.hide(); e.stop();
 										});
 										pop.getElement('#purlOK').addEvent('click', function(e){
-											MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
+											//MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
+											MooRTE.Range.set();												//MooRTE.activeBar.retrieve('ranges').set();
 											var value = pop.getElementById('popURL').get('value');
 											MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
 											Popup.hide();
@@ -531,10 +548,13 @@ MooRTE.Elements = new Hash({
 											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
 											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
 											url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
-											onButtonDown :function(){ MooRTE.Utilities.setRange() },
-											onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
+											//onButtonDown :function(){ MooRTE.Utilities.setRange() },
+											onButtonDown :function(){ MooRTE.Range.set() },
+											//onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
+											onButtonEnter :function(){ MooRTE.Range.create() },
 											onFileProgress: function(val){  },//self.set('text',val);
-											onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
+											//onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
+											onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
 										});
 										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
 									}
@@ -542,9 +562,10 @@ MooRTE.Elements = new Hash({
 							}							
 						},
 /*#*/	blockquote		:{	onClick:function(){
-								var range = MooRTE.Utilities.storeRange();
-								var block = new Element('blockquote').set('html', range);
-								MooRTE.Utilities.rangeOverwrite(block, range);
+								//var RangeText =  MooRTE.Range.get('html');
+								//var block = new Element('blockquote').set('html', RangeText);
+								MooRTE.Range.wrap('blockquote');
+								//MooRTE.Range.overwrite(block);
 							}
 						}, 
 
@@ -556,8 +577,10 @@ MooRTE.Elements = new Hash({
 /*#*/	'|'            :{text:'|', title:'', element:'span'},
 /*#*/	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
 /*#*/	'l0'           :{'text':'enter the url', element:'span' },
-/*#*/	'l1'           :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
-/*#*/	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+/*#*/	'l1'           :{'type':'text',  'onClick':MooRTE.Range.create }, 
+/*#*/	'l1-old'       :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
+/*#*/	'l2-old'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
+/*#*/	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Range.set();	MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
 /*#*/	'nolink'       :{'text':'please select the text to be made into a link'},
 /*#*/	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
 /*#*/	'imgSelect'    :{element:'span', text:'URL of image' },
@@ -599,7 +622,8 @@ MooRTE.Elements = new Hash({
 								
 								pop = new Popup('popupURL', html, 'Edit Link');
 								pop.getElement('#purlOK').addEvent('click', function(e){
-									MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
+									//MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
+									MooRTE.Range.set();					//MooRTE.activeBar.retrieve('ranges').set();
 									var value = pop.getElementById('popURL').get('value');
 									MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
 									$('pop').addClass('popHide'); e.stop();
@@ -624,3 +648,50 @@ MooRTE.Elements = new Hash({
 						}]
 					}
 });
+
+/*
+	storeRange:function(rangeName){
+		var sel = window.getSelection ? window.getSelection() : window.document.selection;
+		if (!sel) return null;
+		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		return MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+	},
+	
+	setRange: function(rangeName) {
+		var range = MooRTE.ranges[rangeName || 'a1']
+		if(range.select) range.select(); 
+		else{
+			var sel = window.getSelection ? window.getSelection() : window.document.selection;
+			if (sel.removeAllRanges){ 
+				sel.removeAllRanges();
+				sel.addRange(range);
+			}
+		}
+		return MooRTE.Utilities;
+ 	},
+	
+	wrapRange: function(prepend, append, range){
+		if(!range) range = MooRTE.Utilities.storeRange();
+		Browser.Engine.trident ?
+			range.pasteHTML(prepend + range.htmlText + append) :
+			range.surroundContents(document.createElement("code"));
+	},
+	
+	overwriteRange: function(node, range){
+		if(!range) range = MooRTE.Utilities.storeRange();
+		if (Browser.Engine.trident){
+			var id = document.uniqueID;
+			range.pasteHTML("<span id='" + id + "'></span>");
+			node.replaces($(id));
+		} else {
+			range.deleteContents();  //compare the following method (Olav's) with using the insertHTML execommand.
+			if (range.startContainer.nodeType==3) {
+				var refNode = range.startContainer.splitText(range.startOffset);
+				refNode.parentNode.insertBefore(node, refNode);
+			} else {
+				var refNode = range.startContainer.childNodes[range.startOffset];
+				range.startContainer.insertBefore(node, refNode);
+			}	
+		}
+	},
+	*/	
