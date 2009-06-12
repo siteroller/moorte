@@ -51,7 +51,7 @@ var MooRTE = new Class({
 		})
 		
 		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');									//in case a button is pressed before anything is selected.
-		els[0].fireEvent('focus');//,els[0]
+		els[0].fireEvent('focus');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
 		
@@ -121,7 +121,7 @@ MooRTE.Range = {
 		return El;
 	},
 	
-	overwrite:function(node, range){
+	replace:function(node, range){
 		if(!range) range = MooRTE.Range.create();
 		if (Browser.Engine.trident){
 			var id = document.uniqueID;
@@ -400,7 +400,6 @@ Element.implement({
 		if($type(directive)=='object'){options = directive; directive = ''} 
 		if(!directive || (directive == 'create')){
 			/*
-				console.log(options);	
 				if(removed = this.retrieve('removed')){
 					this.grab(removed, 'top');
 					this.store('removed','');
@@ -506,7 +505,6 @@ MooRTE.Elements = new Hash({
 						},
 /*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
-								//MooRTE.Utilities.storeRange();
 								MooRTE.Range.create();
 								$$('#pop,#popupURL').removeClass('popHide');
 								$('popTXT').set('value',MooRTE.ranges.a1);
@@ -525,7 +523,6 @@ MooRTE.Elements = new Hash({
 											Popup.hide(); e.stop();
 										});
 										pop.getElement('#purlOK').addEvent('click', function(e){
-											//MooRTE.Utilities.setRange();												//MooRTE.activeBar.retrieve('ranges').set();
 											MooRTE.Range.set();												//MooRTE.activeBar.retrieve('ranges').set();
 											var value = pop.getElementById('popURL').get('value');
 											MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
@@ -541,19 +538,16 @@ MooRTE.Elements = new Hash({
 							onLoad:function(){
 								new Loader({
 									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
-									styles: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
+									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
 									onComplete:function(){
 										var uploader = new Swiff.Uploader({ //verbose: true, 
 											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
 											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
 											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
 											url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
-											//onButtonDown :function(){ MooRTE.Utilities.setRange() },
 											onButtonDown :function(){ MooRTE.Range.set() },
-											//onButtonEnter :function(){ MooRTE.Utilities.storeRange() },
 											onButtonEnter :function(){ MooRTE.Range.create() },
 											onFileProgress: function(val){  },//self.set('text',val);
-											//onFileComplete: function(args){ MooRTE.Utilities.setRange().exec('insertimage',JSON.decode(args.response.text).file) }
 											onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
 										});
 										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
@@ -561,137 +555,20 @@ MooRTE.Elements = new Hash({
 								})
 							}							
 						},
-/*#*/	blockquote		:{	onClick:function(){
-								//var RangeText =  MooRTE.Range.get('html');
-								//var block = new Element('blockquote').set('html', RangeText);
-								MooRTE.Range.wrap('blockquote');
-								//MooRTE.Range.overwrite(block);
+/*#*/	blockquote		:{	onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	blockquote2		:{	onClick:function(){
+								var RangeText =  MooRTE.Range.get('html');
+								var block = new Element('blockquote').set('html', RangeText);
+								MooRTE.Range.replace(block);
 							}
-						}, 
+						},
+/*#*/	start			:{element:'span'},
 
 /*#*///	depracated
 /*#*/	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
 /*#*/	'Toolbar'      :{element:'div'},  // ''
-/*#*/	'unlink'       :{img:'6'},
-/*#*/	'start'        :{element:'span'},
 /*#*/	'|'            :{text:'|', title:'', element:'span'},
-/*#*/	'Link'         :{img:40, onClick:{Toolbar:['l0','l1','l2','unlink']} },
-/*#*/	'l0'           :{'text':'enter the url', element:'span' },
-/*#*/	'l1'           :{'type':'text',  'onClick':MooRTE.Range.create }, 
-/*#*/	'l1-old'       :{'type':'text',  'onClick':MooRTE.Utilities.storeRange }, 
-/*#*/	'l2-old'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Utilities.setRange(); MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-/*#*/	'l2'           :{'type':'submit', events:{'mousedown':function(e){e.stopPropagation();}, 'onClick':function(e){ MooRTE.Range.set();	MooRTE.Utilities.exec('createlink',this.getPrevious().get('value')); e.stop()}}, 'value':'add link' },
-/*#*/	'nolink'       :{'text':'please select the text to be made into a link'},
-/*#*/	'remoteURL'    :{onClick:['imgSelect','imgInput','insertimage']},
-/*#*/	'imgSelect'    :{element:'span', text:'URL of image' },
-/*#*/	'imgInput'     :{type:'text' },
 /*#*/	'insertimage'  :{onClick:function(args, classRef){ 
-						classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
-						}},
-/*#*/	'cut-old'      :{img:20,  title:'Cut (Ctrl+X)', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(action){	
-							if (Browser.Engine.gecko){
-								if($('popupCutCopy')) $$('#pop,#popupCutCopy').removeClass('popHide');
-								else{
-									var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-												(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-												If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
-												<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
-									new Popup('popupCutCopy', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
-										$$('#pop,#popupCutCopy').addClass('popHide'); e.stop();
-									})
-								}
-							} else MooRTE.Utilities.exec(action); 
-						}
-					},
-/*#*/	'save-old' 		:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
-							var content = $H({ 'page': window.location.pathname });
-							this.getParent('.MooRTE').retrieve('fields').each(function(el){
-								content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
-							});
-							new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
-						}},
-/*#*/	'popupURL-old' :{ img:'8', onLoad:['assetLoader', 'Popup','plugins/Popup/','Popup.js','Popup.css',$empty], onClick:function(){
-							MooRTE.Utilities.storeRange();
-							var pop = $('pop');
-							if(pop) pop.removeClass('popHide');
-							else{
-								var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
-									<span>Link to:</span><input type='text' id='popURL'/><br/>\
-									<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
-									<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
-								
-								pop = new Popup('popupURL', html, 'Edit Link');
-								pop.getElement('#purlOK').addEvent('click', function(e){
-									//MooRTE.Utilities.setRange();		//MooRTE.activeBar.retrieve('ranges').set();
-									MooRTE.Range.set();					//MooRTE.activeBar.retrieve('ranges').set();
-									var value = pop.getElementById('popURL').get('value');
-									MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-									$('pop').addClass('popHide'); e.stop();
-									e.stop(); 
-								})
-								pop.getElement('#purlCancel').addEvent('click', function(e){
-									$('pop').addClass('popHide'); e.stop();
-								})
-							}
-							$('popTXT').set('value',MooRTE.ranges.a1);
-						} 
-					},
-/*#*/	'Upload Photo-old':{ img:15, events:{ mouseenter:function(){ uploader.target = this; uploader.reposition(); }},
-						onLoad:['assetLoader','Swiff.Uploader','../../fancyupload/fancyupload/source/', 'Swiff.Uploader.js','Swiff.Uploader.css', function(){
-							uploader = new Swiff.Uploader({ 
-								verbose: true, target:this, queued: false, multiple: false, instantStart: true, 
-								typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
-								path: '../../fancyupload/fancyupload/source/Swiff.Uploader.swf',
-								url: '/siteRoller/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
-								fileProgress: function(val){ this.set('txt',val); } 
-							});
-						}]
-					}
+							classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
+						}}
 });
-
-/*
-	storeRange:function(rangeName){
-		var sel = window.getSelection ? window.getSelection() : window.document.selection;
-		if (!sel) return null;
-		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-		return MooRTE.ranges[rangeName || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-	},
-	
-	setRange: function(rangeName) {
-		var range = MooRTE.ranges[rangeName || 'a1']
-		if(range.select) range.select(); 
-		else{
-			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			if (sel.removeAllRanges){ 
-				sel.removeAllRanges();
-				sel.addRange(range);
-			}
-		}
-		return MooRTE.Utilities;
- 	},
-	
-	wrapRange: function(prepend, append, range){
-		if(!range) range = MooRTE.Utilities.storeRange();
-		Browser.Engine.trident ?
-			range.pasteHTML(prepend + range.htmlText + append) :
-			range.surroundContents(document.createElement("code"));
-	},
-	
-	overwriteRange: function(node, range){
-		if(!range) range = MooRTE.Utilities.storeRange();
-		if (Browser.Engine.trident){
-			var id = document.uniqueID;
-			range.pasteHTML("<span id='" + id + "'></span>");
-			node.replaces($(id));
-		} else {
-			range.deleteContents();  //compare the following method (Olav's) with using the insertHTML execommand.
-			if (range.startContainer.nodeType==3) {
-				var refNode = range.startContainer.splitText(range.startOffset);
-				refNode.parentNode.insertBefore(node, refNode);
-			} else {
-				var refNode = range.startContainer.childNodes[range.startOffset];
-				range.startContainer.insertBefore(node, refNode);
-			}	
-		}
-	},
-	*/	
