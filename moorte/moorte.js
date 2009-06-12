@@ -388,6 +388,7 @@ MooRTE.Utilities = {
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html && ++loopStop <3);
+		
 		html = html.trim();
 		if(washer != $('washer')) washer.moorte();
 		return html;
@@ -406,7 +407,7 @@ Element.implement({
 				} else
 			*/			
 			return bar ? this.removeClass('rteHide') : new MooRTE($extend(options,{'elements':this}));
-		}else{
+		} else {
 			if(!bar) return false;
 			else switch(directive.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
@@ -416,8 +417,6 @@ Element.implement({
 		}
 	}
 });
-
-var upload;
 
 MooRTE.Elements = new Hash({
 
@@ -441,7 +440,7 @@ MooRTE.Elements = new Hash({
 /*#*/	strikethrough	:{img:4},
 /*#*/	justifyleft	 	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
 							var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
-							t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'))
+							t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'));
 						}},
 /*#*/	justifyfull	 	:{img:7, title:'Justify Full'  },
 /*#*/	justifycenter	:{img:8, title:'Justify Center'},
@@ -470,9 +469,9 @@ MooRTE.Elements = new Hash({
 						}},
 /*#*/	'Html/Text'		:{ img:'26', onClick:['DisplayHTML']}, 
 /*#*/	DisplayHTML		:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-/*#*/						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
-/*#*/						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-/*#*/						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+							var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
+							var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
+							this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 						}},
 /*#*/	colorpicker		:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
 							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
@@ -507,7 +506,7 @@ MooRTE.Elements = new Hash({
 							onClick:function(){
 								MooRTE.Range.create();
 								$$('#pop,#popupURL').removeClass('popHide');
-								$('popTXT').set('value',MooRTE.ranges.a1);
+								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
 							},
 							onLoad:function(){
 								new Loader({
