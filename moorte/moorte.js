@@ -74,7 +74,7 @@ var MooRTE = new Class({
 		var elSize = el.getCoordinates(), f=this.options.floating;
 		rte.removeClass('rteHide').setStyle('width',elSize.width).store('fields', rte.retrieve('fields', []).include(el));
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
-		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top'); //'before'
+		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' 
 	},
 	
 	textArea: function (el){
@@ -424,7 +424,7 @@ MooRTE.Elements = new Hash({
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule', 'blockquote']}] },//'Upload Photo','inserthorizontalrule']}] 
+/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule', 'Upload Photo', 'blockquote']}] },//'Upload Photo','inserthorizontalrule']}] 
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
 /*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
@@ -539,7 +539,8 @@ MooRTE.Elements = new Hash({
 									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
 									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
 									onComplete:function(){
-										var uploader = new Swiff.Uploader({ //verbose: true, 
+										var uploader = new Swiff.Uploader({
+											verbose: true, 
 											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
 											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
 											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',

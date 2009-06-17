@@ -55,9 +55,9 @@ div.MooRTE div.Tango 		.rteSelected{ background-color:#bbb }
 /* End Tango */
 
 /* Begin Sheva skin */
-div.MooRTE div.Sheva 		div.rteToolbar {height:24px}
-div.MooRTE div.Sheva 		a{ height:20px; width:20px; margin:2px; display:inline-block; vertical-align:bottom; background-image:url(images/Sheva.gif) }
-div.MooRTE div.Sheva 		a:hover{ border:2px solid black; margin:0; }
+div.MooRTE div.Sheva 		div.rteToolbar {height:24px; background:url('images/ShevaBG.gif') repeat-x;}
+div.MooRTE div.Sheva 		a{ height:20px; width:20px; xmargin:2px; display:inline-block; vertical-align:bottom; background-image:url(images/Sheva.gif) }
+div.MooRTE div.Sheva 		a:hover{ xborder:2px solid black; xmargin:0; }
 div.MooRTE div.Sheva 		.rteSelected{ background-color:#bbb }
 /* End Tango */
 
