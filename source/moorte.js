@@ -396,20 +396,20 @@ MooRTE.Utilities = {
 }
 
 Element.implement({
-	moorte:function(directive, options){
+	moorte:function(){ //command, options
 		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if($type(directive)=='object'){options = directive; directive = ''} 
-		if(!directive || (directive == 'create')){
+		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd;
+		if(!cmd || (cmd == 'create')){
 			/*
 				if(removed = this.retrieve('removed')){
 					this.grab(removed, 'top');
 					this.store('removed','');
 				} else
 			*/			
-			return bar ? this.removeClass('rteHide') : new MooRTE($extend(options,{'elements':this}));
+			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
 		} else {
 			if(!bar) return false;
-			else switch(directive.toLowerCase()){
+			else switch(cmd.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
 				case 'remove': this.store('removed', bar); new Element('span').replaces(bar).destroy();  break;
 				case 'destroy': bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); bar.destroy(); break; 
@@ -420,7 +420,7 @@ Element.implement({
 
 MooRTE.Elements = new Hash({
 
-/*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
+/*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
