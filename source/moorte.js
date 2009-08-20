@@ -21,7 +21,7 @@ var MooRTE = new Class({
 
 	options:{
 		floating: false,
-		location: 'elements', 											   			//[e,n,t,b,'']
+		location: 'elements',//[e,n,t,b,'']
 		buttons: 'Menu:[Main,File,Insert,save]',
 		skin: 'Word03',
 		elements: 'textarea, .rte'
