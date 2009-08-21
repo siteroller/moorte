@@ -34,8 +34,8 @@ var MooRTE = new Class({
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
-			if(l=='e' || !rte) rte = self.insertToolbar(l);  					//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
-			if(l=='b' || l=='t' || !l) el.set('contentEditable', true).focus();		//[L]ocation == page[t]op, page[b]ottom, none[] 
+			if(l=='e' || !rte) rte = self.insertToolbar(l);							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
+			if(l=='b' || l=='t' || !l) el.set('contentEditable', true)//.focus();	//[L]ocation == page[t]op, page[b]ottom, none[] 
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
@@ -50,8 +50,7 @@ var MooRTE = new Class({
 			});
 		})
 		
-		//MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');									//in case a button is pressed before anything is selected.
-		els[0].fireEvent('focus');
+		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');									//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
 		
@@ -70,7 +69,7 @@ var MooRTE = new Class({
 	},
 	
 	positionToolbar: function (el, rte){												//function is sloppy.  Clean!
-		el.set('contentEditable', true).addClass('rteShow').focus();
+		el.set('contentEditable', true).addClass('rteShow');//.focus();
 		var elSize = el.getCoordinates(), f=this.options.floating;
 		rte.removeClass('rteHide').setStyle('width',elSize.width).store('fields', rte.retrieve('fields', []).include(el));
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
@@ -544,7 +543,7 @@ MooRTE.Elements = new Hash({
 											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
 											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
 											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
-											url: '/siteroller/classes/moorte/moorte/plugins/fancyUpload/uploadHandler.php',
+											url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
 											onButtonDown :function(){ MooRTE.Range.set() },
 											onButtonEnter :function(){ MooRTE.Range.create() },
 											onFileProgress: function(val){  },//self.set('text',val);
