@@ -262,15 +262,25 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
-	assetLoader:function(clas,folder,js,css,onload,key,event){
-		
-		Hash.erase(MooRTE.Elements[key],event);
+	
+	assetLoader:function(args){		//originally: (clas,folder,js,css,onload,key,event)
+		//Hash.erase(MooRTE.Elements[key], event);
 		//if(window[clas]) return;
+		var path = MooRTE.path+args.folder || '';
 		
-		var path = MooRTE.path+folder;
+		if(args.styles) $splat(args.styles).each(function(file){
+			Asset.css(file);
+		});
+		
+		if(args.scripts){
+			var last = args.scripts.length - 1;
+			$splat(args.scripts).each(function(file){
+				last && args.onComplete ?  Asset.javascript(file,{onload:args.onComplete}) : Asset.javascript(file);
+			});
+		}
+		/*
 		new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
 		
-		/*
 		var self = this, path = MooRTE.path+folder;
 		$splat(css).each(function(file){
 			//Asset.css(path+file);			
@@ -458,7 +468,7 @@ MooRTE.Elements = new Hash({
 /*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
 /*#*/	decreasefontsize:{img:42},
 /*#*/	increasefontsize:{img:41},	
-/*#*/	inserthorizontalrule:{img:30, title:'Insert Horizontal Line' },
+/*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
 /*#*/	save			:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 							var content = $H({ 'page': window.location.pathname });
 							this.getParent('.MooRTE').retrieve('fields').each(function(el){
@@ -485,7 +495,7 @@ MooRTE.Elements = new Hash({
 							onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
 							onLoad:function(){ 
 								if (Browser.Engine.gecko) 
-									new Loader({
+									MooRTE.Utilities.assetLoader({ //new Loader({
 										scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
 										styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
 										onComplete:function(){
@@ -508,7 +518,7 @@ MooRTE.Elements = new Hash({
 								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
 							},
 							onLoad:function(){
-								new Loader({
+								MooRTE.Utilities.assetLoader({ //new Loader({
 									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
 									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
 									onComplete:function(){
@@ -534,7 +544,7 @@ MooRTE.Elements = new Hash({
 						},
 /*#*/	'Upload Photo' :{ img:15, 
 							onLoad:function(){
-								new Loader({
+								MooRTE.Utilities.assetLoader({ //new Loader({
 									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
 									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
 									onComplete:function(){
@@ -554,7 +564,7 @@ MooRTE.Elements = new Hash({
 								})
 							}							
 						},
-/*#*/	blockquote		:{	onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	blockquote		:{	img:52, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
 /*#*/	blockquote2		:{	onClick:function(){
 								var RangeText =  MooRTE.Range.get('html');
 								var block = new Element('blockquote').set('html', RangeText);
