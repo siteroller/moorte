@@ -264,8 +264,8 @@ MooRTE.Utilities = {
 	
 	
 	assetLoader:function(args){		//originally: (clas,folder,js,css,onload,key,event)
-		//Hash.erase(MooRTE.Elements[key], event);
-		//if(window[clas]) return;
+		if(args.key) Hash.erase(MooRTE.Elements[args.key], event);
+		if(args['class'] && window[args['class']]) return args.onComplete.run(); 
 		var path = MooRTE.path+args.folder || '';
 		
 		if(args.styles) $splat(args.styles).each(function(file){
@@ -273,9 +273,9 @@ MooRTE.Utilities = {
 		});
 		
 		if(args.scripts){
-			var last = args.scripts.length - 1;
+			var last = args.scripts.length, count=0;
 			$splat(args.scripts).each(function(file){
-				last && args.onComplete ?  Asset.javascript(file,{onload:args.onComplete}) : Asset.javascript(file);
+				++count == last && args.onComplete ?  Asset.javascript(file,{onload:args.onComplete}) : Asset.javascript(file);
 			});
 		}
 		/*
@@ -497,7 +497,7 @@ MooRTE.Elements = new Hash({
 								if (Browser.Engine.gecko) 
 									MooRTE.Utilities.assetLoader({ //new Loader({
 										scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
-										styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
+										styles: [MooRTE.path+'plugins/Popup/Popup.css'], 
 										onComplete:function(){
 											var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 														(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
@@ -519,6 +519,7 @@ MooRTE.Elements = new Hash({
 							},
 							onLoad:function(){
 								MooRTE.Utilities.assetLoader({ //new Loader({
+									'class':'Popup',
 									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
 									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
 									onComplete:function(){
