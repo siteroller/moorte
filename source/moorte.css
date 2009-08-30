@@ -48,10 +48,22 @@ div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid
 /* End rteGrey */
 
 /* Begin Tango skin */
-div.MooRTE div.Tango 		div.rteToolbar {background-color:brown; height:24px}
-div.MooRTE div.Tango 		a{ height:20px; width:20px; margin:2px; background-color:white; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/Tango.gif) }
-div.MooRTE div.Tango 		a:hover{ border:2px solid black; margin:0; }
-div.MooRTE div.Tango 		.rteSelected{ background-color:#bbb }
+div.MooRTE div.Tango 	a{ height:20px; width:20px; margin:2px; background-color:white; display:inline-block; text-decoration:none; vertical-align:bottom; background-image:url(images/Tango.gif) }
+div.Tango li:hover,	div.MooRTE div.Tango 	a:hover{ border:2px solid black; margin:0; }
+div.MooRTE div.Tango 	.rteSelected{ background-color:#bbb }
+
+xdiv.MooRTE div.Tango	{ left:0; bottom:0; width:100%; background:#BCBECD url('images/background_silver.jpg') repeat-x; color:#222; font: 12px Arial; }
+div.MooRTE div.Tango 	span{ height:20px; margin:1px; display:inline-block; }
+div.MooRTE div.Tango	input{ height:20px; width:100px; }
+div.MooRTE div.Tango	div.rteTop{ border-bottom:1px #bbb solid; height:18px; overflow:hidden; vertical-align:bottom; text-align:left; }
+div.MooRTE div.Tango      .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
+div.MooRTE div.Tango      a.Flyout{ position:relative; overflow:hidden;}
+div.MooRTE div.Tango      a.Flyout:hover{ overflow:visible }
+div.MooRTE div.Tango     .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+div.MooRTE div.Tango      div.rteToolbar{ position:relative; width:100%; background-color:brown; height:24px}
+div.MooRTE div.Tango      a.rteText{ height:16px; min-width:38px; margin:2px; display:inline-block; text-align:center; text-decoration:none; border:1px solid grey; -moz-corner-radius:2px }
+div.MooRTE div.Tango      a.rteText:hover{ margin:2px; background-color:#eee}
+div.MooRTE div.Tango      div.rteFlyout{ position:absolute; border:0; top:20px; left:-2px; width:24px; background-color:#ddd }
 /* End Tango */
 
 /* Begin Sheva skin */
