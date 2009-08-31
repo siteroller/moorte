@@ -50,7 +50,7 @@ var MooRTE = new Class({
 			});
 		})
 		
-		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');									//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
+		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');					//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
 		
@@ -68,10 +68,10 @@ var MooRTE = new Class({
 		return rte;
 	},
 	
-	positionToolbar: function (el, rte){												//function is sloppy.  Clean!
-		el.set('contentEditable', true).addClass('rteShow');//.focus();
-		var elSize = el.getCoordinates(), f=this.options.floating;
-		rte.removeClass('rteHide').setStyle('width',elSize.width).store('fields', rte.retrieve('fields', []).include(el));
+	positionToolbar: function (el, rte){													//function is sloppy.  Clean!
+		el.set('contentEditable', true).addClass('rteShow');								//.focus();
+		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
+		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1)).store('fields', rte.retrieve('fields', []).include(el));  //.setStyle('width',f?elSize.width:'100%') breaks if element's contents do not fill the width of the parent, or if parent has no explicit width [and requires content-box].
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
 		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' 
 	},

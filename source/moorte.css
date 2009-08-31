@@ -8,8 +8,8 @@ div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteShow{ border:2px groove #000; }
 .rteTextArea{ border:1px solid #666 }
 .rteTopDown{top:0;}
-.bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  border-box; box-sizing:  border-box; -webkit-box-sizing:  border-box  }
-.cbox{ -moz-box-sizing: content-box; -ms-box-sizing: content-box; box-sizing: content-box; -webkit-box-sizing: content-box }
+div.MooRTE div.Word03, .bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  border-box; box-sizing:  border-box; -webkit-box-sizing:  border-box  }
+.rteShow,  .cbox{ -moz-box-sizing: content-box; -ms-box-sizing: content-box; box-sizing: content-box; -webkit-box-sizing: content-box }
 /* End General*/
 
 /* Begin Word03 skin */
