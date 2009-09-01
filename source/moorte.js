@@ -19,6 +19,9 @@ var MooRTE = new Class({
 	
 	Implements: [Options],
 
+	options:{floating: false,location: 'elements',buttons: 'Menu:[Main,File,Insert,save]',skin: 'Word03',elements: 'textarea, .rte'},
+	
+	/*
 	options:{
 		floating: false,
 		location: 'elements',//[e,n,t,b,'']
@@ -26,7 +29,7 @@ var MooRTE = new Class({
 		skin: 'Word03',
 		elements: 'textarea, .rte'
 	},
-	
+	*/
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
