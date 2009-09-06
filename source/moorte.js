@@ -14,7 +14,7 @@
 *	Notes:
 *	The syntax myFunction.bind(myObj)(args) is used instead of myFunction.run(args,myObj) due to debugging problems in Firebug with the latter syntax!
 */
-
+var clipPop;
 var MooRTE = new Class({
 	
 	Implements: [Options],
@@ -267,6 +267,7 @@ MooRTE.Utilities = {
 	
 	
 	assetLoader:function(args){		//originally: (clas,folder,js,css,onload,key,event)
+		//console.log(args)
 		if(args.key) Hash.erase(MooRTE.Elements[args.key], event);
 		if(args['class'] && window[args['class']]) return args.onComplete.run(); 
 		var path = MooRTE.path+args.folder || '';
@@ -294,17 +295,12 @@ MooRTE.Utilities = {
 		*/
 	},
 	
-	clipboardPopup:function(command){
-		if($('clipboardPopup')) $$('#pop,#clipboardPopup').removeClass('popHide');
-		else{
-			var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-						If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
-						<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
-			new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
-				$$('#pop,#clipboardPopup').addClass('popHide'); e.stop();
-			})
-		}
+	clipStickyWin: function(command){
+			var body = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+				(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+				If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
+			clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
+			clipPop.hide();
 	},
 	
 	clean: function(html, options){
@@ -494,23 +490,13 @@ MooRTE.Elements = new Hash({
 							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							var hex = [c[0],c[2],c[1]].rgbToHex();
 						}},
-/*#*/	cut				:{img:20,  title:'Cut (Ctrl+X)', 
-							onClick:function(action){ Browser.Engine.gecko ? $$('#pop,#clipboardPopup').removeClass('popHide') : MooRTE.Utilities.exec(action); },
-							onLoad:function(){ 
+/*#*/	cut				:{ img:20,  title:'Cut (Ctrl+X)', 
+							onClick:function(action){ Browser.Engine.gecko ? clipPop.show() : MooRTE.Utilities.exec(action); },
+							onLoad:function(){
 								if (Browser.Engine.gecko) 
-									MooRTE.Utilities.assetLoader({ //new Loader({
-										scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
-										styles: [MooRTE.path+'plugins/Popup/Popup.css'], 
-										onComplete:function(){
-											var html = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-														(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-														If this functionality is important, consider switching to a less secure browser such as IE,<br/> which will allow us to easily access [and modify] your system.\
-														<div class='btns'><input id='pCutCopyCancel' type='submit' value='OK'/></div>"; 
-											new Popup('clipboardPopup', html, 'Security Restriction').getElement('#pCutCopyCancel').addEvent('click', function(e){
-												Popup.hide(); e.stop();
-											});
-											Popup.hide(); 
-										} 
+									MooRTE.Utilities.assetLoader({
+										scripts: [MooRTE.path+'../stickywin/clientcide.moore.js'],
+										onComplete: MooRTE.Utilities.clipStickyWin
 									});
 							}
 						},
