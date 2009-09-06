@@ -295,12 +295,18 @@ MooRTE.Utilities = {
 		*/
 	},
 	
-	clipStickyWin: function(command){
-			var body = "For your protection, Firefox does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-				(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
-				If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
-			clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
-			clipPop.hide();
+	clipStickyWin: function(caller){
+		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
+			MooRTE.Utilities.assetLoader({
+				scripts: [MooRTE.path+'../stickywin/clientcide.moore.js'],
+				onComplete: function(command){
+					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+						If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
+					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
+					MooRTE.Elements.clipPop.hide();
+				}
+			});
 	},
 	
 	clean: function(html, options){
@@ -459,8 +465,6 @@ MooRTE.Elements = new Hash({
 /*#*/	indent			:{img:12},
 /*#*/	insertorderedlist  :{img:14, title:'Numbered List' },
 /*#*/	insertunorderedlist:{img:15, title:'Bulleted List' },
-/*#*/	copy        	:{img:21, title:'Copy (Ctrl+C)',  onClick:function(){ MooRTE.Elements.cut.onClick('copy');  }},
-/*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onClick:function(){ MooRTE.Elements.cut.onClick('paste'); }},
 /*#*/	selectall   	:{img:25, title:'Select All (Ctrl + A)'},
 /*#*/	removeformat	:{img:26, title:'Clear Formatting'},
 /*#*/	undo        	:{img:31, title:'Undo (Ctrl + Z)' },
@@ -468,6 +472,15 @@ MooRTE.Elements = new Hash({
 /*#*/	decreasefontsize:{img:42},
 /*#*/	increasefontsize:{img:41},	
 /*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
+/*#*/	cut				:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
+							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+						},
+/*#*/	copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
+							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+						},
+/*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
+							onClick:function(action){ Browser.Engine.gecko || Browser.Engine.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+						},
 /*#*/	save			:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
 							var content = $H({ 'page': window.location.pathname });
 							this.getParent('.MooRTE').retrieve('fields').each(function(el){
@@ -490,16 +503,6 @@ MooRTE.Elements = new Hash({
 							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							var hex = [c[0],c[2],c[1]].rgbToHex();
 						}},
-/*#*/	cut				:{ img:20,  title:'Cut (Ctrl+X)', 
-							onClick:function(action){ Browser.Engine.gecko ? clipPop.show() : MooRTE.Utilities.exec(action); },
-							onLoad:function(){
-								if (Browser.Engine.gecko) 
-									MooRTE.Utilities.assetLoader({
-										scripts: [MooRTE.path+'../stickywin/clientcide.moore.js'],
-										onComplete: MooRTE.Utilities.clipStickyWin
-									});
-							}
-						},
 /*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
 								MooRTE.Range.create();
