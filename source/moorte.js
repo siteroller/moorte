@@ -537,6 +537,38 @@ MooRTE.Elements = new Hash({
 										MooRTE.Elements.linkPop.hide();
 							}	})	}	
 						},  // Ah, but its a shame this ain't LISP ;) ))))))))))!
+/*#*/	'Upload Photo' :{ img:15, 
+							onLoad:function(){
+								MooRTE.Utilities.assetLoader({ //new Loader({
+									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
+									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
+									onComplete:function(){
+										var uploader = new Swiff.Uploader({
+											verbose: true, 
+											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
+											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
+											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
+											url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
+											onButtonDown :function(){ MooRTE.Range.set() },
+											onButtonEnter :function(){ MooRTE.Range.create() },
+											onFileProgress: function(val){  },//self.set('text',val);
+											onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
+										});
+										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
+									}
+								})
+							}							
+						},
+/*#*/	blockquote		:{	img:52, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	start			:{element:'span'},
+
+/*#*///	depracated
+/*#*/	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
+/*#*/	'Toolbar'      :{element:'div'},  // ''
+/*#*/	'|'            :{text:'|', title:'', element:'span'},
+/*#*/	'insertimage'  :{onClick:function(args, classRef){ 
+							classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
+						}},
 /*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
 								MooRTE.Range.create();
@@ -569,42 +601,10 @@ MooRTE.Elements = new Hash({
 								})
 							}
 						},
-/*#*/	'Upload Photo' :{ img:15, 
-							onLoad:function(){
-								MooRTE.Utilities.assetLoader({ //new Loader({
-									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
-									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
-									onComplete:function(){
-										var uploader = new Swiff.Uploader({
-											verbose: true, 
-											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
-											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
-											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
-											url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
-											onButtonDown :function(){ MooRTE.Range.set() },
-											onButtonEnter :function(){ MooRTE.Range.create() },
-											onFileProgress: function(val){  },//self.set('text',val);
-											onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
-										});
-										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
-									}
-								})
-							}							
-						},
-/*#*/	blockquote		:{	img:52, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
 /*#*/	blockquote2		:{	onClick:function(){
 								var RangeText =  MooRTE.Range.get('html');
 								var block = new Element('blockquote').set('html', RangeText);
 								MooRTE.Range.replace(block);
 							}
-						},
-/*#*/	start			:{element:'span'},
-
-/*#*///	depracated
-/*#*/	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
-/*#*/	'Toolbar'      :{element:'div'},  // ''
-/*#*/	'|'            :{text:'|', title:'', element:'span'},
-/*#*/	'insertimage'  :{onClick:function(args, classRef){ 
-							classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
-						}}
+						}
 });
