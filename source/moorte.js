@@ -266,39 +266,45 @@ MooRTE.Utilities = {
 	},
 	
 	
-	assetLoader:function(args){		//originally: (clas,folder,js,css,onload,key,event)
-		//console.log(args)
-		if(args.key) Hash.erase(MooRTE.Elements[args.key], event);
-		if(args['class'] && window[args['class']]) return args.onComplete.run(); 
-		var path = MooRTE.path+args.folder || '';
+	assetLoader:function(args){
+		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
+		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), me = args.me;// + (args.folder || '')
+		if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
 		
+		var hrefs = head.getElements('link').map(function(el){return el.get('href')});
 		if(args.styles) $splat(args.styles).each(function(file){
-			Asset.css(file);
+			if(!hrefs.contains(path+file)) Asset.css(path+file);
 		});
 		
+		var srcs = head.getElements('script[src]').map(function(el){return el.get('src')});
+		var scripts = args.scripts.filter(function(script){ 
+			return !srcs.contains(path+script);
+		});
+		if(!scripts[0] || (args['class'] && window[args['class']])) return args.onComplete.run(); 
+		MooRTE.Utilities.assetLoader.busy = true;
+		var curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
+		me.setStyles({'background-image':'url("'+MooRTE.path+'images/loading.gif")','background-position':'1px 1px'});
+		var loaded = function(){
+			me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+			MooRTE.Utilities.assetLoader.busy = false;
+			args.onComplete(); 
+		}
 		if(args.scripts){
 			var last = args.scripts.length, count=0;
 			$splat(args.scripts).each(function(file){
-				++count == last && args.onComplete ?  Asset.javascript(file,{onload:args.onComplete}) : Asset.javascript(file);
+				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded}) : Asset.javascript(path+file);
 			});
 		}
-		/*
-		new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
 		
-		var self = this, path = MooRTE.path+folder;
-		$splat(css).each(function(file){
-			//Asset.css(path+file);			
-		})
-		$splat(js).each(function(file){
-			Asset.javascript(path+file,{'onload':onload.bind(self)}	);//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
-		})
+		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
+		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
 		*/
 	},
 	
 	clipStickyWin: function(caller){
 		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
-				scripts: [MooRTE.path+'../stickywin/clientcide.moore.js'],
+				scripts: ['stickywin/clientcide.moore.js'],
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
@@ -503,6 +509,34 @@ MooRTE.Elements = new Hash({
 							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							var hex = [c[0],c[2],c[1]].rgbToHex();
 						}},
+/*#*/	hyperlink		:{ img:46, title:'Create hyperlink', 
+							onClick:function(){
+									MooRTE.Range.create();
+									MooRTE.Elements.linkPop.show();
+									$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
+							},
+							onLoad: function(){
+								MooRTE.Utilities.assetLoader({
+									scripts: ['stickywin/clientcide.moore.js'],
+									onComplete: function(){
+										var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
+													<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
+													<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email";
+										var buttons = [ 
+											{ text:'cancel' },
+											{ text:'OK',
+												onClick:function(){
+													MooRTE.Range.set();
+													var value = $('popURL').get('value');
+													if($('pURL1').get('checked')) value = 'mailto:'+value;
+													MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+												} 
+											}
+										];
+										MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
+										MooRTE.Elements.linkPop.hide();
+							}	})	}	
+						},  // Ah, but its a shame this ain't LISP ;) ))))))))))!
 /*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
 								MooRTE.Range.create();
