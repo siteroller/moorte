@@ -304,6 +304,7 @@ MooRTE.Utilities = {
 	clipStickyWin: function(caller){
 		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
+				me: this,
 				scripts: ['stickywin/clientcide.moore.js'],
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
@@ -517,6 +518,7 @@ MooRTE.Elements = new Hash({
 							},
 							onLoad: function(){
 								MooRTE.Utilities.assetLoader({
+									me: this,
 									scripts: ['stickywin/clientcide.moore.js'],
 									onComplete: function(){
 										var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
