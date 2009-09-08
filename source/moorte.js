@@ -14,7 +14,7 @@
 *	Notes:
 *	The syntax myFunction.bind(myObj)(args) is used instead of myFunction.run(args,myObj) due to debugging problems in Firebug with the latter syntax!
 */
-var clipPop;
+
 var MooRTE = new Class({
 	
 	Implements: [Options],
@@ -42,7 +42,7 @@ var MooRTE = new Class({
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
-					rte.addClass('rteHide'); this.set('contentEditable', false).removeClass('rteShow');	
+					rte.addClass('rteHide'); this.removeClass('rteShow');//.set('contentEditable', false)
 				}
 			});
 			el.store('bar', rte).addEvents({
@@ -267,8 +267,9 @@ MooRTE.Utilities = {
 	
 	
 	assetLoader:function(args){
+		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
-		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), me = args.me;// + (args.folder || '')
+		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
 		if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
 		
 		var hrefs = head.getElements('link').map(function(el){return el.get('href')});
@@ -289,10 +290,13 @@ MooRTE.Utilities = {
 			MooRTE.Utilities.assetLoader.busy = false;
 			args.onComplete(); 
 		}
+		var aborted = function(){
+			MooRTE.Utilities.assetLoader.busy = false;
+		}
 		if(args.scripts){
 			var last = args.scripts.length, count=0;
 			$splat(args.scripts).each(function(file){
-				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded}) : Asset.javascript(path+file);
+				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
 			});
 		}
 		
@@ -443,9 +447,9 @@ MooRTE.Elements = new Hash({
 
 /*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
-/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },//
+/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','popupURL','inserthorizontalrule', 'Upload Photo', 'blockquote']}] },//'Upload Photo','inserthorizontalrule']}] 
+/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','hyperlink','inserthorizontalrule', 'blockquote']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
 /*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
@@ -513,8 +517,8 @@ MooRTE.Elements = new Hash({
 /*#*/	hyperlink		:{ img:46, title:'Create hyperlink', 
 							onClick:function(){
 									MooRTE.Range.create();
-									MooRTE.Elements.linkPop.show();
 									$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
+									MooRTE.Elements.linkPop.show();
 							},
 							onLoad: function(){
 								MooRTE.Utilities.assetLoader({
@@ -528,6 +532,7 @@ MooRTE.Elements = new Hash({
 											{ text:'cancel' },
 											{ text:'OK',
 												onClick:function(){
+												//	if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
 													MooRTE.Range.set();
 													var value = $('popURL').get('value');
 													if($('pURL1').get('checked')) value = 'mailto:'+value;
