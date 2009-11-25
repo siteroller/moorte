@@ -494,7 +494,7 @@ MooRTE.Elements = new Hash({
 /*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
 							onClick:function(action){ Browser.Engine.gecko || Browser.Engine.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
-/*#*/	save			:{ img:'11', src:'$root/moorte/plugins/save/saveFile.php', onClick:function(){
+/*#*/	save			:{ img:'11', src:'/moorte/plugins/save/saveFile.php', onClick:function(){
 							var content = $H({ 'page': window.location.pathname });
 							this.getParent('.MooRTE').retrieve('fields').each(function(el){
 								content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
