@@ -398,8 +398,7 @@ MooRTE.Utilities = {
 		var washer;
 		if($type(html)=='element'){
 			washer = html;
-			html = washer.get('html');
-			washer.moorte('remove');
+			if(washer.getFirst() == washer.retrieve('bar')) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
