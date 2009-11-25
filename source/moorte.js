@@ -80,8 +80,10 @@ var MooRTE = new Class({
 	},
 	
 	textArea: function (el){
-		var div = new Element('div', {text:el.get('value')});
-		new Element('div', {'class':'rteTextArea '+el.get('class'), 'styles':el.getCoordinates() }).adopt(div, new Element('span')).setStyle('overflow','auto').inject(el, 'before');
+		var div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':el.getCoordinates()}).setStyle('overflow','auto').inject(el,'before');
+		el.getParent('form').addEvent('submit',function(e){
+			el.set('value', MooRTE.Utilities.clean(div)); 
+		})
 		el.addClass('rteHide');
 		return div;
 	}
