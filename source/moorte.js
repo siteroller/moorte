@@ -422,23 +422,24 @@ MooRTE.Utilities = {
 }
 
 Element.implement({
-	moorte:function(){ //command, options
-		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd;
+	moorte:function(){ 
+		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		if(!cmd || (cmd == 'create')){
-			/*
-				if(removed = this.retrieve('removed')){
-					this.grab(removed, 'top');
-					this.store('removed','');
-				} else
-			*/			
+			if(removed = this.retrieve('removed')){
+				bar.inject(removed[0], removed[1]);
+				this.eliminate('removed');
+			}
 			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
 		} else {
 			if(!bar) return false;
 			else switch(cmd.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
-				case 'remove': this.store('removed', bar); new Element('span').replaces(bar).destroy();  break;
-				case 'destroy': bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); bar.destroy(); break; 
+				case 'remove':
+					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
+					new Element('span').replaces(bar).destroy(); break;
+				case 'destroy': 
+					bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); 
+					bar.destroy(); break; 
 			}
 		}
 	}
