@@ -397,17 +397,16 @@ MooRTE.Utilities = {
 		
 		// In order to clean the content, we copy it into a div.  If an element is passed it, we just use that element.
 		// washer will be the element whose text is being cleaned, html is the text to clean.
+		
 		var washer;
 		// If an element was passed in, call it washer & its content html.
 		if($type(html)=='element'){
 			washer = html;
-		
+			
 			// Remove the RTE from the element so that it doesn't get cleaned out and sent.
 			// This is only needed if the RTE is within the element we want to clean, so we check for that. 
 			// It now checks if the RTE is the first element.  Checking if the RTE is contained anywhere in washer would be safer, but I cant think where it would be needed.
 			if(washer.getFirst() == washer.retrieve('bar')) washer.moorte('remove');
-			// console.log(washer.getFirst() == washer.retrieve('bar'),washer,washer.getFirst(),washer.retrieve('bar'))
-			// console.log('woohoo');
 			
 		// Otherwise, call the passed in content html, and put it into its own container called washer.
 		// If this function has been run before washer exists, do not recreate.
@@ -419,24 +418,23 @@ MooRTE.Utilities = {
 		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });   
 		// Cleanup step 2: use a regex for the remainder of the cleanup. Put content into a string 'html'
 		html = washer.get('html');
+		// Restore the RTE to the element if it had been removed.
+		if(washer != $('washer')) washer.moorte();
+		
 		// Extend array of regexs according to passed in options.
 		if(xhtml)cleanup.extend(xhtml);
 		if(semantic)cleanup.extend(semantic);
 		if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
 		
 		// loop through regexs until content is returned the same way it went in. 
-		var loopStop = 0;  //while testing.
+		// var loopStop = 0;  //while testing.
 		do{	
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
-		} while (cleaned != html && ++loopStop <3);
+		} while (cleaned != html); // && ++loopStop <3
 		
-		// Trim off leading and trailing spaces.
-		html = html.trim();
-		// Restore the RTE to the element if it had been removed.
-		if(washer != $('washer')) washer.moorte();
-		// Return clean HTML
-		return html;
+		// Trim off leading and trailing spaces and return HTML
+		return html.trim();
 	}
 }
 

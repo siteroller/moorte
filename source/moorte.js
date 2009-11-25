@@ -404,20 +404,19 @@ MooRTE.Utilities = {
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
 		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
 		html = washer.get('html');
+		if(washer != $('washer')) washer.moorte();
 		
 		if(xhtml)cleanup.extend(xhtml);
 		if(semantic)cleanup.extend(semantic);
 		if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
 
-		var loopStop = 0;  //while testing.
+		// var loopStop = 0;  //while testing.
 		do{	
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
-		} while (cleaned != html && ++loopStop <3);
+		} while (cleaned != html); // && ++loopStop <3
 		
-		html = html.trim();
-		if(washer != $('washer')) washer.moorte();
-		return html;
+		return html.trim();
 	}
 }
 
