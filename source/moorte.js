@@ -38,7 +38,7 @@ var MooRTE = new Class({
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
 			if(l=='e' || !rte) rte = self.insertToolbar(l);							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
-			if(l=='b' || l=='t' || !l) el.set('contentEditable', true)//.focus();	//[L]ocation == page[t]op, page[b]ottom, none[] 
+			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);//.focus();	//[L]ocation == page[t]op, page[b]ottom, none[] 
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
 				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
@@ -51,7 +51,7 @@ var MooRTE = new Class({
 				'keydown':MooRTE.Utilities.shortcuts, 
 				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
 			});
-		})
+		});
 		
 		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');					//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
@@ -83,7 +83,7 @@ var MooRTE = new Class({
 		var div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':el.getCoordinates()}).setStyle('overflow','auto').inject(el,'before');
 		el.getParent('form').addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
-		})
+		});
 		el.addClass('rteHide');
 		return div;
 	}
@@ -143,7 +143,7 @@ MooRTE.Range = {
 			}	
 		}
 	}
-}
+};
 
 MooRTE.Utilities = {
 	exec: function(args){
@@ -172,10 +172,10 @@ MooRTE.Utilities = {
 		});
 		update.value.each(function(vals){
 			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
-		})
+		});
 		update.custom.each(function(){
 			vals[2].bind(vals[1])(vals[0]);
-		})
+		});
 	},
 	
 	addElements: function(buttons, place, relative, name){
@@ -209,7 +209,7 @@ MooRTE.Utilities = {
 			
 			if(!e || name == 'rteGroup_Auto'){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
+				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',');
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -291,16 +291,16 @@ MooRTE.Utilities = {
 			me.setStyles({'background-image':curImg, 'background-position':curPos}); 
 			MooRTE.Utilities.assetLoader.busy = false;
 			args.onComplete(); 
-		}
+		};
 		var aborted = function(){
 			MooRTE.Utilities.assetLoader.busy = false;
-		}
+		};
 		if(args.scripts){
 			var last = args.scripts.length, count=0;
 			$splat(args.scripts).each(function(file){
 				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
 			});
-		}
+		};
 		
 		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
 		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
@@ -418,7 +418,7 @@ MooRTE.Utilities = {
 		
 		return html.trim();
 	}
-}
+};
 
 Element.implement({
 	moorte:function(){ 
