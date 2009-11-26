@@ -431,14 +431,17 @@ Element.implement({
 			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
 		} else {
 			if(!bar) return false;
-			else switch(cmd.toLowerCase()){
-				case 'hide': bar.addClass('rteHide'); break;
+			switch(cmd.toLowerCase()){
 				case 'remove':
 					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
 					new Element('span').replaces(bar).destroy(); break;
 				case 'destroy': 
-					bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); 
+					bar.retrieve('fields').each(function(el){
+						el.removeEvents().eliminate('bar').set('contentEditable',false);
+						if(el.hasClass('rteTextArea'))el.getNext('textarea').removeClass('rteHide'); el.destroy();
+					});
 					bar.destroy(); break; 
+				case 'hide': bar.addClass('rteHide'); break;
 			}
 		}
 	}
