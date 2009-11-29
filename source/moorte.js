@@ -52,6 +52,7 @@ var MooRTE = new Class({
 				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
 			});
 		});
+		rte.store('fields', els);
 		
 		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');					//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
@@ -74,7 +75,7 @@ var MooRTE = new Class({
 	positionToolbar: function (el, rte){													//function is sloppy.  Clean!
 		el.set('contentEditable', true).addClass('rteShow');								//.focus();
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
-		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1)).store('fields', rte.retrieve('fields', []).include(el));  //.setStyle('width',f?elSize.width:'100%') breaks if element's contents do not fill the width of the parent, or if parent has no explicit width [and requires content-box].
+		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));//.store('fields', rte.retrieve('fields', []).include(el));  //.setStyle('width',f?elSize.width:'100%') breaks if element's contents do not fill the width of the parent, or if parent has no explicit width [and requires content-box].
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
 		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' 
 	},
@@ -392,7 +393,7 @@ MooRTE.Utilities = {
 			[/><br ?\/?>/gi,'>'],													// Remove useless BRs
 			[/<br ?\/?>\s*<\/(h1|h2|h3|h4|h5|h6|li|p)/gi, '</$1'],					// Remove BRs right before the end of blocks
 			//Handled with DOM:
-			[/<p>(?:\s*)<p>/g, '<p>'],												// Remove empty <p> tags
+			[/<p>(?:\s*)<p>/g, '<p>']												// Remove empty <p> tags
 		];
 		
 		var washer;
@@ -451,7 +452,7 @@ MooRTE.Elements = new Hash({
 
 /*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
-/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','cut','copy','paste','redo','undo','selectall','removeformat']}] },
+/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat']}] },
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
 /*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','hyperlink','inserthorizontalrule', 'blockquote']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
@@ -496,12 +497,12 @@ MooRTE.Elements = new Hash({
 /*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
 							onClick:function(action){ Browser.Engine.gecko || Browser.Engine.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
-/*#*/	save			:{ img:'11', src:'/moorte/plugins/save/saveFile.php', onClick:function(){
-							var content = $H({ 'page': window.location.pathname });
+/*#*/	save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
+							var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
 							this.getParent('.MooRTE').retrieve('fields').each(function(el){
-								content['content_'+(el.get('id')||'')] = MooRTE.Utilities.clean(el);
+								content['content'][next++] = MooRTE.Utilities.clean(el);
 							});
-							new Request({url:MooRTE.Elements.save.src}).send(content.toQueryString());
+							new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(content.toQueryString());
 						}},
 /*#*/	'Html/Text'		:{ img:'26', onClick:['DisplayHTML']}, 
 /*#*/	DisplayHTML		:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
