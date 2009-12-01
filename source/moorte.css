@@ -1,12 +1,12 @@
 /*  position to top/bottom of page, the hide/show class  */
 /* Begin General */
 div.rteFloat{ position:absolute; }
-div.MooRTE{ left:0; width:100%; }
+div.MooRTE{ left:0; width:100%;position:relative; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteHide{ display:none; }
 .rteShow{ border:2px groove #000; }
-.rteTextArea{ border:1px solid #666 }
+.rteTextArea{ border:1px solid #666; display:inline-block; font-size:1em; zoom:1; _display:inline;  overflow-y:hidden; overflow-x:auto; word-wrap: break-word }
 .rteTopDown{top:0;}
 div.MooRTE div.Word03, .bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  border-box; box-sizing:  border-box; -webkit-box-sizing:  border-box  }
 .rteShow,  .cbox{ -moz-box-sizing: content-box; -ms-box-sizing: content-box; box-sizing: content-box; -webkit-box-sizing: content-box }
@@ -61,7 +61,7 @@ div.MooRTE div.Tango	div.rteTop{ border-bottom:1px #bbb solid; height:18px; over
 div.MooRTE div.Tango      .saveBtn{ background-image:url('images/Save.png'); position:absolute; top:1px; right:15px; width:75px;}
 div.MooRTE div.Tango      a.Flyout{ position:relative; overflow:hidden;}
 div.MooRTE div.Tango      a.Flyout:hover{ overflow:visible }
-div.MooRTE div.Tango     .displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+div.MooRTE div.Tango     .displayHtml{position:absolute; border:1px solid grey; left:0; margin:-2px;}
 div.MooRTE div.Tango      div.rteToolbar{ position:relative; width:100%; background-color:brown; height:24px}
 div.MooRTE div.Tango      a.rteText{ height:16px; min-width:38px; margin:2px; display:inline-block; text-align:center; text-decoration:none; border:1px solid grey; -moz-corner-radius:2px }
 div.MooRTE div.Tango      a.rteText:hover{ margin:2px; background-color:#eee}

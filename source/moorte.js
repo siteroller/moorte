@@ -77,12 +77,12 @@ var MooRTE = new Class({
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
 		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));//.store('fields', rte.retrieve('fields', []).include(el));  //.setStyle('width',f?elSize.width:'100%') breaks if element's contents do not fill the width of the parent, or if parent has no explicit width [and requires content-box].
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
-		else rte.inject((el.getParent().hasClass('rteTextArea')?el.getParent():el),'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' 
+		else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' (el.getParent().hasClass('rteTextArea')?el.getParent():el) 
 	},
 	
 	textArea: function (el){
-		var div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':el.getCoordinates()}).setStyle('overflow','auto').inject(el,'before');
-		el.getParent('form').addEvent('submit',function(e){
+		var form, div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':{'min-height':el.getSize().y, width:el.getSize().x }}).inject(el,'before');//el.getCoordinates().setStyle('overflow','auto')
+		if(form = el.getParent('form'))form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
 		el.addClass('rteHide');
@@ -573,6 +573,21 @@ MooRTE.Elements = new Hash({
 						},
 /*#*/	blockquote		:{	img:52, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
 /*#*/	start			:{element:'span'},
+/*#*/	viewSource		:{ img:'26', onClick:function(a,b){
+							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
+							if(this.hasClass('rteSelected')){
+								this.removeClass('rteSelected');
+								if(el.getFirst() == el.retrieve('bar')) el.moorte('remove');
+								el.set('html',ta.addClass('rteHide').get('value')).moorte();
+							} else if(ta){
+								ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
+								this.addClass('rteSelected');
+							} else MooRTE.Utilities.group.run(['source',a],this);
+						}},
+/*#*/	source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
+							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
+							this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
+						}},
 
 /*#*///	depracated
 /*#*/	'Menu'         :{element:'div'},  //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
