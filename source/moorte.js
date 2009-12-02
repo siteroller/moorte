@@ -117,6 +117,13 @@ MooRTE.Range = {
 			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
 	},
 	
+	insert: function(what, range){ //html option that says if text or html?
+		if(Browser.Engine.trident){
+			if(!range) range = MooRTE.Range.create();
+			range.pasteHTML(what); 
+		} else MooRTE.Utilities.exec('insertHTML',what);
+		return MooRTE.Range;
+	},
 	wrap:function(element, options, range){
 		if(!range) range = MooRTE.Range.create();
 		var El = new Element(element, options);
@@ -156,6 +163,10 @@ MooRTE.Utilities = {
 	},
 	
 	shortcuts: function(e){
+		if(e.key=='enter'){ 
+			e.stop();
+			return MooRTE.Range.insert('<br/>');
+		}
 		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');	
 		if(e && e.control && shorts.has(e.key)){
 			e.stop();
@@ -464,9 +475,9 @@ MooRTE.Elements = new Hash({
 	                
 /*#*///	Buttons
 /*#*/	div			 	:{element:'div'},
-/*#*/	bold		 	:{img:1, shortcut:'b' },
-/*#*/	italic		 	:{img:2, shortcut:'i' },
-/*#*/	underline	 	:{img:3, shortcut:'u' },
+/*#*/	bold		 	:{img:1, shortcut:'b', tag:'b' },
+/*#*/	italic		 	:{img:2, shortcut:'i', tag:'i' },
+/*#*/	underline	 	:{img:3, shortcut:'u', tag:'u' },
 /*#*/	strikethrough	:{img:4},
 /*#*/	justifyleft	 	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
 							var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
