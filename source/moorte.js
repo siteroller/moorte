@@ -21,15 +21,6 @@ var MooRTE = new Class({
 
 	options:{floating: false,location: 'elements',buttons: 'Menu:[Main,File,Insert,save]',skin: 'Word03',elements: 'textarea, .rte'},
 	
-	/*
-	options:{
-		floating: false,
-		location: 'elements',//[e,n,t,b,'']
-		buttons: 'Menu:[Main,File,Insert,save]',
-		skin: 'Word03',
-		elements: 'textarea, .rte'
-	},
-	*/
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
@@ -37,24 +28,24 @@ var MooRTE = new Class({
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
-			if(l=='e' || !rte) rte = self.insertToolbar(l);							//[L]ocation == elem[e]nts. [Creates bar if none or, when 'elements', for each element]
-			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);//.focus();	//[L]ocation == page[t]op, page[b]ottom, none[] 
-			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({				//[L]ocation == elem[e]nts ? inli[n]e
+			if(l=='e' || !rte) rte = self.insertToolbar(l);	
+			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);
+			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({
 				'click': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
-					rte.addClass('rteHide'); this.removeClass('rteShow');//.set('contentEditable', false)
+					rte.addClass('rteHide'); this.removeClass('rteShow');
 				}
 			});
 			el.store('bar', rte).addEvents({
 				'mouseup':MooRTE.Utilities.updateBtns, 
 				'keyup'  :MooRTE.Utilities.updateBtns, 
 				'keydown':MooRTE.Utilities.shortcuts, 
-				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } //this.retrieve('bar');activeField is not used at all, activeBar is used for the button check.
+				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } 
 			});
 		});
 		rte.store('fields', els);
 		
-		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');					//in case a button is pressed before anything is selected. Was: els[0].fireEvent('focus');
+		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');
 		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if(l=='b') rte.addClass('rtePageBottom');
 		
@@ -72,12 +63,12 @@ var MooRTE = new Class({
 		return rte;
 	},
 	
-	positionToolbar: function (el, rte){													//function is sloppy.  Clean!
-		el.set('contentEditable', true).addClass('rteShow');								//.focus();
+	positionToolbar: function (el, rte){
+		el.set('contentEditable', true).addClass('rteShow');
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
-		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));//.store('fields', rte.retrieve('fields', []).include(el));  //.setStyle('width',f?elSize.width:'100%') breaks if element's contents do not fill the width of the parent, or if parent has no explicit width [and requires content-box].
+		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
-		else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left')); //'before' (el.getParent().hasClass('rteTextArea')?el.getParent():el) 
+		else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
 	},
 	
 	textArea: function (el){
@@ -141,7 +132,7 @@ MooRTE.Range = {
 			node.replaces($(id));
 		} else {
 			MooRTE.Utilities.exec('inserthtml', node); return;
-			range.deleteContents();  //compare the following method (Olav's) with using the insertHTML execommand.
+			range.deleteContents();  // Consider using Range.insert() instead of the following (Olav's method).
 			if (range.startContainer.nodeType==3) {
 				var refNode = range.startContainer.splitText(range.startOffset);
 				refNode.parentNode.insertBefore(node, refNode);
@@ -155,10 +146,10 @@ MooRTE.Range = {
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten(); 												// args can be an array (for the hash), or regular arguments(elsewhere).
-		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase())); //Fix for FF3 bug for justify, in&outdent
-		if(g) document.designMode = 'on';//alert(args);
-		document.execCommand(args[0], args[2]||null, args[1]||false);					//document.execCommand('justifyright', false, null);//document.execCommand('createlink', false, 'http://www.google.com');
+		args = $A(arguments).flatten();
+		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
+		if(g) document.designMode = 'on';
+		document.execCommand(args[0], args[2]||null, args[1]||false);
 		if(g) document.designMode = 'off';
 	},
 	
@@ -176,7 +167,7 @@ MooRTE.Utilities = {
 	},
 	
 	updateBtns: function(e){
-		var val, update = MooRTE.activeBar.retrieve('update'); //vals[command, element, function]
+		var val, update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){ 
 			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
@@ -194,15 +185,15 @@ MooRTE.Utilities = {
 		if(!place) place = MooRTE.activeBar.getFirst();
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
 		if($type(buttons) == 'string'){
-			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
-			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
+			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
+			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
 			buttons = JSON.decode('['+buttons+']');
 		}
 	
 		
-		//the following should be a loop.  When was the loop removed and why?!
+		// The following should be a loop.  When was the loop removed and why?!
 		if(btns[0]){ buttons = btns; btns = [];}
 		$splat(buttons).each(function(item){
 			switch($type(item)){
