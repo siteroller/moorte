@@ -33,3 +33,18 @@ function eventHandler(){
 	var event = if (args.test(/^on[A-Z]/)); 
 	//case 'object': case 'array', which will be made into a new toolbar!
 }
+
+MooRTE.Range = {
+	set:function(rangeName){
+		var range = MooRTE.ranges[rangeName || 'a1'];
+		if(range.select) range.select(); 
+		else{
+			var sel = window.getSelection ? window.getSelection() : window.document.selection;
+			if (sel.removeAllRanges){ 
+				sel.removeAllRanges();
+				sel.addRange(range);
+			}
+		}
+		return MooRTE.Range;
+	}
+}

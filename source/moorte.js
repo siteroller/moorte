@@ -24,7 +24,7 @@ var MooRTE = new Class({
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:(URI ? new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') : '') });
 		
 		els.each(function(el){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
@@ -89,19 +89,6 @@ MooRTE.Range = {
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
-	set:function(rangeName){
-		var range = MooRTE.ranges[rangeName || 'a1'];
-		if(range.select) range.select(); 
-		else{
-			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			if (sel.removeAllRanges){ 
-				sel.removeAllRanges();
-				sel.addRange(range);
-			}
-		}
-		return MooRTE.Range;
-	},
-	
 	get: function(what, range){
 		if(!range) range = MooRTE.Range.create();
 		return !Browser.Engine.trident ? range.toString() :
@@ -122,6 +109,18 @@ MooRTE.Range = {
 			range.pasteHTML(El.set('html', range.htmlText).outerHTML) : 
 			range.surroundContents(El);
 		return El;
+	},
+	wrapText:function(element, caller){
+		var area = caller.getParent('.RTE').getElement('textarea');
+		if(!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
+		if(!Browser.Engine.trident){
+			var start = area.selectionStart, RE = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value')), El = element+RE[2]+'</'+element.match(/^<(\w+)/)[1]+'>';
+			area.set('value', RE[1]+El+RE[3]).selectionEnd = start + El.length;
+		} else { 
+			var El = new Element(element||'span', {html:range.get()});
+			range.pasteHTML(El);
+		}
+		return MooRTE.Range;
 	},
 	
 	replace:function(node, range){
@@ -146,7 +145,7 @@ MooRTE.Range = {
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten();
+		args = $A(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
 		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
 		if(g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||null, args[1]||false);
@@ -223,13 +222,15 @@ MooRTE.Utilities = {
 						'mousedown': function(e){
 							MooRTE.activeBtn = this;
 							MooRTE.activeBar = this.getParent('.MooRTE');
-							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							else MooRTE.Utilities.eventHandler('onClick', this, btn);
+							var source = MooRTE.activeBar.retrieve('source');
+							
+							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							else MooRTE.Utilities.eventHandler(source ? 'source' : 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
+				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate','source',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
 				if(val.onUpdate || state) 
@@ -253,7 +254,7 @@ MooRTE.Utilities = {
 		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': MooRTE.Utilities.eventHandler(event, caller, name); break;
+			case 'string': onEvent == 'source' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
 			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
 		}
 	},
@@ -466,9 +467,9 @@ MooRTE.Elements = new Hash({
 	                
 /*#*///	Buttons
 /*#*/	div			 	:{element:'div'},
-/*#*/	bold		 	:{img:1, shortcut:'b', tag:'b' },
-/*#*/	italic		 	:{img:2, shortcut:'i', tag:'i' },
-/*#*/	underline	 	:{img:3, shortcut:'u', tag:'u' },
+/*#*/	bold		 	:{img:1, shortcut:'b', source:'<b>' },
+/*#*/	italic		 	:{img:2, shortcut:'i', source:'<i>' },
+/*#*/	underline	 	:{img:3, shortcut:'u', source:'<u>' },
 /*#*/	strikethrough	:{img:4},
 /*#*/	justifyleft	 	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
 							var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
