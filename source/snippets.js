@@ -48,3 +48,18 @@ MooRTE.Range = {
 		return MooRTE.Range;
 	}
 }
+
+addElements: function(buttons, place, relative, name){
+	//....
+	events:{
+		'mousedown': function(e){
+			//...
+			//Check to ensure that the range is within an area controlled by the activeBar:
+			var selected = MooRTE.Range.parent(),ok;
+			MooRTE.activeBar.retrieve('fields').each(function(field){ if(field.hasChild(selected)){ ok=1; break;} });
+			if(!ok)return;
+			// Or check that the range is in an area which has been extended (but could be through a second instance of MooRTE).
+			if(!MooRTE.activeField.hasChild(MooRTE.Range.parent()))return; 
+		}
+	}
+}

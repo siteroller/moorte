@@ -218,10 +218,13 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
 					events:{
 						'mousedown': function(e){
-							MooRTE.activeBtn = this;
-							MooRTE.activeBar = this.getParent('.MooRTE');
-							if(!val.onClick && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							else MooRTE.Utilities.eventHandler('onClick', this, btn);
+							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source');
+							// If activeField is not a field which can be controlled by this bar, change active field - and the focus - to one which can be.
+							// If range is outside of extended area, this will effectively destroy the range, keeping the toolbar from editing areas outside of its environs!
+							if(!bar.retrieve('fields').contains(MooRTE.activeField)) MooRTE.activeField = bar.retrieve('fields')[0].focus();
+							
+							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}

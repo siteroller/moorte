@@ -19,7 +19,7 @@ var MooRTE = new Class({
 	
 	Implements: [Options],
 
-	options:{floating: false,location: 'elements',buttons: 'Menu:[Main,File,Insert,save]',skin: 'Word03',elements: 'textarea, .rte'},
+	options:{floating: false,location: 'elements',buttons: 'Menu:[Main,File,Insert]',skin: 'Word03',elements: 'textarea, .rte'},
 	
 	initialize: function(options){
 		this.setOptions(options);
@@ -140,6 +140,12 @@ MooRTE.Range = {
 				range.startContainer.insertBefore(node, refNode);
 			}	
 		}
+	},
+	
+	parent:function(range){
+		// Only FF support for now!
+		if(!range) range = MooRTE.Range.create();
+		return range.commonAncestorContainer;
 	}
 };
 
@@ -220,12 +226,11 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
 					events:{
 						'mousedown': function(e){
-							MooRTE.activeBtn = this;
-							MooRTE.activeBar = this.getParent('.MooRTE');
-							var source = MooRTE.activeBar.retrieve('source');
+							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source');
+							if(!bar.retrieve('fields').contains(MooRTE.activeField)) MooRTE.activeField = bar.retrieve('fields')[0].focus();
 							
 							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							else MooRTE.Utilities.eventHandler(source ? 'source' : 'onClick', this, btn);
+							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
@@ -402,7 +407,7 @@ MooRTE.Utilities = {
 		var washer;
 		if($type(html)=='element'){
 			washer = html;
-			if(washer.getFirst() == washer.retrieve('bar')) washer.moorte('remove');
+			if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
@@ -574,18 +579,22 @@ MooRTE.Elements = new Hash({
 								})
 							}							
 						},
-/*#*/	blockquote		:{	img:52, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	blockquote		:{	img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
 /*#*/	start			:{element:'span'},
-/*#*/	viewSource		:{ img:'26', onClick:function(a,b){
-							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
+/*#*/	viewSource		:{ img:35, onClick:'source', source:function(btn){
+							var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 							if(this.hasClass('rteSelected')){
+								bar.eliminate('source');
 								this.removeClass('rteSelected');
-								if(el.getFirst() == el.retrieve('bar')) el.moorte('remove');
+								if(el.hasChild(el.retrieve('bar'))) el.moorte('remove');
 								el.set('html',ta.addClass('rteHide').get('value')).moorte();
-							} else if(ta){
-								ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
-								this.addClass('rteSelected');
-							} else MooRTE.Utilities.group.run(['source',a],this);
+							} else {
+								bar.store('source','source');
+								if(ta){
+									this.addClass('rteSelected');
+									ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
+								} else MooRTE.Utilities.group.run(['source',btn],this);
+							}
 						}},
 /*#*/	source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
 							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
