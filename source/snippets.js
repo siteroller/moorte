@@ -63,3 +63,24 @@ addElements: function(buttons, place, relative, name){
 		}
 	}
 }
+
+function arrayCompare(array1, array2, exact){
+		if(!exact){ 
+			array1.sort();
+			array2.sort();
+		}
+		return array1.toString() === array2.toString();
+}
+
+function outerhtml(el){
+	var wrap = new Element('div').wraps(el), html = wrap.get('html'); 
+	el.inject(wrap, 'after');
+	wrap.destroy();
+	return html;
+}
+
+function focus(el){
+	el = el.firstChild;
+	do{	if (el.nodeType == 3) el.focus(); break;
+	} while (el = el.nextSibling); 
+}
