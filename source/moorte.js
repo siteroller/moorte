@@ -24,10 +24,10 @@ var MooRTE = new Class({
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBtn:'', activeBar:'', path:(URI ? new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') : '') });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'', path:(URI ? new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') : '') });
 		
-		els.each(function(el){
-			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') el = self.textArea(el);
+		els.each(function(el,index){
+			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
 			if(l=='e' || !rte) rte = self.insertToolbar(l);	
 			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);
 			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({
@@ -59,7 +59,7 @@ var MooRTE = new Class({
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
 		MooRTE.activeBar = rte; // not used!
-		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); //Should give more appropriate name. Also, allow for last of multiple classes  
+		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	},
 	
@@ -72,11 +72,10 @@ var MooRTE = new Class({
 	},
 	
 	textArea: function (el){
-		var form, div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':{'min-height':el.getSize().y, width:el.getSize().x }}).inject(el,'before');//el.getCoordinates().setStyle('overflow','auto')
+		var form, div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':{'min-height':el.getSize().y, width:el.getSize().x }}).inject(el.addClass('rteHide'),'before');//el.getCoordinates().setStyle('overflow','auto')
 		if(form = el.getParent('form'))form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
-		el.addClass('rteHide');
 		return div;
 	}
 });
@@ -143,9 +142,11 @@ MooRTE.Range = {
 	},
 	
 	parent:function(range){
-		// Only FF support for now!
+
 		if(!range) range = MooRTE.Range.create();
-		return range.commonAncestorContainer;
+		return Browser.Engine.trident ?  
+			$type(range) == 'object' ? range.parentElement() : range
+			: range.commonAncestorContainer;
 	}
 };
 
@@ -197,16 +198,18 @@ MooRTE.Utilities = {
 			buttons = JSON.decode('['+buttons+']');
 		}
 	
-		
-		// The following should be a loop.  When was the loop removed and why?!
-		if(btns[0]){ buttons = btns; btns = [];}
-		$splat(buttons).each(function(item){
-			switch($type(item)){
-				case 'string': btns.push(item); break;
-				case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
-				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
-			}
-		});
+		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. It was then removed, probably by mistake, till 2009-12-09 13:18:15 
+		var loopStop = loop = 0; //Remove loopstop variable after testing!!
+		do{
+			if(btns[0]){ buttons = btns; btns = [];}
+			$splat(buttons).each(function(item){
+				switch($type(item)){
+					case 'string': btns.push(item); break;
+					case 'array' : item.each(function(val){btns.push(val)}); loop = (item.length==1); break;	//item.each(buttons.push);
+					case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
+				}
+			})
+		} while(loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
 		btns.each(function(btn){
 			var btnVals,btnClass;
@@ -223,12 +226,13 @@ MooRTE.Utilities = {
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
+					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
-						'mousedown': function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source');
-							if(!bar.retrieve('fields').contains(MooRTE.activeField)) MooRTE.activeField = bar.retrieve('fields')[0].focus();
-							
+						mousedown: function(e){
+							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source'), fields = bar.retrieve('fields'),holder;
+							if(!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+							if(!MooRTE.activeField == (holder = MooRTE.Range.parent()) && !MooRTE.activeField.hasChild(holder))return;
+														
 							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
@@ -272,7 +276,7 @@ MooRTE.Utilities = {
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
 		this.addClass('rteSelected rteAdd'+name);
-		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
+		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);//3rdel
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
@@ -460,7 +464,7 @@ MooRTE.Elements = new Hash({
 
 /*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
-/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat']}] },
+/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
 /*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','hyperlink','inserthorizontalrule', 'blockquote']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
