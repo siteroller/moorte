@@ -298,9 +298,9 @@ MooRTE.Utilities = {
 		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
 		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
-		if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
-		
 		var hrefs = head.getElements('link').map(function(el){return el.get('href')});
+		
+		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
 		if(args.styles) $splat(args.styles).each(function(file){
 			if(!hrefs.contains(path+file)) Asset.css(path+file);
 		});

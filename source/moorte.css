@@ -21,7 +21,7 @@ div.MooRTE div.Word03    div.rteToolbar{ position:relative; width:100%; backgrou
 div.MooRTE div.Word03    div.rteToolbar a{ height:20px; width:20px; margin:1px; display:inline-block; text-decoration:none; vertical-align:top; background-image:url(images/Word03.gif)}
 div.MooRTE div.Word03    div.rteToolbar a:hover{ border:1px solid black; margin:0; background-color:#FFB874 }
 div.MooRTE div.Word03    .rteSelected{background-color:white}
-div.MooRTE div.Word03    div.rteMenu a{margin:2px; display:inline-block; text-decoration:none; vertical-align:top; }
+div.MooRTE div.Word03    div.rteMenu a{margin:2px; display:inline-block; text-decoration:none; vertical-align:top; *padding:0 4px}
 div.MooRTE div.Word03    div.rteMenu a.rteText{font: 12px black Arial; color:black; }
 div.MooRTE div.Word03    span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
 div.MooRTE div.Word03    a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; margin:0 8px; border:1px solid #B9D2F8}
@@ -52,7 +52,7 @@ div.MooRTE div.rteGrey          .displayHtml{position:absolute; border:1px solid
 
 /* Begin Tango skin */
 div.MooRTE div.Tango      div.rteMenu{ background-color:brown; word-wrap: normal; zoom:1}
-div.MooRTE div.Tango      div.rteMenu a{ padding:0 4px;}
+div.MooRTE div.Tango      div.rteMenu a{ *padding:0 4px;}
 div.MooRTE div.Tango 	.rteSelected{ background-color:#bbb }
 xdiv.MooRTE div.Tango 	{ left:0; bottom:0; width:100%; background-color:#B9D2F8; color:#222; font: 12px Arial; }
 div.MooRTE div.Tango	a{ height:20px; border:2px solid brown; width:20px; display:inline-block; text-decoration:none; vertical-align:top; background-image:url(images/Tango.gif); background-color:#fff; }
