@@ -90,6 +90,7 @@ var MooRTE = new Class({
 });
 
 MooRTE.Range = {
+	// Create function takes selected area and stores inside a range object.
 	create: function(range){
 		var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		if (!sel) return null;
@@ -97,19 +98,19 @@ MooRTE.Range = {
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	},
 	
+	//Set function sets the 'active' range to whatever is passed in (instead of the current selection).
 	set:function(rangeName){
 		var range = MooRTE.ranges[rangeName || 'a1'];
-		if(range.select) range.select(); 
-		else{
-			var sel = window.getSelection ? window.getSelection() : window.document.selection;
-			if (sel.removeAllRanges){ 
-				sel.removeAllRanges();
-				sel.addRange(range);
-			}
+		if(range.select) range.select(); 	//IE. Could use Mootools check as well, but this is more forward compliant - who knows IE9?
+		else { 								//Other browsers
+			var sel = window.getSelection;	//https://developer.mozilla.org/en/DOM/window.getSelection
+			sel.removeAllRanges(); 			//https://developer.mozilla.org/En/DOM/Selection/RemoveAllRanges
+			sel.addRange(range);			//https://developer.mozilla.org/En/DOM/Selection/AddRange
 		}
 		return MooRTE.Range;
 	},
 	
+	//Get function returns the text or html of the passed in range.  If none passed, returns the current range.
 	get: function(what, range){
 		if(!range) range = MooRTE.Range.create();
 		return !Browser.Engine.trident ? range.toString() :

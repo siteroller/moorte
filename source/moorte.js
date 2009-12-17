@@ -13,6 +13,7 @@
 *	We really want your help!  Please join!!
 *	Notes:
 *	The syntax myFunction.bind(myObj)(args) is used instead of myFunction.run(args,myObj) due to debugging problems in Firebug with the latter syntax!
+*	Version 0.5 previousCommit:0945e0
 */
 
 var MooRTE = new Class({
@@ -82,10 +83,22 @@ var MooRTE = new Class({
 
 MooRTE.Range = {
 	create: function(range){
-		var sel = window.getSelection ? window.getSelection() : window.document.selection;
+		var sel = window.document.selection || window.getSelection();
 		if (!sel) return null;
 		return MooRTE.ranges[range || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		//var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+	},
+	
+	set:function(rangeName){
+		var range = MooRTE.ranges[rangeName || 'a1'];
+		if(range.select) range.select();
+		else {
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+		return MooRTE.Range;
 	},
 	
 	get: function(what, range){
@@ -101,6 +114,7 @@ MooRTE.Range = {
 		} else MooRTE.Utilities.exec('insertHTML',what);
 		return MooRTE.Range;
 	},
+	
 	wrap:function(element, options, range){
 		if(!range) range = MooRTE.Range.create();
 		var El = new Element(element, options);
@@ -109,6 +123,7 @@ MooRTE.Range = {
 			range.surroundContents(El);
 		return El;
 	},
+	
 	wrapText:function(element, caller){
 		var area = caller.getParent('.RTE').getElement('textarea');
 		if(!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
@@ -142,7 +157,6 @@ MooRTE.Range = {
 	},
 	
 	parent:function(range){
-
 		if(!range) range = MooRTE.Range.create();
 		return Browser.Engine.trident ?  
 			$type(range) == 'object' ? range.parentElement() : range
@@ -231,8 +245,7 @@ MooRTE.Utilities = {
 						mousedown: function(e){
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source'), fields = bar.retrieve('fields'),holder;
 							if(!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							if(!MooRTE.activeField == (holder = MooRTE.Range.parent()) && !MooRTE.activeField.hasChild(holder))return;
-														
+							if(!(MooRTE.activeField == (holder = MooRTE.Range.parent()) || MooRTE.activeField.hasChild(holder)))return;
 							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
@@ -466,7 +479,7 @@ MooRTE.Elements = new Hash({
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
 /*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
-/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','hyperlink','inserthorizontalrule', 'blockquote']}] },//'Upload Photo'
+/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
 /*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
