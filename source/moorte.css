@@ -1,7 +1,7 @@
 /*  position to top/bottom of page, the hide/show class  */
 /* Begin General */
-div.rteFloat{ position:absolute; }
-div.MooRTE{ left:0; width:100%;position:relative; }
+div.MooRTE{ left:0; width:100%; position:relative; }
+div.MooRTE.rteFloat{ position:absolute; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteHide{ display:none; }
