@@ -128,6 +128,47 @@ assetLoader:function(args){
 	},
 })
 
-
+/*#*/	'|'            :{text:'|', title:'', element:'span'},
+/*#*/	'insertimage'  :{onClick:function(args, classRef){ 
+							classRef.exec([this.getParent().getElement('input[type=text]').get('text')]) 
+						}},
+/*#*/	popupURL		:{ img:46, title:'Create hyperlink', 
+							onClick:function(){
+								MooRTE.Range.create();
+								$$('#pop,#popupURL').removeClass('popHide');
+								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
+							},
+							onLoad:function(){
+								MooRTE.Utilities.assetLoader({ //new Loader({
+									'class':'Popup',
+									scripts: [MooRTE.path+'plugins/Popup/Popup.js'], 
+									styles:[MooRTE.path+'plugins/Popup/Popup.css'], 
+									onComplete:function(){
+										var html = "<span>Text of Link:</span><input type='text' id='popTXT'/><br/>\
+											<span>Link to:</span><input type='text' id='popURL'/><br/>\
+											<div class='radio'> <input type='radio' name='pURL' value='web' checked/>Web<input type='radio' name='pURL' value='email'/>Email</div>\
+											<div class='btns'><input id='purlOK' type='submit' value='OK'/><input id='purlCancel' type='submit' value='Cancel'/></div>";
+										var pop = new Popup('popupURL', html, 'Edit Link');
+										pop.getElement('#purlCancel').addEvent('click', function(e){
+											Popup.hide(); e.stop();
+										});
+										pop.getElement('#purlOK').addEvent('click', function(e){
+											MooRTE.Range.set();												//MooRTE.activeBar.retrieve('ranges').set();
+											var value = pop.getElementById('popURL').get('value');
+											MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+											Popup.hide();
+											e.stop(); 
+										});
+										Popup.hide();
+									} 
+								})
+							}
+						},
+/*#*/	blockquote2		:{	onClick:function(){
+								var RangeText =  MooRTE.Range.get('html');
+								var block = new Element('blockquote').set('html', RangeText);
+								MooRTE.Range.replace(block);
+							}
+						}
 
 }
