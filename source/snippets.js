@@ -84,3 +84,50 @@ function focus(el){
 	do{	if (el.nodeType == 3) el.focus(); break;
 	} while (el = el.nextSibling); 
 }
+
+
+MooRTE.Utilities:{
+...
+assetLoader:function(args){
+		
+		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
+		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
+		var hrefs = head.getElements('link').map(function(el){return el.get('href')});
+		
+		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
+		if(args.styles) $splat(args.styles).each(function(file){
+			if(!hrefs.contains(path+file)) Asset.css(path+file);
+		});
+		
+		var srcs = head.getElements('script[src]').map(function(el){return el.get('src')});
+		var scripts = args.scripts.filter(function(script){ 
+			return !srcs.contains(path+script);
+		});
+		if(!scripts[0] || (args['class'] && window[args['class']])) return args.onComplete.run(); 
+		MooRTE.Utilities.assetLoader.busy = true;
+		var curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
+		me.setStyles({'background-image':'url("'+MooRTE.path+'images/loading.gif")','background-position':'1px 1px'});
+		var loaded = function(){
+			me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+			MooRTE.Utilities.assetLoader.busy = false;
+			args.onComplete(); 
+		};
+		var aborted = function(){
+			MooRTE.Utilities.assetLoader.busy = false;
+		};
+		if(args.scripts){
+			var last = args.scripts.length, count=0;
+			$splat(args.scripts).each(function(file){
+				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
+			});
+		};
+		
+		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
+		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
+		*/
+	},
+})
+
+
+
+}

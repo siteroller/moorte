@@ -295,49 +295,41 @@ MooRTE.Utilities = {
 	
 	
 	assetLoader:function(args){
-		
-		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
-		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
-		var hrefs = head.getElements('link').map(function(el){return el.get('href')});
-		
-		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
-		if(args.styles) $splat(args.styles).each(function(file){
-			if(!hrefs.contains(path+file)) Asset.css(path+file);
-		});
-		
-		var srcs = head.getElements('script[src]').map(function(el){return el.get('src')});
-		var scripts = args.scripts.filter(function(script){ 
-			return !srcs.contains(path+script);
-		});
-		if(!scripts[0] || (args['class'] && window[args['class']])) return args.onComplete.run(); 
-		MooRTE.Utilities.assetLoader.busy = true;
-		var curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
-		me.setStyles({'background-image':'url("'+MooRTE.path+'images/loading.gif")','background-position':'1px 1px'});
-		var loaded = function(){
-			me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-			MooRTE.Utilities.assetLoader.busy = false;
-			args.onComplete(); 
-		};
-		var aborted = function(){
-			MooRTE.Utilities.assetLoader.busy = false;
-		};
-		if(args.scripts){
-			var last = args.scripts.length, count=0;
-			$splat(args.scripts).each(function(file){
-				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
+		if(!this.assetsLoaded){
+			Depender.include({
+				core: {scripts:"js/MooTools/core"}, 
+				more: {scripts:"js/MooTools/more"}, 
+				moo : {scripts:"js"} 
+			}).setOptions({
+				loadedSources: ['core'],
+				onRequire: function(requiredScripts) {
+					var me = args.me, curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
+					me.setStyles({'background-image':'url("http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif")','background-position':'1px 1px'});
+				},
+				onRequirementLoaded: function(loadedScripts) {
+					me.setStyles({'background-image':curImg, 'background-position':curPos}); console.log(1);
+				}
+			});	
+			this.assetsLoaded = true;
+		}
+		return function(arg){
+			Depender.require({
+				scripts: arg.scripts,
+				callback: arg.onComplete
 			});
-		};
-		
-		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
-		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
-		*/
-	},
+			
+			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});
+			if(arg.styles) $splat(arg.styles).each(function(file){
+				if(!hrefs.contains(path+file)) Asset.css(path+file);
+			});
+		}
+	}(),
 	
 	clipStickyWin: function(caller){
 		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
 				me: this,
-				scripts: ['stickywin/clientcide.moore.js'],
+				scripts: 'StickyWinModalUI',
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
@@ -553,7 +545,7 @@ MooRTE.Elements = new Hash({
 							onLoad: function(){
 								MooRTE.Utilities.assetLoader({
 									me: this,
-									scripts: ['stickywin/clientcide.moore.js'],
+									scripts: 'StickyWinModalUI',
 									onComplete: function(){
 										var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
 													<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
