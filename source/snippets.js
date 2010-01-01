@@ -1,3 +1,19 @@
+/*
+---
+description: Snippets that keep floating in and out of the sourcecode.
+
+license: MIT-style
+
+authors:
+- Sam Goody
+
+requires:
+- none
+
+provides: [none]
+
+*/
+
 MooRTE.Utilities.clean = function(){
 
 	//If html is an element, process all of that element's innards.  Perhaps even offer taking the outerhtml.  If not, use a separate element to dump stuff into.

@@ -1,20 +1,30 @@
-/* Copyright November 2008, Sam Goody, ssgoodman@gmail.com 
-*   Licensed under the Open Source License
-*
-* 	Authors:		
-*		Sam Goody (ssgoodman@gmail.com)
-*		Mark Kohen
-*		T. Anolik
-*	Credits:
-*	Based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
-*	Ideas and inspiration: Guillerr, MooEditable
-*	Icons from OpenWysiwyg - http://www.openwebware.com
-*	Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
-*	We really want your help!  Please join!!
-*	Notes:
-*	The syntax myFunction.bind(myObj)(args) is used instead of myFunction.run(args,myObj) due to debugging problems in Firebug with the latter syntax!
-*	Version 0.5 previousCommit:0945e0
+/*
+---
+description: Rich Text Editor that can be applied directly to any collection of DOM elements.
+
+copyright:
+ - November 2008, Sam Goody
+
+license: OSL
+
+authors:
+- Sam Goody
+
+requires:
+- core/1.2.0: '*'
+- more/1.2.4: 'Depender.js'
+
+provides: [MooRTE, MooRTE.Elements, MooRTE.Utilities, MooRTE.Range,]
+
+Credits:
+ - Based on the tutorial at: http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
+ - Ideas and inspiration: Guillerr, CheeAun, HugoBuriel
+ - Some icons from OpenWysiwyg - http://www.openwebware.com
+ - Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
+ - We really want your help!  Please join!!
+
 */
+
 
 var MooRTE = new Class({
 	
