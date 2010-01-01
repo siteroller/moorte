@@ -20,12 +20,12 @@ var MooRTE = new Class({
 	
 	Implements: [Options],
 
-	options:{floating: false,location: 'elements',buttons: 'Menu:[Main,File,Insert]',skin: 'Word03',elements: 'textarea, .rte'},
+	options:{floating: false,location: 'elements',buttons: 'div.Menu:[Main,File,Insert]',skin: 'Word03',elements: 'textarea, .rte'},
 	
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'', path:(URI ? new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') : '') });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'' });
 		
 		els.each(function(el,index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
@@ -293,23 +293,22 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
-	
 	assetLoader:function(args){
 		if(!this.assetsLoaded){
-			Depender.include({
+			Depender..setOptions({
+				loadedSources: ['core'],
+				onRequire: function(requiredScripts) {
+					//var me = args.me, curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
+					//me.setStyles({'background-image':'url("http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif")','background-position':'1px 1px'});
+				},
+				onRequirementLoaded: function(loadedScripts) {
+					//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+				}
+			}).include({	/*MooRTE.path*/
 				core: {scripts:"js/MooTools/core"}, 
 				more: {scripts:"js/MooTools/more"}, 
 				moo : {scripts:"js"} 
-			}).setOptions({
-				loadedSources: ['core'],
-				onRequire: function(requiredScripts) {
-					var me = args.me, curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
-					me.setStyles({'background-image':'url("http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif")','background-position':'1px 1px'});
-				},
-				onRequirementLoaded: function(loadedScripts) {
-					me.setStyles({'background-image':curImg, 'background-position':curPos}); console.log(1);
-				}
-			});	
+			});
 			this.assetsLoaded = true;
 		}
 		return function(arg){
