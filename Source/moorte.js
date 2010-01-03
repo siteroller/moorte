@@ -23,6 +23,7 @@ credits:
 - Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
 - MoRTE needs YOU!! Join at http://groups.google.com/group/moorte!
 
+...
 */
 
 
