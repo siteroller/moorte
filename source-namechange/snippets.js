@@ -188,3 +188,5 @@ assetLoader:function(args){
 						}
 
 }
+
+path:(URI ? new URI($$('script[src*=moorte.js]')[0].get('src')).get('directory') : '') 
