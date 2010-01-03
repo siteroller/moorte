@@ -11,7 +11,7 @@ requires:
 - none
 
 provides: [none]
-
+...
 */
 
 MooRTE.Utilities.clean = function(){
