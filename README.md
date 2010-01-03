@@ -5,7 +5,7 @@ Rich Text Editor Framework for Mootools.
 
 Tiny, flexible, and does not use a IFrame.
 
-![Screenshot](http://url_to_project_screenshot)
+![Screenshot](http://siteroller.net/projects/moorte/images/moorte_screenshot.jpg)
 
 
 Dependencies:
@@ -52,7 +52,7 @@ Options
      - Only applicable when called with the new keyword [var mrte = new MooRTE({elements:'textarea'}) ])
 	
 
-Customisation:
+Customization:
 ---------
 
 ### MooRTE.Elements
