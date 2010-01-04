@@ -1,11 +1,11 @@
 /*  position to top/bottom of page, the hide/show class  */
 /* Begin General */
-div.MooRTE{ left:0; width:100%; position:relative; }
+div.MooRTE{ left:0; width:100%; position:absolute; top:0; }
 div.MooRTE.rteFloat{ position:absolute; }
 div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
 div.MooRTE.rtePageTop{ position:fixed; top:0;  }
 .rteHide{ display:none; }
-.rteShow{ border:2px groove #000; vertical-align:top; }
+.rteShow{ border:2px groove #000; vertical-align:top; position:relative;}
 .rteTextArea{ border:1px solid #666; display:inline-block; word-wrap: break-word; overflow-y:hidden; overflow-x:auto;}
 div.rteTextArea{ *display:inline; }
 .rteTopDown{top:0;}

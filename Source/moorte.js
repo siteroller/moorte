@@ -79,8 +79,10 @@ var MooRTE = new Class({
 		el.set('contentEditable', true).addClass('rteShow');
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
 		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
-		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rte.getFirst().getCoordinates().height > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
-		else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
+		var rteHeight = rte.getFirst().getCoordinates().height;
+		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
+		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
+		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).adopt(rte);
 	},
 	
 	textArea: function (el){
@@ -186,6 +188,7 @@ MooRTE.Utilities = {
 	
 	shortcuts: function(e){
 		if(e.key=='enter'){ 
+			if(!Browser.Engine.trident)return;
 			e.stop();
 			return MooRTE.Range.insert('<br/>');
 		}
@@ -305,8 +308,9 @@ MooRTE.Utilities = {
 	},
 	
 	assetLoader:function(args){
-		if(!this.assetsLoaded){
-			Depender..setOptions({
+		if (!Depender){ var Depender; return; }
+		if (!this.assetsLoaded){
+			Depender.setOptions({
 				loadedSources: ['core'],
 				onRequire: function(requiredScripts) {
 					//var me = args.me, curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
