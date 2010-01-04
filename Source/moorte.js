@@ -26,7 +26,6 @@ credits:
 ...
 */
 
-
 var MooRTE = new Class({
 	
 	Implements: [Options],
@@ -42,10 +41,11 @@ var MooRTE = new Class({
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
 			if(l=='e' || !rte) rte = self.insertToolbar(l);	
 			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);
-			else l=='e' ? self.positionToolbar(el,rte) : el.addEvents({
-				'click': function(){ self.positionToolbar(el, rte); },
+			else l=='e' ? self.positionToolbar(el,rte) : el.set('contentEditable',true).addEvents({
+				'focus': function(){ self.positionToolbar(el, rte); },
 				'blur':function(){ 
-					rte.addClass('rteHide'); this.removeClass('rteShow');
+					this.setStyle('padding-top', this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y).removeClass('rteShow');
+					rte.addClass('rteHide'); 
 				}
 			});
 			el.store('bar', rte).addEvents({
@@ -76,13 +76,14 @@ var MooRTE = new Class({
 	},
 	
 	positionToolbar: function (el, rte){
+		
 		el.set('contentEditable', true).addClass('rteShow');
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
 		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
 		var rteHeight = rte.getFirst().getCoordinates().height;
 		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
 		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
-		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).adopt(rte);
+		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
 	},
 	
 	textArea: function (el){
@@ -203,7 +204,7 @@ MooRTE.Utilities = {
 	updateBtns: function(e){
 		var val, update = MooRTE.activeBar.retrieve('update');
 
-		update.state.each(function(vals){ 
+		update.state.each(function(vals){
 			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
 			else { window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
 		});
@@ -308,7 +309,9 @@ MooRTE.Utilities = {
 	},
 	
 	assetLoader:function(args){
-		if (!Depender){ var Depender; return; }
+		try{ Depender }catch(e){ var Not = 1 };
+		if (Not) return; //{ var Depender; return;}
+		
 		if (!this.assetsLoaded){
 			Depender.setOptions({
 				loadedSources: ['core'],
