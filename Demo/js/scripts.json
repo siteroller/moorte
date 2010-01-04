@@ -1,0 +1,10 @@
+{
+	"mooRTE":{
+		"moorte":{}
+	},	
+	"Clientcide":{
+		"StickyWinModalUI":{
+			"deps":["DomReady", "Selectors", "Class.Binds", "Element.Position", "Element.Shortcuts", "Element.Pin", "IframeShim", "Mask"]
+		}
+	}
+}
