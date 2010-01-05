@@ -456,7 +456,7 @@ MooRTE.Utilities = {
 };
 
 Element.implement({
-	moorte:function(){ 
+	moorte: function(){
 		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		if(!cmd || (cmd == 'create')){
 			if(removed = this.retrieve('removed')){
@@ -481,6 +481,13 @@ Element.implement({
 		}
 	}
 });
+Elements.implement({ 
+	moorte:function(){
+		var opts = Array.link(arguments, { 'options': Object.type }).options;
+		return new MooRTE($extend(opts||{}, {'elements':this}));
+	}
+});
+
 
 MooRTE.Elements = new Hash({
 
