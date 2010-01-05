@@ -21,7 +21,7 @@ credits:
 - Ideas and inspiration - Guillerr, CheeAun, HugoBuriel
 - Some icons from OpenWysiwyg - http://www.openwebware.com
 - Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
-- MoRTE needs YOU!! Join at http://groups.google.com/group/moorte!
+- MooRTE needs YOU!! Join at http://groups.google.com/group/moorte!
 
 ...
 */
@@ -76,7 +76,6 @@ var MooRTE = new Class({
 	},
 	
 	positionToolbar: function (el, rte){
-		
 		el.set('contentEditable', true).addClass('rteShow');
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
 		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
@@ -95,6 +94,7 @@ var MooRTE = new Class({
 	}
 });
 
+if(!MooRTE.Path) MooRTE.Path = 'js/sources.json';
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
@@ -310,29 +310,33 @@ MooRTE.Utilities = {
 	
 	assetLoader:function(args){
 		try{ Depender }catch(e){ var Not = 1 };
-		if (Not) return; //{ var Depender; return;}
+		if (Not) return; //if (!Depender){ var Depender; return;}
 		
 		if (!this.assetsLoaded){
 			Depender.setOptions({
 				loadedSources: ['core'],
-				onRequire: function(requiredScripts) {
-					//var me = args.me, curPos = me.getStyle('background-position'), curImg = me.getStyle('background-image');
-					//me.setStyles({'background-image':'url("http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif")','background-position':'1px 1px'});
+				onRequire: function(args){
+					var self = args.self, size = self.getSize();
+					if (self.getStyle('position') == 'static') self.setStyle('position','relative');
+					self.grabTop(
+						new Element('img',{
+							'class':'spinWait',
+							'styles':{'width':size.x, 'height':size.y, 'position':'absolute', border:0},
+							src:'http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif'
+						})
+					);
 				},
-				onRequirementLoaded: function(loadedScripts) {
-					//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+				onRequirementLoaded: function(load, args){
+					args.self.getElement('.spinWait').destroy();
 				}
-			}).include({	/*MooRTE.path*/
-				core: {scripts:"js/MooTools/core"}, 
-				more: {scripts:"js/MooTools/more"}, 
-				moo : {scripts:"js"} 
-			});
+			}).include(MooRTE.Path);
 			this.assetsLoaded = true;
 		}
 		return function(arg){
 			Depender.require({
 				scripts: arg.scripts,
-				callback: arg.onComplete
+				callback: arg.onComplete,
+				self:arg.self
 			});
 			
 			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});
@@ -345,7 +349,7 @@ MooRTE.Utilities = {
 	clipStickyWin: function(caller){
 		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
-				me: this,
+				self: this,
 				scripts: 'StickyWinModalUI',
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
@@ -568,7 +572,7 @@ MooRTE.Elements = new Hash({
 							},
 							onLoad: function(){
 								MooRTE.Utilities.assetLoader({
-									me: this,
+									self: this,
 									scripts: 'StickyWinModalUI',
 									onComplete: function(){
 										var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
