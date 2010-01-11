@@ -61,8 +61,8 @@ By default, is "js/sources.json"
 
 If you have your own folder structure, modify this path, or no plugins will work! 
 
-`MooRTE.Path = 'Javascripts/2010/mootools/classes/experiments/moorte/scripts.json';
-$('myEl').moorte();`
+    MooRTE.Path = 'Javascripts/2010/mootools/classes/experiments/moorte/scripts.json';
+    $('myEl').moorte();`
 
 
 ### MooRTE.Elements
@@ -98,14 +98,14 @@ To define a custom toolbar:
 + If the toolbar should should also show when menu button is loaded, the onLoad should reference the onClick.
 + The toolbar should be passed in as an array where the first item is 'group' and the buttons object is the second.
 
-	`var myToolbar = {Toolbar:['bold','underline','italic']};
+	var myToolbar = {Toolbar:['bold','underline','italic']};
 	MooRTE.Elements.extend({
 		myMenuEntry:{
 			text:'edit', 
 			onLoad: 'onClick',
 			onClick:['group',myToolbar]
 		}			
-	});`
+	});
 
 Contact:
 ---------
