@@ -7,6 +7,8 @@ Tiny, flexible, and does not use a IFrame.
 
 ![Screenshot](http://siteroller.net/projects/moorte/images/moorte_screenshot.jpg)
 
+[Official Group](http://groups.google.com/group/moorte)
+
 Dependencies:
 ----------
 The basic buttons (bold, italic, etc) only require mootools-core.
