@@ -11,10 +11,10 @@ authors:
 - Sam Goody
 
 requires:
-- core/1.2.4: '*'
+- core
 - more/Depender
 
-provides: [MooRTE, MooRTE.Elements, MooRTE.Utilities, MooRTE.Range]
+provides: [MooRTE, MooRTE.Elements, MooRTE.Utilities, MooRTE.Range, MooRTE.Path, MooRTE.ranges, MooRTE.activeField, MooRTE.activeBar ]
 
 credits:
 - Based on the tutorial at - http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
@@ -23,6 +23,9 @@ credits:
 - Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
 - MooRTE needs YOU!! Join at http://groups.google.com/group/moorte!
 
+Join our group at: http://groups.google.com/group/moorte
+
+Email me at siteroller - |at| - gmail.
 ...
 */
 
@@ -86,8 +89,12 @@ var MooRTE = new Class({
 	},
 	
 	textArea: function (el){
-		var form, div = new Element('div', {text:el.get('value'),'class':'rteTextArea '+el.get('class'), 'styles':{'min-height':el.getSize().y, width:el.getSize().x }}).inject(el.addClass('rteHide'),'before');//el.getCoordinates().setStyle('overflow','auto')
-		if(form = el.getParent('form'))form.addEvent('submit',function(e){
+		var form, div = new Element('div', {
+			text:el.get('value'),
+			'class':'rteTextArea '+el.get('class'), 
+			'styles':{width:el.getSize().x}
+		}).setStyle(Browser.Engine.trident?'height':'min-height',el.getSize().y).injectBefore(el);
+		if(form = el.addClass('rteHide').getParent('form')) form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
 		return div;
@@ -291,7 +298,7 @@ MooRTE.Utilities = {
 		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
 		switch($type(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': onEvent == 'source' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
+			case 'string': onEvent == 'source' && onEvent.substr(0,2)!='on' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
 			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
 		}
 	},
@@ -320,8 +327,8 @@ MooRTE.Utilities = {
 					if (self.getStyle('position') == 'static') self.setStyle('position','relative');
 					self.grabTop(
 						new Element('img',{
-							'class':'spinWait',
-							'styles':{'width':size.x, 'height':size.y, 'position':'absolute', border:0},
+							'class': 'spinWait',
+							'styles': {'width':size.x, 'height':size.y},
 							src:'http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif'
 						})
 					);
@@ -334,9 +341,9 @@ MooRTE.Utilities = {
 		}
 		return function(arg){
 			Depender.require({
+				self: arg.self,
 				scripts: arg.scripts,
-				callback: arg.onComplete,
-				self:arg.self
+				callback: arg.onComplete
 			});
 			
 			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});

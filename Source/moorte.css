@@ -11,6 +11,7 @@ div.rteTextArea{ *display:inline; }
 .rteTopDown{top:0;}
 div.MooRTE div.Word03, .bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  border-box; box-sizing:  border-box; -webkit-box-sizing:  border-box  }
 .rteShow, .cbox{ -moz-box-sizing: content-box; -ms-box-sizing: content-box; box-sizing: content-box; -webkit-box-sizing: content-box }
+.spinWait {position:absolute; border:0}
 /* End General*/
 
 /* Begin Word03 skin */
