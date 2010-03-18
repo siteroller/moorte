@@ -38,7 +38,7 @@ var MooRTE = new Class({
 	initialize: function(options){
 		this.setOptions(options);
 		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'' });
+		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'', btnVals:[] });
 		
 		els.each(function(el,index){
 			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
@@ -137,7 +137,7 @@ MooRTE.Range = {
 	},
 	
 	wrap:function(element, options, range){
-		if(!range) range = MooRTE.Range.create();
+		if (!range) range = MooRTE.Range.create();
 		var El = new Element(element, options);
 		Browser.Engine.trident ?
 			range.pasteHTML(El.set('html', range.htmlText).outerHTML) : 
@@ -147,8 +147,8 @@ MooRTE.Range = {
 	
 	wrapText:function(element, caller){
 		var area = caller.getParent('.RTE').getElement('textarea');
-		if(!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
-		if(!Browser.Engine.trident){
+		if (!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
+		if (!Browser.Engine.trident){
 			var start = area.selectionStart, RE = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value')), El = element+RE[2]+'</'+element.match(/^<(\w+)/)[1]+'>';
 			area.set('value', RE[1]+El+RE[3]).selectionEnd = start + El.length;
 		} else { 
@@ -224,9 +224,10 @@ MooRTE.Utilities = {
 	},
 	
 	addElements: function(buttons, place, relative, name){
-		if(!place) place = MooRTE.activeBar.getFirst();
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
-		if($type(buttons) == 'string'){
+		if (!place) place = MooRTE.activeBar.getFirst();
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), btns = []; 
+		if ($type(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
@@ -274,7 +275,8 @@ MooRTE.Utilities = {
 						}
 					}
 				}).extend(val);
-				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate','source',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
+				MooRTE.btnVals[(Browser.Engine.trident ? 'include' : 'erase')]('unselectable');
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href').map(properties.erase.bind(properties));
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
 				if(val.onUpdate || state) 
@@ -305,6 +307,7 @@ MooRTE.Utilities = {
 	
 	group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');
+		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
 		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
 			el.removeClass('rteSelected');
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
@@ -644,7 +647,30 @@ MooRTE.Elements = new Hash({
 							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 							this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 						}},
-
+/*#*/	input			:{ img:59, 
+							onClick:function(){ MooRTE.Range.insert('<input type="text" value="">') } 
+						},
+/*#*/	submit			:{ img:59, 
+							onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
+						},	
+/*#*/	cleanWord		:{	onClick: function() {
+							var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
+							var rs = [
+								/<!--.+?-->/g,			// Comments
+								/<title>.+?<\/title>/g,	// Title
+								/<(meta|link|.?o:|.?style|.?div|.?head|.?html|body|.?body|.?span|!\[)[^>]*?>/g, // Unnecessary tags
+								/ v:.*?=".*?"/g,		// Weird nonsense attributes
+								/ style=".*?"/g,		// Styles
+								/ class=".*?"/g,		// Classes
+								/(&nbsp;){2,}/g,		// Redundant &nbsp;s
+								/<p>(\s|&nbsp;)*?<\/p>/g// Empty paragraphs
+							]; 
+							rs.each(function(regex) {
+								s = s.replace(regex, '');
+							});
+							return s.replace(/\s+/g, ' ');
+						} },						
+						
 /*#*///	depracated
-/*#*/	'Toolbar'      :{element:'div'} //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
+/*#*/	'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 });
