@@ -213,7 +213,10 @@ MooRTE.Utilities = {
 
 		update.state.each(function(vals){
 			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
-			else { window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
+			else {
+				// insertorderedlist,insertunorderedlist, has been disabled on line 263, for throwing errors in FF when textfield is empty.
+				window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
+			}
 		});
 		update.value.each(function(vals){
 			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
@@ -257,7 +260,7 @@ MooRTE.Utilities = {
 			
 			if(!e || name == 'rteGroup_Auto'){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',');
+				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,'.contains(btn.toLowerCase()+',');// insertorderedlist,insertunorderedlist,
 				
 				var properties = $H({
 					href:'javascript:void(0)',
@@ -350,8 +353,8 @@ MooRTE.Utilities = {
 			});
 			
 			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});
-			if(arg.styles) $splat(arg.styles).each(function(file){
-				if(!hrefs.contains(path+file)) Asset.css(path+file);
+			if (arg.styles) $splat(arg.styles).each(function(file){
+				//if (!hrefs.contains(MooRTE.Path + file)) Asset.css(path + file);
 			});
 		}
 	}(),
@@ -508,7 +511,7 @@ MooRTE.Elements = new Hash({
 /*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
-/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
+/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] },
 /*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
@@ -540,8 +543,6 @@ MooRTE.Elements = new Hash({
 /*#*/	removeformat	:{img:26, title:'Clear Formatting'},
 /*#*/	undo        	:{img:31, title:'Undo (Ctrl + Z)' },
 /*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
-/*#*/	decreasefontsize:{img:42},
-/*#*/	increasefontsize:{img:41},	
 /*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
 /*#*/	cut				:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
 							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
@@ -648,7 +649,7 @@ MooRTE.Elements = new Hash({
 							this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 						}},
 /*#*/	input			:{ img:59, 
-							onClick:function(){ MooRTE.Range.insert('<input type="text" value="">') } 
+							onClick:function(){ MooRTE.Range.insert("<input>") } 
 						},
 /*#*/	submit			:{ img:59, 
 							onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
@@ -669,8 +670,45 @@ MooRTE.Elements = new Hash({
 								s = s.replace(regex, '');
 							});
 							return s.replace(/\s+/g, ' ');
-						} },						
+						} },
+/*#*/	decreasefontsize:{ img:41, 
+							onClick:function(){
+								if (Browser.Engine.trident) return function(){	
+									MooRTE.Utilities.exec('fontsize',window.document.queryCommandValue('fontsize') + 1);
+								}
+							}()
+						},
+/*#*/	increasefontsize:{	img:42, 
+							onClick:function(){
+								if (Browser.Engine.trident) return function(){
+									MooRTE.Utilities.exec('fontsize',window.document.queryCommandValue('fontsize') + 1);
+								}
+							}()
+						},
+/*#*/	fontsize		:{	
+							
+						},
+/*#*/	insertimage		:{},
+/*#*/	backcolor		:{ 	img:43,
+							onLoad:function(){
+								MooRTE.Utilities.assetLoader({
+									scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+									styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+									onComplete:function(){
+
+									}
+								})
+							},
+							onClick: function(){
+								var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
+							}
+						},
+/*#*/	forecolor		:{
+							
+						},
 						
+/*#*/	formatblock:{},
+		
 /*#*///	depracated
 /*#*/	'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 });
