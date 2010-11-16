@@ -29,6 +29,12 @@ Email me at siteroller - |at| - gmail.
 ...
 */
 
+function obj(key, val){
+	var obj = {};
+	obj[key] = val;
+	return obj;
+}
+
 var MooRTE = new Class({
 	
 	Implements: [Options]
@@ -52,17 +58,18 @@ var MooRTE = new Class({
 			if (el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
 			if (l=='e' || !rte) rte = self.insertToolbar(l);	
 			if (l=='b' || l=='t' || !l) el.set('contentEditable', true);
-			else l == 'e' 
+			else l == 'e'
 				? self.positionToolbar(el,rte)
 				: el.set('contentEditable',true).addEvents({
 					'focus': function(){ self.positionToolbar(el, rte); },
 					'blur': function(){ 
 						this.setStyle( 'padding-top'
 									 , this.getStyle('padding-top')
-										.slice(0,-2) - rte
-										.getFirst()
-										.getSize()
-										.y
+										.slice(0,-2)
+										- rte
+											.getFirst()
+											.getSize()
+											.y
 									).removeClass('rteShow');
 						rte.addClass('rteHide'); 
 					}
@@ -86,9 +93,9 @@ var MooRTE = new Class({
 	}
 	, insertToolbar: function (pos){
 		var self = this;
-		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
-			 new Element('div', {'class':'RTE '+self.options.skin })
-		).inject(document.body);
+		var rte = new Element( 'div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
+					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
+					.inject(document.body);
 		MooRTE.activeBar = rte; // not used!
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
@@ -98,7 +105,11 @@ var MooRTE = new Class({
 		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
 		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
 		var rteHeight = rte.getFirst().getCoordinates().height;
-		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
+		if (f) rte
+				.setStyles({ 'left': elSize.left, 'top': (elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) })
+				.addClass('rteFloat')
+				.getFirst()
+				.addClass('rteFloat');
 		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
 	}
@@ -107,7 +118,7 @@ var MooRTE = new Class({
 			text:el.get('value'),
 			'class':'rteTextArea '+el.get('class'), 
 			'styles':{width:el.getSize().x}
-		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).injectBefore(el);
+		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).inject(el,'before');
 		if(form = el.addClass('rteHide').getParent('form')) form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
@@ -187,14 +198,14 @@ MooRTE.Range = {
 	, parent:function(range){
 		if(!range) range = MooRTE.Range.create();
 		return Browser.ie ?  
-			$type(range) == 'object' ? range.parentElement() : range
+			typeOf(range) == 'object' ? range.parentElement() : range
 			: range.commonAncestorContainer;
 	}
 };
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
+		args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
 		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
 		if(g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||null, args[1]||false);
@@ -237,7 +248,7 @@ MooRTE.Utilities = {
 		if (!place) place = MooRTE.activeBar.getFirst();
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), btns = []; 
-		if ($type(buttons) == 'string'){
+		if (typeOf(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
@@ -249,18 +260,18 @@ MooRTE.Utilities = {
 		var loopStop = loop = 0; //Remove loopstop variable after testing!!
 		do{
 			if (btns[0]) buttons = btns, btns = [];
-			$splat(buttons).each(function(item){
-				switch($type(item)){
+			Array.from(buttons).each(function(item){
+				switch(typeOf(item)){
 					case 'string': btns.push(item); break;
 					case 'array' : item.each(function(val){btns.push(val)}); loop = (item.length==1); break;	//item.each(buttons.push);
-					case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
+					case 'object': Object.each(item, function(val,key){ btns.push(obj(key,val)) }); break;			
 				}
 			})
 		} while(loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
 		btns.each(function(btn){
 			var btnVals,btnClass;
-			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
+			if (typeOf(btn)=='object'){btnVals = Object.values(btn)[0]; btn = Object.keys(btn)[0];}
 			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn=btnClass.shift();
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
@@ -269,7 +280,7 @@ MooRTE.Utilities = {
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,'.contains(btn.toLowerCase()+',');// insertorderedlist,insertunorderedlist,
 				
-				var properties = $H({
+				var properties = Object.append({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
@@ -278,23 +289,30 @@ MooRTE.Utilities = {
 						mousedown: function(e){
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source'), fields = bar.retrieve('fields'),holder;
 							if(!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							if(!(MooRTE.activeField == (holder = MooRTE.Range.parent()) || MooRTE.activeField.hasChild(holder)))return;
+							if (!( MooRTE.activeField == (holder = MooRTE.Range.parent()) || 
+								   (MooRTE.activeField.contains(holder) && MooRTE.activeField != holder)
+							)) return;
+							
 							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
 						}
 					}
-				}).extend(val);
+				}, val);
 				MooRTE.btnVals[(Browser.ie ? 'include' : 'erase')]('unselectable');
-				MooRTE.btnVals[val.element ? 'include' : 'erase']('href').map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href').map(function(arg){
+					console.log(arg)
+					//return properties.erase(arg).bind(properties);
+				});
+				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
 				if(val.onUpdate || state) 
-					parent.retrieve('update', $H({'value':[], 'state':[], 'custom':[] }))[
+					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
 						'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
-				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
+				//if (val.shortcut) parent.retrieve('shortcuts',{}).set(val.shortcut,btn);
+				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
@@ -307,8 +325,9 @@ MooRTE.Utilities = {
 	
 	eventHandler: function(onEvent, caller, name){
 		var event;
-		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
-		switch($type(event)){
+		console.log(MooRTE.Elements[name][onEvent]);
+		if(!(event = Object.clone(MooRTE.Elements[name][onEvent]))) return;
+		switch(typeOf(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
 			case 'string': onEvent == 'source' && onEvent.substr(0,2)!='on' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
 			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
@@ -455,7 +474,7 @@ MooRTE.Utilities = {
 		];
 		
 		var washer;
-		if($type(html)=='element'){
+		if(typeOf(html)=='element'){
 			washer = html;
 			if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
@@ -481,13 +500,13 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		if(!cmd || (cmd == 'create')){
 			if(removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
 			}
-			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
+			return bar ? this.removeClass('rteHide') : new MooRTE(Object.append(params.options||{},{'elements':this}));
 		} else {
 			if(!bar) return false;
 			switch(cmd.toLowerCase()){
