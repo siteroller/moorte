@@ -300,10 +300,9 @@ MooRTE.Utilities = {
 					}
 				}, val);
 				MooRTE.btnVals[(Browser.ie ? 'include' : 'erase')]('unselectable');
-				MooRTE.btnVals[val.element ? 'include' : 'erase']('href').map(function(arg){
-					console.log(arg)
-					//return properties.erase(arg).bind(properties);
-				});
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href');//.map(properties.erase.bind(properties);
+				// Greyed out line is functionally the same as MooRTE.btnVals.each(function(arg){  return properties.erase(arg).bind(properties) }).
+				// In Mootools 1.3, erase was deprecated causing it to bork. I don't recall what this did yet. (map was in place of each, but the returned array is not saved.)
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
 				if(val.onUpdate || state) 
@@ -325,7 +324,6 @@ MooRTE.Utilities = {
 	
 	eventHandler: function(onEvent, caller, name){
 		var event;
-		console.log(MooRTE.Elements[name][onEvent]);
 		if(!(event = Object.clone(MooRTE.Elements[name][onEvent]))) return;
 		switch(typeOf(event)){
 			case 'function': event.bind(caller)(name,onEvent); break;
