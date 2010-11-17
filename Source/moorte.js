@@ -41,9 +41,9 @@ var MooRTE = new Class({
 	Implements: [Options]
 
 	, options: { floating: true // false broken by a WK bug that an editable element may not contain non-editable content.
-			   , where: 'before' // 'top/bottom/before/after' according to Mootools standard.
-			   , padFloat: true // margin or padding is added to existing layout. Will add to existing padding!
-			   , stretch: false //If element grows, should it stretch the element, or add toolbars. Other options abound.
+			   , where: 'before' // 'top/bottom/before/after' (Mootools standard.)
+			   , padFloat: true // before/after: add to existing margins when true. top/bottom: padding always added. When false shrinks element accordingly.
+			   , stretch: false // If element grows, should it stretch the element or add toolbars. Other options abound.
 			   , location: 'elements'
 			   , buttons: 'div.Menu:[Main,File,Insert]'
 			   , skin: 'Word03'
@@ -66,7 +66,7 @@ var MooRTE = new Class({
 				? self.positionToolbar(el,rte)
 				: el.set('contentEditable',true).addEvents({
 					'focus': function(){ self.positionToolbar(el, rte); },
-					'blur': function(){ 
+					'blur': function(){
 						this.setStyle( 'padding-top'
 									 , this.getStyle('padding-top')
 										.slice(0,-2)
@@ -89,8 +89,8 @@ var MooRTE = new Class({
 		rte.store('fields', els);
 		
 		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');
-		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
-		else if(l=='b') rte.addClass('rtePageBottom');
+		if (l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
+		else if (l=='b') rte.addClass('rtePageBottom');
 		
 		if(Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
 		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
@@ -307,12 +307,17 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source'), fields = bar.retrieve('fields'),holder;
-							if(!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+							var holder
+							  , bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							  , source = bar.retrieve('source')
+							  , fields = bar.retrieve('fields');
+							
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+						console.log(1);
 							if (!( MooRTE.activeField == (holder = MooRTE.Range.parent()) || 
 								   (MooRTE.activeField.contains(holder) && MooRTE.activeField != holder)
 							)) return;
-							
+							console.log(11);
 							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
