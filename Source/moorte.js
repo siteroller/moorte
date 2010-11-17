@@ -40,7 +40,10 @@ var MooRTE = new Class({
 	
 	Implements: [Options]
 
-	, options: { floating: false
+	, options: { floating: true // false broken by a WK bug that an editable element may not contain non-editable content.
+			   , where: 'before' // 'top/bottom/before/after' according to Mootools standard.
+			   , padFloat: true // margin or padding is added to existing layout. Will add to existing padding!
+			   , stretch: false //If element grows, should it stretch the element, or add toolbars. Other options abound.
 			   , location: 'elements'
 			   , buttons: 'div.Menu:[Main,File,Insert]'
 			   , skin: 'Word03'
@@ -103,14 +106,30 @@ var MooRTE = new Class({
 	}
 	, positionToolbar: function (el, rte){
 		el.set('contentEditable', true).addClass('rteShow');
-		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
-		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
-		var rteHeight = rte.getFirst().getCoordinates().height;
-		if (f) rte
+		var o = this.options
+		  , elSize = el.getCoordinates()
+		  , bw = el
+				.addClass('rte'+(o.stretch?'':'No')+'Stretch')
+				.getStyle('border-width')
+				.match(/(\d)/g)
+		  , rteHeight = rte
+				.removeClass('rteHide')
+				.setStyle('width', elSize.width-(o.floating?0:bw[1]*1+bw[3]*1))
+				.getFirst()
+				.getCoordinates()
+				.height;
+
+		if (o.floating){
+			if (o.padFloat){
+				var pad = {before:'margin-top',after:'margin-after',top:'padding-top',bottom:'padding-bottom'}[o.where];
+				el.setStyle(pad, parseInt(el.getStyle(pad)) + rteHeight);
+			}
+			rte
 				.setStyles({ 'left': elSize.left, 'top': (elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) })
 				.addClass('rteFloat')
 				.getFirst()
 				.addClass('rteFloat');
+		}		
 		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
 	}
@@ -479,7 +498,7 @@ MooRTE.Utilities = {
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
-		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
+		if(!Browser.firefox) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
 		html = washer.get('html');
 		if(washer != $('washer')) washer.moorte();
 		
