@@ -34,6 +34,7 @@ function obj(key, val){
 	obj[key] = val;
 	return obj;
 }
+Browser.webkit = Browser.safari || Browser.chrome;
 
 var MooRTE = new Class({
 	
@@ -384,12 +385,12 @@ MooRTE.Utilities = {
 	}(),
 	
 	clipStickyWin: function(caller){
-		if (Browser.firefox || (Browser.Engine.webkit && caller=='paste')) 
+		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
 				self: this,
 				scripts: 'StickyWinModalUI',
 				onComplete: function(command){
-					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
 						If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
 					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
@@ -484,7 +485,7 @@ MooRTE.Utilities = {
 		
 		if(xhtml)cleanup.extend(xhtml);
 		if(semantic)cleanup.extend(semantic);
-		if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
+		if(Browser.webkit)cleanup.extend(appleCleanup);
 
 		// var loopStop = 0;  //while testing.
 		do{	
@@ -569,13 +570,13 @@ MooRTE.Elements = {
 /*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
 /*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
 /*#*/	cut				:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
-							onClick:function(action){ Browser.Engine.gecko || Browser.Engine.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
 							var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
