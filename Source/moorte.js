@@ -308,31 +308,12 @@ MooRTE.Utilities = {
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
 							  , source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields')
-							  , holder = MooRTE.Range.parent();//.parentNode;
-
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-
-// Till here, all is fine.
-// Must check if the selected textnodes ("holder") are all included within the activeField.
-// Works in FF. In WK, does not. as textfields are not picked up by "contains()".
-//console.log('bar.fields: ', fields);
-//console.log('MooRTE.activeField: ', MooRTE.activeField);
-//console.log('fields.contains(MooRTE.activeField)', fields.contains(MooRTE.activeField));
-//console.log('MooRTE.Range.parent', MooRTE.Range.parent());
-console.log('MooRTE.Range.parent.parentElement', holder, holder.nodeType, typeOf(holder));
-//console.log('holder.compareDocumentPosition(MooRTE.activeField)',holder.compareDocumentPosition(MooRTE.activeField) && Node.DOCUMENT_POSITION_CONTAINED_BY);
-//console.log('MooRTE.activeField.compareDocumentPosition(holder)',MooRTE.activeField.compareDocumentPosition(holder));					
-//	if (!( MooRTE.activeField == (holder = MooRTE.Range.parent()) || 
-//	   (MooRTE.activeField.contains(holder) && MooRTE.activeField != holder)
-//	)) return;
-//if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-//if (!(MooRTE.activeField == holder || MooRTE.activeField.contains(holder, true))) return; console.log('passed'); // Should be the same as 
-
-
-
+							  , holder = MooRTE.Range.parent();
+							
 							//Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
 							
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
 							if (!MooRTE.activeField.contains(holder)) return;
 							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
