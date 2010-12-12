@@ -307,14 +307,15 @@ MooRTE.Utilities = {
 						mousedown: function(e){
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
 							  , source = bar.retrieve('source')
-							  , fields = bar.retrieve('fields')
-							  , holder = MooRTE.Range.parent();
+							  , fields = bar.retrieve('fields');
 							
-							//Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
+							var holder = MooRTE.Range.parent();
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
+							if (!MooRTE.activeField.contains(holder)) return;
 							
 							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							if (!MooRTE.activeField.contains(holder)) return;
 							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
@@ -327,7 +328,7 @@ MooRTE.Utilities = {
 				// In Mootools 1.3, erase was deprecated causing it to bork. I don't recall what this did yet. (map was in place of each, but the returned array is not saved.)
 				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
 					
-				if(val.onUpdate || state) 
+				if (val.onUpdate || state) 
 					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
 						'value' : (state ? 'state' : 'custom')
@@ -345,12 +346,19 @@ MooRTE.Utilities = {
 	},
 	
 	eventHandler: function(onEvent, caller, name){
-		var event;
-		if(!(event = Object.clone(MooRTE.Elements[name][onEvent]))) return;
+		// UNTESTED: Function rewritten do to removal of $unlink in v1.3  //if(!event) return;
+		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
-			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': onEvent == 'source' && onEvent.substr(0,2)!='on' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
-			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+			case 'function':
+				event = Object.clone(event); 
+				event.bind(caller)(name,onEvent); break;
+			case 'array':
+				event = Array.clone(event); 
+				event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+			case 'string':
+				onEvent == 'source' && onEvent.substr(0,2) != 'on'
+					? MooRTE.Range.wrapText(event, caller)
+					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	},
 	
