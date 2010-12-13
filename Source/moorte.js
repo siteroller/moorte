@@ -510,22 +510,22 @@ MooRTE.Utilities = {
 		];
 		
 		var washer;
-		if(typeOf(html)=='element'){
+		if (typeOf(html)=='element'){
 			washer = html;
 			if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
-		if(!Browser.firefox) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
+		if (!Browser.firefox) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
 		html = washer.get('html');
-		if(washer != $('washer')) washer.moorte();
+		if (washer != $('washer')) washer.moorte();
 		
-		if(xhtml)cleanup.extend(xhtml);
-		if(semantic)cleanup.extend(semantic);
-		if(Browser.webkit)cleanup.extend(appleCleanup);
+		if (xhtml)cleanup.extend(xhtml);
+		if (semantic)cleanup.extend(semantic);
+		if (Browser.webkit)cleanup.extend(appleCleanup);
 
 		// var loopStop = 0;  //while testing.
-		do{	
+		do {	
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html); // && ++loopStop <3
@@ -537,7 +537,7 @@ MooRTE.Utilities = {
 Element.implement({
 	moorte: function(){
 		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if(!cmd || (cmd == 'create')){
+		if (!cmd || (cmd == 'create')){
 			if(removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
