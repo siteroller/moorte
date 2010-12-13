@@ -310,13 +310,16 @@ MooRTE.Utilities = {
 							  , source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
 							
+							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
+							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+							
 							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
 							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
 							var holder = MooRTE.Range.parent();
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
 							if (!MooRTE.activeField.contains(holder)) return;
 							
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
 							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
@@ -352,13 +355,13 @@ MooRTE.Utilities = {
 	
 	eventHandler: function(onEvent, caller, name){
 		// UNTESTED: Function rewritten do to removal of $unlink in v1.3  //if(!event) return;
+		// Must check if function or string is modified now that ulink is gone. Should be OK.
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
-				event = Object.clone(event); 
 				event.bind(caller)(name,onEvent); break;
 			case 'array':
-				event = Array.clone(event); 
+				event = Array.clone(event);
 				event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
 			case 'string':
 				onEvent == 'source' && onEvent.substr(0,2) != 'on'
