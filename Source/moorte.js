@@ -438,11 +438,11 @@ MooRTE.Utilities = {
 	
 	clean: function(html, options){
 	
-		options = $H({
-			xhtml:false, 
-			semantic:true, 
-			remove:''
-		}).extend(options);
+		options = Object.append({
+			xhtml   : false, 
+			semantic: true, 
+			remove  : ''
+		}, options);
 		
 		var br = '<br'+(xhtml?'/':'')+'>';
 		var xhtml = [
@@ -520,9 +520,9 @@ MooRTE.Utilities = {
 		html = washer.get('html');
 		if (washer != $('washer')) washer.moorte();
 		
-		if (xhtml)cleanup.extend(xhtml);
-		if (semantic)cleanup.extend(semantic);
-		if (Browser.webkit)cleanup.extend(appleCleanup);
+		if (xhtml) cleanup.append(xhtml);
+		if (semantic) cleanup.append(semantic);
+		if (Browser.webkit) cleanup.append(appleCleanup);
 
 		// var loopStop = 0;  //while testing.
 		do {	
@@ -563,7 +563,7 @@ Element.implement({
 Elements.implement({ 
 	moorte:function(){
 		var opts = Array.link(arguments, { 'options': Object.type }).options;
-		return new MooRTE($extend(opts||{}, {'elements':this}));
+		return new MooRTE(Object.append(opts||{}, {'elements':this}));
 	}
 });
 
