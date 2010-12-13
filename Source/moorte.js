@@ -55,6 +55,7 @@ var MooRTE = new Class({
 		  , l = this.options.location.substr(4,1).toLowerCase();
 		  
 		if (!MooRTE.activeField) MooRTE.extend({ ranges:{}, btnVals:[], activeField:'', activeBar:'' });
+		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
 		
 		els.each(function(el,index){
 			if (el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
@@ -323,32 +324,15 @@ MooRTE.Utilities = {
 					}
 				}, val);
 				
-				/*
-				The MooRTE.btnVals array was created in commit #54c179 (3/18/10, "Moved the Array...") 
-				This array contains the recognized element keywords (those that can be applied to elements but will not be applied as attributes).
-				
-				The following line
-					['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate','source',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				Was replaced with:
-					MooRTE.btnVals[(Browser.Engine.trident ? 'include' : 'erase')]('unselectable');
-+					MooRTE.btnVals[val.element ? 'include' : 'erase']('href').map(properties.erase.bind(properties));
- 				
-				I have no clue how the original code worked (the modified array was not saved), why any of this is needed, or what the change was supposed to be.
-				Furthermore, erase is no longer possible on an object, and an object could never take a 'bind'.
-				If the newer version were to be written for Mootools 1.3 it would look something like:
-				(Used eg. Array.include() which modifies the passed in array, instead of MooRTE.btnVals = MooRTE.btnVals.include())
-					Array[Browser.ie ? 'include' : 'erase'](MooRTE.btnVals, 'unselectable');
-					Array[val.element ? 'include' : 'erase'](MooRTE.btnVals, 'href');
-					Array.each(MooRTE.btnVals, function(arg){
-						delete properties[arg];
-						//return properties.bind(properties)
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href')
+					.each(function(key){
+						delete properties[key];
 					});
-				*/
 				
 				e = new Element(input && !val.element ? 'input' : val.element || 'a', properties)
 					.addClass((name||'') + ' rte' + btn + (btnClass ? ' rte' + btnClass : ''))
 					.inject(place, relative);
-					
+				
 				if (val.onUpdate || state)
 					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
