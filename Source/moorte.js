@@ -91,7 +91,7 @@ var MooRTE = new Class({
 		if (l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if (l=='b') rte.addClass('rtePageBottom');
 		
-		if(Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
+		if (Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
 		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
 	}
 	, insertToolbar: function (pos){
@@ -227,6 +227,7 @@ MooRTE.Utilities = {
 		args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
 		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
 		if(g) document.designMode = 'on';
+		//console.log(args[0], args[2]||null, args[1]||false)
 		document.execCommand(args[0], args[2]||null, args[1]||false);
 		if(g) document.designMode = 'off';
 	},
@@ -249,14 +250,14 @@ MooRTE.Utilities = {
 		var val, update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){
-			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
+			if (vals[2]) vals[2].bind(vals[1])(vals[0]);
 			else {
 				// insertorderedlist,insertunorderedlist, has been disabled on line 263, for throwing errors in FF when textfield is empty.
 				window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
 			}
 		});
 		update.value.each(function(vals){
-			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
+			if (val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
 		});
 		update.custom.each(function(){
 			vals[2].bind(vals[1])(vals[0]);
@@ -689,8 +690,8 @@ MooRTE.Elements = {
 								})
 							}							
 						},
-/*#*/	blockquote		:{	img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
-/*#*/	start			:{element:'span'},
+/*#*/	blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	start			:{ element:'span' },
 /*#*/	viewSource		:{ img:35, onClick:'source', source:function(btn){
 							var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 							if(this.hasClass('rteSelected')){
@@ -733,17 +734,41 @@ MooRTE.Elements = {
 							});
 							return s.replace(/\s+/g, ' ');
 						} },
-/*#*/	decreasefontsize:{ img:41, 
-							onClick:function(){
-								if (Browser.ie) return function(){	
-									MooRTE.Utilities.exec('fontsize',window.document.queryCommandValue('fontsize') + 1);
+/*#*/	decreasefontsize:{  img:42, 
+							onClick: function(){
+								if (!Browser.firefox) return function(){	
+									var fontsize = window.document.queryCommandValue('fontsize').split(/([^\d]+)/);
+									/* 
+									Fontsize was originally only supposed to accept valuies between 1 - 7.
+									It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
+										http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
+										http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
+										(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
+									
+									Table of values:
+										
+									Webkit is particularly bad:
+										#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
+											Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
+										#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
+											Double the text height, the previous background color will only cover the bottom half of the new text.
+										#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
+											The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
+										The actual ridiculous results of the command:
+											Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
+											Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
+									*/
+									MooRTE.Utilities.exec('fontsize', 3);//+fontsize[0] - 1 + fontsize[1]
+									//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
 								}
 							}()
 						},
-/*#*/	increasefontsize:{	img:42, 
-							onClick:function(){
-								if (Browser.ie) return function(){
-									MooRTE.Utilities.exec('fontsize',window.document.queryCommandValue('fontsize') + 1);
+/*#*/	increasefontsize:{	img:41, 
+							onClick: function(){
+								if (!Browser.firefox) return function(){	
+									var fontsize = (window.document.queryCommandValue('fontsize') || '1em').split(/([^\d]+)/);
+									MooRTE.Utilities.exec('fontsize', +fontsize[0] + 1 + fontsize[1]);
+									
 								}
 							}()
 						},
