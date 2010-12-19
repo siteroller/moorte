@@ -736,8 +736,26 @@ MooRTE.Elements = {
 						} },
 /*#*/	decreasefontsize:{  img:42, 
 							onClick: function(){
-								if (!Browser.firefox) return function(){	
-									var fontsize = window.document.queryCommandValue('fontsize').split(/([^\d]+)/);
+								if (!Browser.firefox) ;
+								return function(){	
+									var size
+									  , fontsize = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
+									
+									if (fontsize == +fontsize) size = +fontsize + 1;
+									else {
+										//convertunit(fontsize[0],fontsize[1],'px');
+										fontsize = fontsize.split(/([^\d]+)/)[0];
+										[0,10,13,16,18,24,32,48].some(function(s,i){	
+											size = i;
+											return (s - fontsize) > 0;
+										});
+									} 
+									MooRTE.Utilities.exec('fontsize', size);
+									console.log(fontsize, size);
+									
+									
+									
+									//console.log(fontsize, window.document.queryCommandValue('fontsize'));
 									/* 
 									Fontsize was originally only supposed to accept valuies between 1 - 7.
 									It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
@@ -755,10 +773,22 @@ MooRTE.Elements = {
 										#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
 											The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
 										The actual ridiculous results of the command:
+											https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
 											Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
 											Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
+											
+											Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
+											http://www.w3schools.com/CSS/pr_font_font-size.asp
+											http://style.cleverchimp.com/font_size_intervals/altintervals.html
 									*/
-									MooRTE.Utilities.exec('fontsize', 3);//+fontsize[0] - 1 + fontsize[1]
+									//fontsize = fontsize[0];
+									
+									  //if (fontsize == sizes[entry]) entry++;
+									  //, choose = entry[1] == fontsize ? (sizes[size] == fontsize ? fontsize + 1 : fontsize);
+									  //, choose = (sizes[size] == fontsize ? fontsize + 1 : fontsize);
+									
+									
+									
 									//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
 								}
 							}()
