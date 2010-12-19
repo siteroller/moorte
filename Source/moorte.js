@@ -176,12 +176,16 @@ MooRTE.Range = {
 		} else MooRTE.Utilities.exec('insertHTML',what);
 		return MooRTE.Range;
 	}
-	, wrap:function(element, options, range){
+	, wrap: function(element, options, range){
 		if (!range) range = MooRTE.Range.create();
 		var El = new Element(element, options);
-		Browser.ie ?
-			range.pasteHTML(El.set('html', range.htmlText).outerHTML) : 
-			range.surroundContents(El);
+		try {
+			Browser.ie 
+				? range.pasteHTML(El.set('html', range.htmlText).outerHTML) 
+				: range.surroundContents(El); 
+		} catch(e) {
+			if (e.code == 1) return false; // "Bad Boundary Points"
+		}
 		return El;
 	}
 	, wrapText:function(element, caller){
