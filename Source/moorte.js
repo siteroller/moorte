@@ -84,6 +84,7 @@ var MooRTE = new Class({
 						   , mouseup: MooRTE.Utilities.updateBtns
 						   , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
 				});
+			rte.addEvent('mouseup', MooRTE.Utilities.updateBtns);
 		});
 		rte.store('fields', els);
 		
@@ -229,11 +230,11 @@ MooRTE.Range = {
 MooRTE.Utilities = {
 	exec: function(args){
 		args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
-		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
-		if(g) document.designMode = 'on';
 		//console.log(args[0], args[2]||null, args[1]||false)
+		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
+		if (g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||null, args[1]||false);
-		if(g) document.designMode = 'off';
+		if (g) document.designMode = 'off';
 	},
 	
 	shortcuts: function(e){
