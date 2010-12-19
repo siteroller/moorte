@@ -532,7 +532,23 @@ MooRTE.Utilities = {
 		} while (cleaned != html); // && ++loopStop <3
 		
 		return html.trim();
+	},
+	
+	fontsize: function(dir){
+		var size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
+		
+		if (size == +size) size = +size + dir;
+		else {
+			//MooRTE.Utilities.convertunit(size[0],size[1],'px');
+			size = size.split(/([^\d]+)/)[0];
+			[0,10,13,16,18,24,32,48].every(function(s,i){	
+				if ((s - size) < 0) return true;
+				size = !(s - size) || dir < 0 ? i + dir : i;
+			});
+		}
+		MooRTE.Utilities.exec('fontsize', size);		
 	}
+	
 };
 
 Element.implement({
@@ -736,28 +752,9 @@ MooRTE.Elements = {
 						} },
 /*#*/	decreasefontsize:{  img:42, 
 							onClick: function(){
-								if (!Browser.firefox) ;
-								return function(){	
-									var size
-									  , fontsize = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
-									
-									if (fontsize == +fontsize) size = +fontsize + 1;
-									else {
-										//convertunit(fontsize[0],fontsize[1],'px');
-										fontsize = fontsize.split(/([^\d]+)/)[0];
-										[0,10,13,16,18,24,32,48].some(function(s,i){	
-											size = i;
-											return (s - fontsize) > 0;
-										});
-									} 
-									MooRTE.Utilities.exec('fontsize', size);
-									console.log(fontsize, size);
-									
-									
-									
-									//console.log(fontsize, window.document.queryCommandValue('fontsize'));
-									/* 
-									Fontsize was originally only supposed to accept valuies between 1 - 7.
+								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
+							}()
+							/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
 									It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
 										http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
 										http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
@@ -781,25 +778,11 @@ MooRTE.Elements = {
 											http://www.w3schools.com/CSS/pr_font_font-size.asp
 											http://style.cleverchimp.com/font_size_intervals/altintervals.html
 									*/
-									//fontsize = fontsize[0];
-									
-									  //if (fontsize == sizes[entry]) entry++;
-									  //, choose = entry[1] == fontsize ? (sizes[size] == fontsize ? fontsize + 1 : fontsize);
-									  //, choose = (sizes[size] == fontsize ? fontsize + 1 : fontsize);
-									
-									
-									
 									//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
-								}
-							}()
 						},
 /*#*/	increasefontsize:{	img:41, 
 							onClick: function(){
-								if (!Browser.firefox) return function(){	
-									var fontsize = (window.document.queryCommandValue('fontsize') || '1em').split(/([^\d]+)/);
-									MooRTE.Utilities.exec('fontsize', +fontsize[0] + 1 + fontsize[1]);
-									
-								}
+								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 							}()
 						},
 /*#*/	fontsize		:{	
