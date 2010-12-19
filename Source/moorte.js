@@ -534,12 +534,12 @@ MooRTE.Utilities = {
 		return html.trim();
 	},
 	
-	fontsize: function(dir){
-		var size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
+	fontsize: function(dir, size){
+		if (size == undefined) size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
 		
 		if (size == +size) size = +size + dir;
 		else {
-			//MooRTE.Utilities.convertunit(size[0],size[1],'px');
+			// MooRTE.Utilities.convertunit(size[0],size[1],'px'); Convert em's, xx-small, etc.
 			size = size.split(/([^\d]+)/)[0];
 			[0,10,13,16,18,24,32,48].every(function(s,i){	
 				if ((s - size) < 0) return true;
