@@ -154,9 +154,9 @@ MooRTE.Range = {
 		//var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 	}
-	, set:function(rangeName){
+	, set: function(rangeName){
 		var range = MooRTE.ranges[rangeName || 'a1'];
-		if(range.select) range.select();
+		if (range.select) range.select();
 		else {
 			var sel = window.getSelection();
 			sel.removeAllRanges();
@@ -165,12 +165,12 @@ MooRTE.Range = {
 		return MooRTE.Range;
 	}
 	, get: function(what, range){
-		if(!range) range = MooRTE.Range.create();
+		if (!range) range = MooRTE.Range.create();
 		return !Browser.ie ? range.toString() :
 			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
 	}
 	, insert: function(what, range){ //html option that says if text or html?
-		if(Browser.ie){
+		if (Browser.ie){
 			if(!range) range = MooRTE.Range.create();
 			range.pasteHTML(what); 
 		} else MooRTE.Utilities.exec('insertHTML',what);
@@ -188,7 +188,7 @@ MooRTE.Range = {
 		}
 		return El;
 	}
-	, wrapText:function(element, caller){
+	, wrapText: function(element, caller){
 		var area = caller.getParent('.RTE').getElement('textarea');
 		if (!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
 		if (!Browser.ie){
@@ -200,7 +200,7 @@ MooRTE.Range = {
 		}
 		return MooRTE.Range;
 	}
-	, replace:function(node, range){
+	, replace: function(node, range){
 		if(!range) range = MooRTE.Range.create();
 		if (Browser.ie){
 			var id = document.uniqueID;
@@ -218,7 +218,7 @@ MooRTE.Range = {
 			}	
 		}
 	}
-	, parent:function(range){
+	, parent: function(range){
 		if(!range) range = MooRTE.Range.create();
 		return Browser.ie ?  
 			typeOf(range) == 'object' ? range.parentElement() : range
