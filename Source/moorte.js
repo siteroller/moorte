@@ -389,7 +389,7 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
 	
-	assetLoader:function(args){
+	assetLoader: function(args){
 		try{ Depender }catch(e){ var Not = 1 };
 		if (Not) return; //if (!Depender){ var Depender; return;}
 		
@@ -560,14 +560,14 @@ Element.implement({
 	moorte: function(){
 		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		if (!cmd || (cmd == 'create')){
-			if(removed = this.retrieve('removed')){
+			if (removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
 			}
 			return bar ? this.removeClass('rteHide') : new MooRTE(Object.append(params.options||{},{'elements':this}));
 		} else {
-			if(!bar) return false;
-			switch(cmd.toLowerCase()){
+			if (!bar) return false;
+			switch (cmd.toLowerCase()){
 				case 'remove':
 					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
 					new Element('span').replaces(bar).destroy(); break;
@@ -621,13 +621,13 @@ MooRTE.Elements = {
    , superscript	:{img:17}
    , outdent		:{img:11}
    , indent			:{img:12}
-   , insertorderedlist:{img:14, title:'Numbered List' }
-   , insertunorderedlist:{img:15, title:'Bulleted List' }
+   , insertorderedlist:{img:14, title:'Numbered List'}
+   , insertunorderedlist:{img:15, title:'Bulleted List'}
    , selectall   	:{img:25, title:'Select All (Ctrl + A)'}
    , removeformat	:{img:26, title:'Clear Formatting'}
-   , undo        	:{img:31, title:'Undo (Ctrl + Z)' }
-   , redo         	:{img:32, title:'Redo (Ctrl+Y)' }
-   , inserthorizontalrule:{img:56, title:'Insert Horizontal Line' }
+   , undo        	:{img:31, title:'Undo (Ctrl + Z)'}
+   , redo         	:{img:32, title:'Redo (Ctrl+Y)'}
+   , inserthorizontalrule:{img:56, title:'Insert Horizontal Line'}
    , cut			:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
 						onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 					}
@@ -644,7 +644,7 @@ MooRTE.Elements = {
 						});
 						new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(content.toQueryString());
 					}}
-   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}, 
+   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}
    , DisplayHTML	:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
 						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
 						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
@@ -659,13 +659,14 @@ MooRTE.Elements = {
 						for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 						var hex = [c[0],c[2],c[1]].rgbToHex();
 					}}
-   , hyperlink		:{ img:46, title:'Create hyperlink', 
-						onClick:function(){
+   , hyperlink		:{ img:46
+					   , title:'Create hyperlink'
+					   , onClick:function(){
 								MooRTE.Range.create();
 								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
 								MooRTE.Elements.linkPop.show();
-						},
-						onLoad: function(){
+						}
+					   , onLoad: function(){
 							MooRTE.Utilities.assetLoader({
 								self: this,
 								scripts: 'StickyWinModalUI',
@@ -689,22 +690,26 @@ MooRTE.Elements = {
 									MooRTE.Elements.linkPop.hide();
 						}	})	}	
 					}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , 'Upload Photo' :{ img:15, 
-						onLoad:function(){
+   , 'Upload Photo' :{ img: 15
+					   , onLoad: function(){
 							MooRTE.Utilities.assetLoader({ //new Loader({
 								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
 								styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
 								onComplete:function(){
 									var uploader = new Swiff.Uploader({
-										verbose: true, 
-										target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
-										typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
-										path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
-										url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
-										onButtonDown :function(){ MooRTE.Range.set() },
-										onButtonEnter :function(){ MooRTE.Range.create() },
-										onFileProgress: function(val){  },//self.set('text',val);
-										onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
+										verbose: true 
+										, target: this
+										, queued: false
+										, multiple: false
+										, instantStart: true
+										, fieldName:'photoupload' 
+										, typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'}
+										, path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf'
+										, url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php'
+										, onButtonDown :function(){ MooRTE.Range.set() }
+										, onButtonEnter :function(){ MooRTE.Range.create() }
+										, onFileProgress: function(val){  } //self.set('text',val);
+										, onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
 									});
 									this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
 								}
