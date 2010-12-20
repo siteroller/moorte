@@ -208,7 +208,7 @@ MooRTE.Range = {
 			range.pasteHTML("<span id='" + id + "'></span>");
 			node.replaces($(id));
 		} else {
-			MooRTE.Utilities.exec('inserthtml', node); return;
+			MooRTE.Utilities.exec('inserthtml', node); return;  ToDo: is this really supposed to return?!
 			range.deleteContents();  // Consider using Range.insert() instead of the following (Olav's method).
 			if (range.startContainer.nodeType==3) {
 				var refNode = range.startContainer.splitText(range.startOffset);
@@ -220,7 +220,7 @@ MooRTE.Range = {
 		}
 	}
 	, parent: function(range){
-		if(!range) range = MooRTE.Range.create();
+		if (!range) range = MooRTE.Range.create() || return false;
 		return Browser.ie ?  
 			typeOf(range) == 'object' ? range.parentElement() : range
 			: range.commonAncestorContainer;
@@ -592,228 +592,223 @@ Elements.implement({
 
 MooRTE.Elements = {
 
-/*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
-/*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
-/*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
-/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] },
-/*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] },//'Upload Photo'
-/*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
+   // Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
+     Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] }
+   , File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] }
+   , Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] }
+   , Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] }//'Upload Photo'
+   , View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] }
 
-/*#*///	Groups (Flyouts) - All groups should be created dynamically by the download builder. 
-/*#*/	Justify			:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' },
-/*#*/	Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' },
-/*#*/	Indents			:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' },
+   // Groups (Flyouts) - All groups should be created dynamically by the download builder. 
+   , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
+   , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
+   , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
-/*#*///	Buttons
-/*#*/	div			 	:{element:'div'},
-/*#*/	bold		 	:{img:1, shortcut:'b', source:'<b>' },
-/*#*/	italic		 	:{img:2, shortcut:'i', source:'<i>' },
-/*#*/	underline	 	:{img:3, shortcut:'u', source:'<u>' },
-/*#*/	strikethrough	:{img:4},
-/*#*/	justifyleft	 	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
-							var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
-							t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'));
-						}},
-/*#*/	justifyfull	 	:{img:7, title:'Justify Full'  },
-/*#*/	justifycenter	:{img:8, title:'Justify Center'},
-/*#*/	justifyright	:{img:9, title:'Justify Right' },
-/*#*/	subscript		:{img:18},
-/*#*/	superscript		:{img:17},
-/*#*/	outdent			:{img:11},
-/*#*/	indent			:{img:12},
-/*#*/	insertorderedlist  :{img:14, title:'Numbered List' },
-/*#*/	insertunorderedlist:{img:15, title:'Bulleted List' },
-/*#*/	selectall   	:{img:25, title:'Select All (Ctrl + A)'},
-/*#*/	removeformat	:{img:26, title:'Clear Formatting'},
-/*#*/	undo        	:{img:31, title:'Undo (Ctrl + Z)' },
-/*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
-/*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
-/*#*/	cut				:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+   // Buttons
+   , div			:{element:'div'}
+   , bold		 	:{img:1, shortcut:'b', source:'<b>' }
+   , italic		 	:{img:2, shortcut:'i', source:'<i>' }
+   , underline	 	:{img:3, shortcut:'u', source:'<u>' }
+   , strikethrough	:{img:4}
+   , justifyleft	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
+						var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
+						t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'));
+					}}
+   , justifyfull	:{img:7, title:'Justify Full'  }
+   , justifycenter	:{img:8, title:'Justify Center'}
+   , justifyright	:{img:9, title:'Justify Right' }
+   , subscript		:{img:18}
+   , superscript	:{img:17}
+   , outdent		:{img:11}
+   , indent			:{img:12}
+   , insertorderedlist:{img:14, title:'Numbered List' }
+   , insertunorderedlist:{img:15, title:'Bulleted List' }
+   , selectall   	:{img:25, title:'Select All (Ctrl + A)'}
+   , removeformat	:{img:26, title:'Clear Formatting'}
+   , undo        	:{img:31, title:'Undo (Ctrl + Z)' }
+   , redo         	:{img:32, title:'Redo (Ctrl+Y)' }
+   , inserthorizontalrule:{img:56, title:'Insert Horizontal Line' }
+   , cut			:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
+						onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+					}
+   , copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
+						onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+					}
+   , paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
+						onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+					}
+   , save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
+						var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
+						this.getParent('.MooRTE').retrieve('fields').each(function(el){
+							content['content'][next++] = MooRTE.Utilities.clean(el);
+						});
+						new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(content.toQueryString());
+					}}
+   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}, 
+   , DisplayHTML	:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
+						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
+						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
+						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+					}}
+   , colorpicker	:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
+						//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
+						//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+						//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
+						//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
+						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
+						for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+						var hex = [c[0],c[2],c[1]].rgbToHex();
+					}}
+   , hyperlink		:{ img:46, title:'Create hyperlink', 
+						onClick:function(){
+								MooRTE.Range.create();
+								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
+								MooRTE.Elements.linkPop.show();
 						},
-/*#*/	copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-						},
-/*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
-							onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-						},
-/*#*/	save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
-							var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
-							this.getParent('.MooRTE').retrieve('fields').each(function(el){
-								content['content'][next++] = MooRTE.Utilities.clean(el);
-							});
-							new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(content.toQueryString());
-						}},
-/*#*/	'Html/Text'		:{ img:'26', onClick:['DisplayHTML']}, 
-/*#*/	DisplayHTML		:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-							var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
-							var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-							this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
-						}},
-/*#*/	colorpicker		:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
-							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
-							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
-							//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
-							var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
-							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-							var hex = [c[0],c[2],c[1]].rgbToHex();
-						}},
-/*#*/	hyperlink		:{ img:46, title:'Create hyperlink', 
-							onClick:function(){
-									MooRTE.Range.create();
-									$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
-									MooRTE.Elements.linkPop.show();
-							},
-							onLoad: function(){
-								MooRTE.Utilities.assetLoader({
-									self: this,
-									scripts: 'StickyWinModalUI',
-									onComplete: function(){
-										var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
-													<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
-													<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email";
-										var buttons = [ 
-											{ text:'cancel' },
-											{ text:'OK',
-												onClick:function(){
-												//	if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
-													MooRTE.Range.set();
-													var value = $('popURL').get('value');
-													if($('pURL1').get('checked')) value = 'mailto:'+value;
-													MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-												} 
-											}
-										];
-										MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
-										MooRTE.Elements.linkPop.hide();
-							}	})	}	
-						},  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-/*#*/	'Upload Photo' :{ img:15, 
-							onLoad:function(){
-								MooRTE.Utilities.assetLoader({ //new Loader({
-									scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
-									styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
-									onComplete:function(){
-										var uploader = new Swiff.Uploader({
-											verbose: true, 
-											target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
-											typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
-											path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
-											url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
-											onButtonDown :function(){ MooRTE.Range.set() },
-											onButtonEnter :function(){ MooRTE.Range.create() },
-											onFileProgress: function(val){  },//self.set('text',val);
-											onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
-										});
-										this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
-									}
-								})
-							}							
-						},
-/*#*/	blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
-/*#*/	start			:{ element:'span' },
-/*#*/	viewSource		:{ img:35, onClick:'source', source:function(btn){
-							var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
-							if(this.hasClass('rteSelected')){
-								bar.eliminate('source');
-								this.removeClass('rteSelected');
-								if(el.hasChild(el.retrieve('bar'))) el.moorte('remove');
-								el.set('html',ta.addClass('rteHide').get('value')).moorte();
-							} else {
-								bar.store('source','source');
-								if(ta){
-									this.addClass('rteSelected');
-									ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
-								} else MooRTE.Utilities.group.run(['source',btn],this);
-							}
-						}},
-/*#*/	source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
-							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
-							this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
-						}},
-/*#*/	input			:{ img:59, 
-							onClick:function(){ MooRTE.Range.insert("<input>") } 
-						},
-/*#*/	submit			:{ img:59, 
-							onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
-						},	
-/*#*/	cleanWord		:{	onClick: function() {
-							var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
-							var rs = [
-								/<!--.+?-->/g,			// Comments
-								/<title>.+?<\/title>/g,	// Title
-								/<(meta|link|.?o:|.?style|.?div|.?head|.?html|body|.?body|.?span|!\[)[^>]*?>/g, // Unnecessary tags
-								/ v:.*?=".*?"/g,		// Weird nonsense attributes
-								/ style=".*?"/g,		// Styles
-								/ class=".*?"/g,		// Classes
-								/(&nbsp;){2,}/g,		// Redundant &nbsp;s
-								/<p>(\s|&nbsp;)*?<\/p>/g// Empty paragraphs
-							]; 
-							rs.each(function(regex) {
-								s = s.replace(regex, '');
-							});
-							return s.replace(/\s+/g, ' ');
-						} },
-/*#*/	decreasefontsize:{  img:42, 
-							onClick: function(){
-								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
-							}()
-							/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
-									It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
-										http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
-										http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
-										(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
+						onLoad: function(){
+							MooRTE.Utilities.assetLoader({
+								self: this,
+								scripts: 'StickyWinModalUI',
+								onComplete: function(){
+									var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
+												<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
+												<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email";
+									var buttons = [ 
+										{ text:'cancel' },
+										{ text:'OK',
+											onClick:function(){
+											//	if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
+												MooRTE.Range.set();
+												var value = $('popURL').get('value');
+												if($('pURL1').get('checked')) value = 'mailto:'+value;
+												MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
+											} 
+										}
+									];
+									MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
+									MooRTE.Elements.linkPop.hide();
+						}	})	}	
+					}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
+   , 'Upload Photo' :{ img:15, 
+						onLoad:function(){
+							MooRTE.Utilities.assetLoader({ //new Loader({
+								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
+								styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
+								onComplete:function(){
+									var uploader = new Swiff.Uploader({
+										verbose: true, 
+										target:this, queued: false, multiple: false, instantStart: true, fieldName:'photoupload', 
+										typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'	},
+										path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf',
+										url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php',
+										onButtonDown :function(){ MooRTE.Range.set() },
+										onButtonEnter :function(){ MooRTE.Range.create() },
+										onFileProgress: function(val){  },//self.set('text',val);
+										onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
+									});
+									this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
+								}
+							})
+						}							
+					}
+   , blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , start			:{ element:'span' }
+   , viewSource		:{ img:35, onClick:'source', source:function(btn){
+						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
+						if(this.hasClass('rteSelected')){
+							bar.eliminate('source');
+							this.removeClass('rteSelected');
+							if(el.hasChild(el.retrieve('bar'))) el.moorte('remove');
+							el.set('html',ta.addClass('rteHide').get('value')).moorte();
+						} else {
+							bar.store('source','source');
+							if(ta){
+								this.addClass('rteSelected');
+								ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
+							} else MooRTE.Utilities.group.run(['source',btn],this);
+						}
+					}}
+   , source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
+						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
+						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
+					}}
+   , input			:{ img:59, 
+						onClick:function(){ MooRTE.Range.insert("<input>") } 
+					}
+   , submit			:{ img:59, 
+						onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
+					}
+   , cleanWord		:{	onClick: function() {
+						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
+						var rs = [
+							/<!--.+?-->/g,			// Comments
+							/<title>.+?<\/title>/g,	// Title
+							/<(meta|link|.?o:|.?style|.?div|.?head|.?html|body|.?body|.?span|!\[)[^>]*?>/g, // Unnecessary tags
+							/ v:.*?=".*?"/g,		// Weird nonsense attributes
+							/ style=".*?"/g,		// Styles
+							/ class=".*?"/g,		// Classes
+							/(&nbsp;){2,}/g,		// Redundant &nbsp;s
+							/<p>(\s|&nbsp;)*?<\/p>/g// Empty paragraphs
+						]; 
+						rs.each(function(regex) {
+							s = s.replace(regex, '');
+						});
+						return s.replace(/\s+/g, ' ');
+					} }
+   , decreasefontsize:{  img:42, 
+						onClick: function(){
+							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
+						}()
+						/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
+								It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
+									http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
+									http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
+									(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
+								
+								Table of values:
 									
-									Table of values:
+								Webkit is particularly bad:
+									#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
+										Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
+									#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
+										Double the text height, the previous background color will only cover the bottom half of the new text.
+									#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
+										The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
+									The actual ridiculous results of the command:
+										https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
+										Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
+										Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
 										
-									Webkit is particularly bad:
-										#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
-											Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
-										#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
-											Double the text height, the previous background color will only cover the bottom half of the new text.
-										#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
-											The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
-										The actual ridiculous results of the command:
-											https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
-											Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
-											Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
-											
-											Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
-											http://www.w3schools.com/CSS/pr_font_font-size.asp
-											http://style.cleverchimp.com/font_size_intervals/altintervals.html
-									*/
-									//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
-						},
-/*#*/	increasefontsize:{	img:41, 
-							onClick: function(){
-								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
-							}()
-						},
-/*#*/	fontsize		:{	
-							
-						},
-/*#*/	insertimage		:{},
-/*#*/	backcolor		:{ 	img:43,
-							onLoad:function(){
-								MooRTE.Utilities.assetLoader({
-									scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
-									styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
-									onComplete:function(){
+										Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
+										http://www.w3schools.com/CSS/pr_font_font-size.asp
+										http://style.cleverchimp.com/font_size_intervals/altintervals.html
+								*/
+								//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
+					}
+   , increasefontsize:{	img:41, 
+						onClick: function(){
+							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
+						}()
+					}
+   , fontsize		:{}
+   , insertimage	:{}
+   , forecolor		:{}			
+   , formatblock	:{}
+   , backcolor		:{ 	img:43,
+						onLoad:function(){
+							MooRTE.Utilities.assetLoader({
+								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+								styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+								onComplete:function(){
 
-									}
-								})
-							},
-							onClick: function(){
-								var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
-							}
+								}
+							})
 						},
-/*#*/	forecolor		:{
-							
-						},
-						
-/*#*/	formatblock:{},
-		
-/*#*///	depracated
-/*#*/	'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
+						onClick: function(){
+							var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
+						}
+					}
+					
+   // Deprecated
+   , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 };
