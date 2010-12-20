@@ -212,32 +212,54 @@ MooRTE.Utilities = {
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
-				var properties = $H({
+				var properties = Object.append({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):'',
+					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
-						'mousedown': function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source');
-							// If activeField is not a field which can be controlled by this bar, change active field - and the focus - to one which can be.
-							// If range is outside of extended area, this will effectively destroy the range, keeping the toolbar from editing areas outside of its environs!
-							if(!bar.retrieve('fields').contains(MooRTE.activeField)) MooRTE.activeField = bar.retrieve('fields')[0].focus();
+						mousedown: function(e){
+							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							  , source = bar.retrieve('source')
+							  , fields = bar.retrieve('fields');
 							
-							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
+							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+							
+							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
+							// "holder" is a reference to the node that includes all selected text. 
+							// Will be a text node or an element, depending on what is actually selected.
+							var holder = MooRTE.Range.parent();
+							// If using webkit, we need an element, as text nodes are not officially "contained": bug #1113
+							// (nodeType == 3) means we have a text node. "parentElement" is a Webkit-specific property.
+							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
+							// If the "active field" does not contain all of the selected text, return.
+							// Otherwise one would be able to select & modify non-editable text, or text in a non-active field.
+							if (!MooRTE.activeField.contains(holder)) return;
+							
+							// If element has no onClick event, no [source ??], and is an 'a' element [or undefined/default] -   
+							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							// If it has a source, run that. If it has an onClick event, run that.
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
-							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
+							// If the button is passed an event, stop the event from propogating. 
+							// If button is meant to accept input, the event must continue or the cursor will not appear. 
+							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
 						}
 					}
-				}).extend(val);
-				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
+				}, val);
+				
+				// The MooRTE.btnVals array contains all properties that are NOT added to the element being created.
+				// For example, if this is not IE, "unselectable=on" is not needed.
+				// Check if href should be removed. , but do not save the MooRTE array with the change, as this is element specific.
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href')
+				// include/erase returns a temporary array. We do not save this array, as href is element specific.
+				// For each item in this temporary array, we delete the corresponding key in the properties array.
+					.each(function(key){
+						delete properties[key];
+					});
 					
-				if(val.onUpdate || state) 
-					parent.retrieve('update', $H({'value':[], 'state':[], 'custom':[] }))[
-						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
-						'value' : (state ? 'state' : 'custom')
-					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);

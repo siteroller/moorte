@@ -5,21 +5,25 @@ Rich Text Editor Framework for Mootools.
 
 Tiny, flexible, and does not use a IFrame.
 
+[Official Group Page](http://groups.google.com/group/moorte)
+
 ![Screenshot](http://siteroller.net/projects/moorte/images/moorte_screenshot.jpg)
 
-[Official Group](http://groups.google.com/group/moorte)
+#### Important:
+Due to a Forge issue, the last version of this project was broken.<br>
+Anyone who has previously downloaded MooRTE is requested to please update.
 
-Dependencies:
-----------
-The basic buttons (bold, italic, etc) only require mootools-core.
+## Dependencies:
+
+The basic buttons (bold, italic, etc) require mootools-core.
 
 Many other buttons buttons rely on 3rd party scripts.
-[The popup in the "hyperlink" button uses StickyWin, the "Upload Button" uses FancyUpload, etc.]
+[Eg. the popup in the "hyperlink" button uses StickyWin, the "Upload Button" uses FancyUpload, etc.]
 They require Depender.js, which is used to load in each of these third-party scripts as needed.
 See the Depender docs for the correct setup of these docs. The Demo folder of the download is setup correctly. 
 
-How to use
-----------
+## How to use
+
 ### Basic usage:
 	$('myElement').moorte(options);
 
@@ -29,11 +33,8 @@ How to use
 	$$('.myElements').moorte(options);
 	// single, group, or to apply to the page.
 	var myRTE = new MooRTE(options);
-
-
 	
-Options
----------	
+## Options
  - buttons: 'div.Toolbar':['bold','italic','underline]
     "buttons" can refer to anything in the MooRTE.Elements object.
 	It will accept a JSON Object of any complexity, and is very loose in the definition.
@@ -52,9 +53,23 @@ Options
  - elements: 'textarea, .rte' - What elements should the RTE extend.
      - Only applicable when called with the new keyword [var mrte = new MooRTE({elements:'textarea'}) ])
 	
+## Community
 
-Customization:
----------
+Issues? Ideas? Wanna Join? [We need help!]
+
+ - Open threads regarding the color picker on the [MooRTE Google Group](http://groups.google.com/group/moorte).
+ - Watch the [GitHUB page](http://github.com/siteroller/colorpicker) for updates.
+ - Leave issues on the [GitHUB Issue Tracker](http://github.com/siteroller/colorpicker/issues).
+ - Check out the [Mootools Forge Page](http://mootools.net/forge/p/colorroller%20-%20mootools%20color%20picker).  
+    - As [the Forge is buggy](http://blog.siteroller.net/mootools-forge-gotchas), the info and downloads on this page are probably out of date.
+ - Or email us:
+
+        var name = "moorte";
+        var company = "siteroller.net";
+        var email = name + '@' + company;
+        // There's gotta be a better way to keep spammers at bay, no?!
+		
+## Customization:
 
 ### MooRTE.Path
 
@@ -108,13 +123,6 @@ To define a custom toolbar:
 			onClick:['group',myToolbar]
 		}			
 	});
-
-Contact:
----------
-Due to a GITHUB issue, the cached version of this project was a broken one.<br>
-Please redownload and test - this version should work.
-If you have issues, please comment on the Google group (Sign up required to prevent spam bots.)
-http://groups.google.com/group/moorte
-or email me at siteroller - the at dingbat - gmail.
 	
-There are many more options, see the docs on the site.
+There are many more options, see the docs on the site.	
+

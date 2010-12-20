@@ -3,97 +3,142 @@
 description: Rich Text Editor (WYSIWYG / NAWTE / Editor Framework) that can be applied directly to any collection of DOM elements.
 
 copyright:
-- November 2008, Sam Goody
+- November 2008, 2010 Sam Goody
 
 license: OSL v3.0 (http://www.opensource.org/licenses/osl-3.0.php)
 
 authors:
-- Sam Goody
+- Sam Goody <siteroller - |at| - gmail>
 
 requires:
 - core
-- more/Depender
 
 provides: [MooRTE, MooRTE.Elements, MooRTE.Utilities, MooRTE.Range, MooRTE.Path, MooRTE.ranges, MooRTE.activeField, MooRTE.activeBar ]
 
 credits:
-- Based on the tutorial at - http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Great job, Olav!!
+- Based on the tutorial at - http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1.  Bravo, Olav!!
 - Ideas and inspiration - Guillerr, CheeAun, HugoBuriel
 - Some icons from OpenWysiwyg - http://www.openwebware.com
-- Cleanup regexs from CheeAun and Ryan's work on MooEditable (though the method of applying them is our own!)
-- MooRTE needs YOU!! Join at http://groups.google.com/group/moorte!
+- Cleanup regexs from CheeAun and Ryan's work on MooEditable (methodology is our own!)
+- MooRTE needs YOU!!
 
 Join our group at: http://groups.google.com/group/moorte
 
-Email me at siteroller - |at| - gmail.
 ...
 */
 
+function obj(key, val){
+	var obj = {};
+	obj[key] = val;
+	return obj;
+}
+Browser.webkit = Browser.safari || Browser.chrome;
+
 var MooRTE = new Class({
 	
-	Implements: [Options],
+	Implements: [Options]
 
-	options:{floating: false,location: 'elements',buttons: 'div.Menu:[Main,File,Insert]',skin: 'Word03',elements: 'textarea, .rte'},
-	
-	initialize: function(options){
+	, options: { floating: true // false broken by WK bug - "an editable element may not contain non-editable content".
+			   , where: 'before' // 'top/bottom/before/after' (Mootools standard.)
+			   , padFloat: true // before/after: add to existing margins when true. top/bottom: padding always added. If false shrinks element accordingly.
+			   , stretch: false // If element grows, should it stretch the element or add toolbars. Other options abound.
+			   , location: 'elements'
+			   , buttons: 'div.Menu:[Main,File,Insert]'
+			   , skin: 'Word03'
+			   , elements: 'textarea, .rte'
+	}
+	, initialize: function(options){
 		this.setOptions(options);
-		var self = this, rte, els = $$(this.options.elements), l = this.options.location.substr(4,1).toLowerCase();
-		if(!MooRTE.activeField) MooRTE.extend({ranges:{}, activeField:'', activeBar:'' });
+		var rte
+		  , self = this
+		  , els = $$(this.options.elements)
+		  , l = this.options.location.substr(4,1).toLowerCase();
+		  
+		if (!MooRTE.activeField) MooRTE.extend({ ranges:{}, btnVals:[], activeField:'', activeBar:'' });
+		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
 		
 		els.each(function(el,index){
-			if(el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
-			if(l=='e' || !rte) rte = self.insertToolbar(l);	
-			if(l=='b' || l=='t' || !l) el.set('contentEditable', true);
-			else l=='e' ? self.positionToolbar(el,rte) : el.set('contentEditable',true).addEvents({
-				'focus': function(){ self.positionToolbar(el, rte); },
-				'blur':function(){ 
-					this.setStyle('padding-top', this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y).removeClass('rteShow');
-					rte.addClass('rteHide'); 
-				}
-			});
-			el.store('bar', rte).addEvents({
-				'mouseup':MooRTE.Utilities.updateBtns, 
-				'keyup'  :MooRTE.Utilities.updateBtns, 
-				'keydown':MooRTE.Utilities.shortcuts, 
-				'focus'  :function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; } 
-			});
+			if (el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
+			if (l=='e' || !rte) rte = self.insertToolbar(l);	
+			if (l=='b' || l=='t' || !l) el.set('contentEditable', true);
+			else l == 'e'
+				? self.positionToolbar(el,rte)
+				: el.set('contentEditable',true).addEvents({
+					'focus': function(){ self.positionToolbar(el, rte); },
+					'blur': function(){
+						this.setStyle( 'padding-top'
+									 , this.getStyle('padding-top')
+										.slice(0,-2)
+										- rte
+											.getFirst()
+											.getSize()
+											.y
+									).removeClass('rteShow');
+						rte.addClass('rteHide'); 
+					}
+				});
+			
+			el.store('bar', rte)
+				.addEvents({ keydown: MooRTE.Utilities.shortcuts
+						   , keyup  : MooRTE.Utilities.updateBtns
+						   , mouseup: MooRTE.Utilities.updateBtns
+						   , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
+				});
+			rte.addEvent('mouseup', MooRTE.Utilities.updateBtns);
 		});
 		rte.store('fields', els);
 		
 		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');
-		if(l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
-		else if(l=='b') rte.addClass('rtePageBottom');
+		if (l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
+		else if (l=='b') rte.addClass('rtePageBottom');
 		
-		if(Browser.Engine.gecko) MooRTE.Utilities.exec('styleWithCSS');
+		if (Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
 		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
-	},
-	
-	insertToolbar: function (pos){
+	}
+	, insertToolbar: function (pos){
 		var self = this;
-		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
-			 new Element('div', {'class':'RTE '+self.options.skin })
-		).inject(document.body);
+		var rte = new Element( 'div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
+					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
+					.inject(document.body);
 		MooRTE.activeBar = rte; // not used!
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
-	},
-	
-	positionToolbar: function (el, rte){
+	}
+	, positionToolbar: function (el, rte){
 		el.set('contentEditable', true).addClass('rteShow');
-		var elSize = el.getCoordinates(), f=this.options.floating, bw = el.getStyle('border-width').match(/(\d)/g);
-		rte.removeClass('rteHide').setStyle('width', elSize.width-(f?0:bw[1]*1+bw[3]*1));
-		var rteHeight = rte.getFirst().getCoordinates().height;
-		if(f) rte.setStyles({ 'left':elSize.left, 'top':(elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) }).addClass('rteFloat').getFirst().addClass('rteFloat');
+		var o = this.options
+		  , elSize = el.getCoordinates()
+		  , bw = el
+				.addClass('rte'+(o.stretch?'':'No')+'Stretch')
+				.getStyle('border-width')
+				.match(/(\d)/g)
+		  , rteHeight = rte
+				.removeClass('rteHide')
+				.setStyle('width', elSize.width-(o.floating?0:bw[1]*1+bw[3]*1))
+				.getFirst()
+				.getCoordinates()
+				.height;
+
+		if (o.floating){
+			if (o.padFloat){
+				var pad = {before:'margin-top',after:'margin-after',top:'padding-top',bottom:'padding-bottom'}[o.where];
+				el.setStyle(pad, parseInt(el.getStyle(pad)) + rteHeight);
+			}
+			rte
+				.setStyles({ 'left': elSize.left, 'top': (elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) })
+				.addClass('rteFloat')
+				.getFirst()
+				.addClass('rteFloat');
+		}		
 		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
-	},
-	
-	textArea: function (el){
+	}
+	, textArea: function (el){
 		var form, div = new Element('div', {
 			text:el.get('value'),
 			'class':'rteTextArea '+el.get('class'), 
 			'styles':{width:el.getSize().x}
-		}).setStyle(Browser.Engine.trident?'height':'min-height',el.getSize().y).injectBefore(el);
+		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).inject(el,'before');
 		if(form = el.addClass('rteHide').getParent('form')) form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
@@ -109,46 +154,45 @@ MooRTE.Range = {
 		return MooRTE.ranges[range || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
 		//var sel = window.getSelection ? window.getSelection() : window.document.selection;
 		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-	},
-	
-	set:function(rangeName){
+	}
+	, set: function(rangeName){
 		var range = MooRTE.ranges[rangeName || 'a1'];
-		if(range.select) range.select();
+		if (range.select) range.select();
 		else {
 			var sel = window.getSelection();
 			sel.removeAllRanges();
 			sel.addRange(range);
 		}
 		return MooRTE.Range;
-	},
-	
-	get: function(what, range){
-		if(!range) range = MooRTE.Range.create();
-		return !Browser.Engine.trident ? range.toString() :
+	}
+	, get: function(what, range){
+		if (!range) range = MooRTE.Range.create();
+		return !Browser.ie ? range.toString() :
 			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
-	},
-	
-	insert: function(what, range){ //html option that says if text or html?
-		if(Browser.Engine.trident){
+	}
+	, insert: function(what, range){ //html option that says if text or html?
+		if (Browser.ie){
 			if(!range) range = MooRTE.Range.create();
 			range.pasteHTML(what); 
 		} else MooRTE.Utilities.exec('insertHTML',what);
 		return MooRTE.Range;
-	},
-	
-	wrap:function(element, options, range){
-		if(!range) range = MooRTE.Range.create();
+	}
+	, wrap: function(element, options, range){
+		if (!range) range = MooRTE.Range.create();
 		var El = new Element(element, options);
-		Browser.Engine.trident ?
-			range.pasteHTML(El.set('html', range.htmlText).outerHTML) : 
-			range.surroundContents(El);
+		try {
+			Browser.ie 
+				? range.pasteHTML(El.set('html', range.htmlText).outerHTML) 
+				: range.surroundContents(El); 
+		} catch(e) {
+			if (e.code == 1) return false; // "Bad Boundary Points"
+		}
 		return El;
-	},
-	
-	wrapText:function(element, caller){
+	}
+	, wrapText: function(element, caller){
 		var area = caller.getParent('.RTE').getElement('textarea');
-		if(!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
-		if(!Browser.Engine.trident){
+		if (!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
+		if (!Browser.ie){
 			var start = area.selectionStart, RE = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value')), El = element+RE[2]+'</'+element.match(/^<(\w+)/)[1]+'>';
 			area.set('value', RE[1]+El+RE[3]).selectionEnd = start + El.length;
 		} else { 
@@ -156,11 +200,10 @@ MooRTE.Range = {
 			range.pasteHTML(El);
 		}
 		return MooRTE.Range;
-	},
-	
-	replace:function(node, range){
+	}
+	, replace: function(node, range){
 		if(!range) range = MooRTE.Range.create();
-		if (Browser.Engine.trident){
+		if (Browser.ie){
 			var id = document.uniqueID;
 			range.pasteHTML("<span id='" + id + "'></span>");
 			node.replaces($(id));
@@ -175,28 +218,28 @@ MooRTE.Range = {
 				range.startContainer.insertBefore(node, refNode);
 			}	
 		}
-	},
-	
-	parent:function(range){
+	}
+	, parent: function(range){
 		if(!range) range = MooRTE.Range.create();
-		return Browser.Engine.trident ?  
-			$type(range) == 'object' ? range.parentElement() : range
+		return Browser.ie ?  
+			typeOf(range) == 'object' ? range.parentElement() : range
 			: range.commonAncestorContainer;
 	}
 };
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = $A(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
-		var g = (Browser.Engine.gecko && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
-		if(g) document.designMode = 'on';
+		args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
+		//console.log(args[0], args[2]||null, args[1]||false)
+		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
+		if (g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||null, args[1]||false);
-		if(g) document.designMode = 'off';
+		if (g) document.designMode = 'off';
 	},
 	
 	shortcuts: function(e){
 		if(e.key=='enter'){ 
-			if(!Browser.Engine.trident)return;
+			if(!Browser.ie)return;
 			e.stop();
 			return MooRTE.Range.insert('<br/>');
 		}
@@ -212,11 +255,14 @@ MooRTE.Utilities = {
 		var val, update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){
-			if(vals[2]) vals[2].bind(vals[1])(vals[0]);
-			else { window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');}
+			if (vals[2]) vals[2].bind(vals[1])(vals[0]);
+			else {
+				// insertorderedlist,insertunorderedlist, has been disabled on line 263, for throwing errors in FF when textfield is empty.
+				window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
+			}
 		});
 		update.value.each(function(vals){
-			if(val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
+			if (val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
 		});
 		update.custom.each(function(){
 			vals[2].bind(vals[1])(vals[0]);
@@ -224,9 +270,10 @@ MooRTE.Utilities = {
 	},
 	
 	addElements: function(buttons, place, relative, name){
-		if(!place) place = MooRTE.activeBar.getFirst();
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
-		if($type(buttons) == 'string'){
+		if (!place) place = MooRTE.activeBar.getFirst();
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), btns = []; 
+		if (typeOf(buttons) == 'string'){
 			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
 			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
@@ -237,52 +284,71 @@ MooRTE.Utilities = {
 		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. It was then removed, probably by mistake, till 2009-12-09 13:18:15 
 		var loopStop = loop = 0; //Remove loopstop variable after testing!!
 		do{
-			if(btns[0]){ buttons = btns; btns = [];}
-			$splat(buttons).each(function(item){
-				switch($type(item)){
+			if (btns[0]) buttons = btns, btns = [];
+			Array.from(buttons).each(function(item){
+				switch(typeOf(item)){
 					case 'string': btns.push(item); break;
 					case 'array' : item.each(function(val){btns.push(val)}); loop = (item.length==1); break;	//item.each(buttons.push);
-					case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
+					case 'object': Object.each(item, function(val,key){ btns.push(obj(key,val)) }); break;			
 				}
 			})
 		} while(loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
 		btns.each(function(btn){
 			var btnVals,btnClass;
-			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
+			if (typeOf(btn)=='object'){btnVals = Object.values(btn)[0]; btn = Object.keys(btn)[0];}
 			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn=btnClass.shift();
 			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
 			
 			if(!e || name == 'rteGroup_Auto'){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',');
+				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,'.contains(btn.toLowerCase()+',');// insertorderedlist,insertunorderedlist,
 				
-				var properties = $H({
+				var properties = Object.append({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE'), source = bar.retrieve('source'), fields = bar.retrieve('fields'),holder;
-							if(!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							if(!(MooRTE.activeField == (holder = MooRTE.Range.parent()) || MooRTE.activeField.hasChild(holder)))return;
-							if(!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
+							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							  , source = bar.retrieve('source')
+							  , fields = bar.retrieve('fields');
+							
+							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
+							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
+							
+							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
+							var holder = MooRTE.Range.parent();
+							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
+							if (!MooRTE.activeField.contains(holder)) return;
+							
+							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
 							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
-							if(e && e.stop) input || textarea ? e.stopPropagation() : e.stop();					//if input accept events, which means keeping it from propogating to the stop of the parent!!
+							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
 						}
 					}
-				}).extend(val);
-				['args','shortcut','element','onClick','img','onLoad','onExpand','onHide','onShow','onUpdate','source',(val.element?'href':'null'),(Browser.Engine.trident?'':'unselectable')].map(properties.erase.bind(properties));
-				e = new Element((input && !val.element ? 'input' : val.element||'a'), properties.getClean()).inject(place,relative).addClass((name||'')+' rte'+btn + (btnClass ? ' rte'+btnClass : ''));
-					
-				if(val.onUpdate || state) 
-					parent.retrieve('update', $H({'value':[], 'state':[], 'custom':[] }))[
+				}, val);
+				
+				MooRTE.btnVals[val.element ? 'include' : 'erase']('href')
+					.each(function(key){
+						delete properties[key];
+					});
+				
+				e = new Element(input && !val.element ? 'input' : val.element || 'a', properties)
+					.addClass((name||'') + ' rte' + btn + (btnClass ? ' rte' + btnClass : ''))
+					.inject(place, relative);
+				
+				if (val.onUpdate || state)
+					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
 						'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
-				if (val.shortcut) parent.retrieve('shortcuts',$H({})).set(val.shortcut,btn);
+				//if (val.shortcut) parent.retrieve('shortcuts',{}).set(val.shortcut,btn);
+				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
 				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
@@ -294,18 +360,26 @@ MooRTE.Utilities = {
 	},
 	
 	eventHandler: function(onEvent, caller, name){
-		var event;
-		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
-		switch($type(event)){
-			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': onEvent == 'source' && onEvent.substr(0,2)!='on' ? MooRTE.Range.wrapText(event, caller) : MooRTE.Utilities.eventHandler(event, caller, name); break;
-			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+		// UNTESTED: Function rewritten do to removal of $unlink in v1.3  //if(!event) return;
+		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		var event = MooRTE.Elements[name][onEvent];
+		switch(typeOf(event)){
+			case 'function':
+				event.bind(caller)(name,onEvent); break;
+			case 'array':
+				event = Array.clone(event);
+				event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+			case 'string':
+				onEvent == 'source' && onEvent.substr(0,2) != 'on'
+					? MooRTE.Range.wrapText(event, caller)
+					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	},
 	
 	group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');
-		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
+		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
+		Object.each(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]'), function(el){ 
 			el.removeClass('rteSelected');
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
 			MooRTE.Utilities.eventHandler('onHide', self, name);
@@ -347,19 +421,19 @@ MooRTE.Utilities = {
 			});
 			
 			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});
-			if(arg.styles) $splat(arg.styles).each(function(file){
-				if(!hrefs.contains(path+file)) Asset.css(path+file);
+			if (arg.styles) $splat(arg.styles).each(function(file){
+				//if (!hrefs.contains(MooRTE.Path + file)) Asset.css(path + file);
 			});
 		}
 	}(),
 	
 	clipStickyWin: function(caller){
-		if (Browser.Engine.gecko || (Browser.Engine.webkit && caller=='paste')) 
+		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			MooRTE.Utilities.assetLoader({
 				self: this,
 				scripts: 'StickyWinModalUI',
 				onComplete: function(command){
-					var body = "For your protection, "+(Browser.Engine.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
+					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
 						If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
 					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
@@ -370,11 +444,11 @@ MooRTE.Utilities = {
 	
 	clean: function(html, options){
 	
-		options = $H({
-			xhtml:false, 
-			semantic:true, 
-			remove:''
-		}).extend(options);
+		options = Object.append({
+			xhtml   : false, 
+			semantic: true, 
+			remove  : ''
+		}, options);
 		
 		var br = '<br'+(xhtml?'/':'')+'>';
 		var xhtml = [
@@ -442,39 +516,55 @@ MooRTE.Utilities = {
 		];
 		
 		var washer;
-		if($type(html)=='element'){
+		if (typeOf(html)=='element'){
 			washer = html;
 			if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
-		if(!Browser.Engine.gecko) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
+		if (!Browser.firefox) washer.getElements('p>p:only-child').each(function(el){ var p = el.getParent(); if(p.childNodes.length == 1) el.replaces(p)  });  // The following will not apply in Firefox, as it redraws the p's to surround the inner one with empty outer ones.  It should be tested for in other browsers. 
 		html = washer.get('html');
-		if(washer != $('washer')) washer.moorte();
+		if (washer != $('washer')) washer.moorte();
 		
-		if(xhtml)cleanup.extend(xhtml);
-		if(semantic)cleanup.extend(semantic);
-		if(Browser.Engine.webkit)cleanup.extend(appleCleanup);
+		if (xhtml) cleanup.append(xhtml);
+		if (semantic) cleanup.append(semantic);
+		if (Browser.webkit) cleanup.append(appleCleanup);
 
 		// var loopStop = 0;  //while testing.
-		do{	
+		do {	
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html); // && ++loopStop <3
 		
 		return html.trim();
+	},
+	
+	fontsize: function(dir, size){
+		if (size == undefined) size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
+		
+		if (size == +size) size = +size + dir;
+		else {
+			// MooRTE.Utilities.convertunit(size[0],size[1],'px'); Convert em's, xx-small, etc.
+			size = size.split(/([^\d]+)/)[0];
+			[0,10,13,16,18,24,32,48].every(function(s,i){	
+				if ((s - size) < 0) return true;
+				size = !(s - size) || dir < 0 ? i + dir : i;
+			});
+		}
+		MooRTE.Utilities.exec('fontsize', size);		
 	}
+	
 };
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if(!cmd || (cmd == 'create')){
+		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		if (!cmd || (cmd == 'create')){
 			if(removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
 			}
-			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
+			return bar ? this.removeClass('rteHide') : new MooRTE(Object.append(params.options||{},{'elements':this}));
 		} else {
 			if(!bar) return false;
 			switch(cmd.toLowerCase()){
@@ -495,17 +585,17 @@ Element.implement({
 Elements.implement({ 
 	moorte:function(){
 		var opts = Array.link(arguments, { 'options': Object.type }).options;
-		return new MooRTE($extend(opts||{}, {'elements':this}));
+		return new MooRTE(Object.append(opts||{}, {'elements':this}));
 	}
 });
 
 
-MooRTE.Elements = new Hash({
+MooRTE.Elements = {
 
 /*#*///	Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
 /*#*/	Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },//
 /*#*/	File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
-/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontSize']}] },
+/*#*/	Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] },
 /*#*/	Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] },//'Upload Photo'
 /*#*/	View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] },
 
@@ -537,17 +627,15 @@ MooRTE.Elements = new Hash({
 /*#*/	removeformat	:{img:26, title:'Clear Formatting'},
 /*#*/	undo        	:{img:31, title:'Undo (Ctrl + Z)' },
 /*#*/	redo         	:{img:32, title:'Redo (Ctrl+Y)' },
-/*#*/	decreasefontsize:{img:42},
-/*#*/	increasefontsize:{img:41},	
 /*#*/	inserthorizontalrule:{img:56, title:'Insert Horizontal Line' },
 /*#*/	cut				:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
-							onClick:function(action){ Browser.Engine.gecko ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
-							onClick:function(action){ Browser.Engine.gecko || Browser.Engine.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+							onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						},
 /*#*/	save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
 							var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
@@ -623,8 +711,8 @@ MooRTE.Elements = new Hash({
 								})
 							}							
 						},
-/*#*/	blockquote		:{	img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
-/*#*/	start			:{element:'span'},
+/*#*/	blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } },
+/*#*/	start			:{ element:'span' },
 /*#*/	viewSource		:{ img:35, onClick:'source', source:function(btn){
 							var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 							if(this.hasClass('rteSelected')){
@@ -644,7 +732,88 @@ MooRTE.Elements = new Hash({
 							var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 							this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 						}},
+/*#*/	input			:{ img:59, 
+							onClick:function(){ MooRTE.Range.insert("<input>") } 
+						},
+/*#*/	submit			:{ img:59, 
+							onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
+						},	
+/*#*/	cleanWord		:{	onClick: function() {
+							var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
+							var rs = [
+								/<!--.+?-->/g,			// Comments
+								/<title>.+?<\/title>/g,	// Title
+								/<(meta|link|.?o:|.?style|.?div|.?head|.?html|body|.?body|.?span|!\[)[^>]*?>/g, // Unnecessary tags
+								/ v:.*?=".*?"/g,		// Weird nonsense attributes
+								/ style=".*?"/g,		// Styles
+								/ class=".*?"/g,		// Classes
+								/(&nbsp;){2,}/g,		// Redundant &nbsp;s
+								/<p>(\s|&nbsp;)*?<\/p>/g// Empty paragraphs
+							]; 
+							rs.each(function(regex) {
+								s = s.replace(regex, '');
+							});
+							return s.replace(/\s+/g, ' ');
+						} },
+/*#*/	decreasefontsize:{  img:42, 
+							onClick: function(){
+								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
+							}()
+							/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
+									It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
+										http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
+										http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
+										(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
+									
+									Table of values:
+										
+									Webkit is particularly bad:
+										#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
+											Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
+										#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
+											Double the text height, the previous background color will only cover the bottom half of the new text.
+										#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
+											The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
+										The actual ridiculous results of the command:
+											https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
+											Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
+											Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
+											
+											Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
+											http://www.w3schools.com/CSS/pr_font_font-size.asp
+											http://style.cleverchimp.com/font_size_intervals/altintervals.html
+									*/
+									//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
+						},
+/*#*/	increasefontsize:{	img:41, 
+							onClick: function(){
+								if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
+							}()
+						},
+/*#*/	fontsize		:{	
+							
+						},
+/*#*/	insertimage		:{},
+/*#*/	backcolor		:{ 	img:43,
+							onLoad:function(){
+								MooRTE.Utilities.assetLoader({
+									scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+									styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
+									onComplete:function(){
 
+									}
+								})
+							},
+							onClick: function(){
+								var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
+							}
+						},
+/*#*/	forecolor		:{
+							
+						},
+						
+/*#*/	formatblock:{},
+		
 /*#*///	depracated
-/*#*/	'Toolbar'      :{element:'div'} //div.Menu would create the same div (with a class of rteMenu).  But since it is the default, I dont wish to confuse people...
-});
+/*#*/	'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
+};
