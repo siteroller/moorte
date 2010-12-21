@@ -146,7 +146,7 @@ var MooRTE = new Class({
 	}
 });
 
-if(!MooRTE.Path) MooRTE.Path = 'js/sources.json';
+if (!MooRTE.path) MooRTE.path = 'CMS/library/thirdparty/MooRTE/Source/'; //js/sources.json
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
@@ -208,7 +208,7 @@ MooRTE.Range = {
 			range.pasteHTML("<span id='" + id + "'></span>");
 			node.replaces($(id));
 		} else {
-			MooRTE.Utilities.exec('inserthtml', node); return;  ToDo: is this really supposed to return?!
+			MooRTE.Utilities.exec('inserthtml', node); return;  //ToDo: is this really supposed to return?!
 			range.deleteContents();  // Consider using Range.insert() instead of the following (Olav's method).
 			if (range.startContainer.nodeType==3) {
 				var refNode = range.startContainer.splitText(range.startOffset);
@@ -220,8 +220,8 @@ MooRTE.Range = {
 		}
 	}
 	, parent: function(range){
-		if (!range) range = MooRTE.Range.create() || return false;
-		return Browser.ie ?  
+		if (!(range = range || MooRTE.Range.create())) return false;
+		return Browser.ie ? 
 			typeOf(range) == 'object' ? range.parentElement() : range
 			: range.commonAncestorContainer;
 	}
@@ -391,49 +391,72 @@ MooRTE.Utilities = {
 	
 	assetLoader: function(args){
 		if (MooRTE.Utilities.assetLoader.busy) 
-			return MooRTE.Utilities.assetLoader.delay(750,this,args);
+			return MooRTE.Utilities.assetLoader.delay(750, this, args);
 		
-		var head = $$('head')[0]
-		  , path = MooRTE.path.slice(0,-1)
-		  , path = path.slice(0, path.lastIndexOf('/')+1)
-		  , path = MooRTE.pluginpath || path
-		  , me = args.me // + (args.folder || '')
-		  , hrefs = head.getElements('link').map(function(el){return el.get('href')});
-		
-		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
-		if (args.styles) $splat(args.styles).each(function(file){
-			if (!hrefs.contains(path+file)) Asset.css(path+file);
-		});
-		
-		var srcs = head
+		var head = $(document.head)
+		  , hrefs = head
+					.getElements('link')
+					.map(function(el){return el.get('href')})
+		  , srcs = head
 					.getElements('script[src]')
 					.map(function(el){return el.get('src')})
-		  , scripts = args.scripts.filter(function(script){ 
-				return !srcs.contains(path+script);
-			});
+		  , scripts = Array.from(args.scripts)
+						.filter(function(script){return !srcs.contains(script)});
 		
-		if (!scripts[0] || (args['class'] && window[args['class']])) return args.onComplete.run(); 
+		if (!scripts.length || window[args['class']]) return args.onComplete(); 
+		
 		MooRTE.Utilities.assetLoader.busy = true;
-		
-		var curPos = me.getStyle('background-position')
-		  , curImg = me.getStyle('background-image');
-		
-		me.setStyles({'background-image':'url("'+MooRTE.path+'images/loading.gif")','background-position':'1px 1px'});
-		
 		var loaded = function(){
-				me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-				MooRTE.Utilities.assetLoader.busy = false;
-				args.onComplete(); 
-		    }
+			  //me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+			  MooRTE.Utilities.assetLoader.busy = false;
+			  args.onComplete();
+		  }
 		  , aborted = function(){
-				MooRTE.Utilities.assetLoader.busy = false;
-			};
+			  MooRTE.Utilities.assetLoader.busy = false;
+		  };
+			
+		if (args.styles) Array.from(args.styles).each(function(file){
+			file = MooRTE.path + file;
+			if (!hrefs.contains(file)) Asset.css(file /*, {onLoad: }*/);
+		});
+		
+		if (scripts){
+			var last = args.scripts.length, count = 0;
+			Array.from(args.scripts).each(function(file){
+				file = MooRTE.path + file;
+				++count == last && args.onComplete
+					?  Asset.javascript(file, {onload:loaded, onabort:aborted}) 
+					: Asset.javascript(file);
+			});
+		};
+		/*
+		console.log(args, scripts, args.styles);
+		
 		if (args.scripts){
-			var last = args.scripts.length, count=0;
+			var last = args.scripts.length, count = 0;
 			$splat(args.scripts).each(function(file){
 				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
 			});
 		};
+		*/
+		 //if (!scripts.length || (args['class'] && window[args['class']])) return args.onComplete(); 
+		 //, path = MooRTE.Path
+		  //, me = args.me // + (args.folder || '')
+		/*
+		  , path = MooRTE.Path.slice(0,-1)
+		  , path = path.slice(0, path.lastIndexOf('/')+1)
+		  , path = MooRTE.pluginpath || path
+		  */
+		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
+		
+		
+		
+		  
+		
+		
+		
+		
+		
 		
 		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
 		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
@@ -720,28 +743,29 @@ MooRTE.Elements = {
 						}
 					   , onLoad: function(){
 							MooRTE.Utilities.assetLoader({
-								self: this,
-								scripts: 'StickyWinModalUI',
-								onComplete: function(){
+								self: this
+								, scripts: 'Assets/scripts/StickyWinModalUI.js'
+								, onComplete: function(){
 									var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
 												<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
-												<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email";
-									var buttons = [ 
-										{ text:'cancel' },
-										{ text:'OK',
-											onClick:function(){
-											//	if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
+												<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email"
+									  , buttons = 
+										[ { text:'cancel' }
+										, { text:'OK'
+										  , onClick: function(){
+												// if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
 												MooRTE.Range.set();
 												var value = $('popURL').get('value');
-												if($('pURL1').get('checked')) value = 'mailto:'+value;
+												if ($('pURL1').get('checked')) value = 'mailto:' + value;
 												MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-											} 
-										}
-									];
+												} 
+										  }
+										];
 									MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
 									MooRTE.Elements.linkPop.hide();
-						}	})	}	
-					}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
+								}	
+							})
+					}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
    , 'Upload Photo' :{ img: 15
 					   , onLoad: function(){
 							MooRTE.Utilities.assetLoader({ //new Loader({
