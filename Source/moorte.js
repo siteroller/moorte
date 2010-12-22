@@ -816,45 +816,68 @@ credits:
 Usage:
 - var loader = new AssetLoader('scripts.js') // Loads in one script or css file
 - var loader = new AssetLoader().load('script.js');
-- var loader = new AssetLoader().load({
+- var loader = new AssetLoader({
 					JSPath: 'scripts/'
 					, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-					, js: [{src:'StickyWinModalUI.js'}]
-					, onComplete: function(){ console.log('done3') }
-				});
+					, onComplete: function(){ console.log('all scripts have been loaded') }
+					});
+loader.load({
+						js: [{src:'StickyWinModalUI.js'}]
+						});
 				
 				
-options:
+Usage
+AssetLoader([options]);
+returns
+	The AssetLoader Class
+options[object]
 	Path: prepended to every file that is included by the class.
 	JSPath: prepended to every JS file, after the Path (if exists).
 	CSSPath: prepended to every JS file, after the Path (if exists).
-	
 	onComplete: Run when all scripts have loaded. Does not wait for styles to load.
+	nochain: whether scripts should load simultaneusly or not
+	
+Assets.load(options)
+returns
+	true if files are attached, before the are loaded.
+options[mixed]	
+	string/array
+		files	
+	object
+		js: files
+		css: files
+		mixed: files
 
-	js: files
-	css: files
-	mixed: files
+	Where 'files' can be a single file or an array of files.
+	Each file can be either:
+		string - the path to the JS/CSS file, relative to the html page.  eg 'Assets/myscripts.js'
+		object - the options that are passed into the script/link tag.  eg {src:'Assets/myscripts.js', events:{load: myFunc}}
+	When passed as js:files the files are assumed to be scripts, no matter what the file extension.
+	When passed as mixed:files, the filetypes are determined dynamically.
 	
-		Where 'files' can be a single file or an array of files.
-		Each file can be either:
-			string - the path to the JS/CSS file, relative to the html page.  eg 'Assets/myscripts.js'
-			object - the options that are passed into the script/link tag.  eg {src:'Assets/myscripts.js', events:{load: myFunc}}
-		When passed as js:files the files are assumed to be scripts, no matter what the file extension.
-		When passed as mixed:files, the filetypes are determined dynamically.
-		
-		eg: load({mixed:['myfile.css', 'myfile.js', {href:'myfile.php'}]});
-			Will assume the first file is CSS, the latter are js;
-			The first two based on the file extension, the last as links do not have a 'src' attribute.
-	
-	If a file is called multiple times, it will only be attached once. 
-	However the onLoad and onComplete function will run. 
-	
-	Although load() can be called more than once, the latter onComplete & Paths of the latter calls will obliterate the onComplete 
-	of the first two
+	eg - load({mixed:['myfile.css', 'myfile.js', {href:'myfile.php'}]});
+	is the same as - load(['myfile.css', 'myfile.js', {href:'myfile.php'}]);
+		Will assume the first file is CSS, the latter are js;
+		The first two based on the file extension, the last as links do not have a 'src' attribute.
+
+If a file is called multiple times, the onLoad and onComplete will run after it is attached. It will only be attached once. 
 	
 */
 var AssetLoader = new Class({
-	once: function(){
+	Implements: Options
+	, options: {
+		path: ''
+		, jspath: ''
+		, csspath: ''
+		, onComplete: ''
+		, nochain: false
+	}
+	, initialize: function(options, files){
+		if (!AssetLoader.scripts) this.once();
+		this.setOptions(options);
+		if (files) this.load(files);
+		}
+	, once: function(){
 		var head = $(document.head);
 		AssetLoader.scripts =
 			head
@@ -865,10 +888,6 @@ var AssetLoader = new Class({
 				.getElements('link')
 				.map(function(el){return el.get('href')});
 		AssetLoader.loading = {};
-		}
-	, initialize: function(files){
-		if (!AssetLoader.scripts) this.once();
-		this.load(files);
 		}
 	, load: function(files){
 		var self = this;	
@@ -881,7 +900,7 @@ var AssetLoader = new Class({
 		}
 		this.nochain = files.nochain;
 		this.onComplete = files.onComplete;
-		this.JSPath = (files.Path || '') + (files.JSPath || '');
+		this.JSPath = this.options.path + this.options.jspath;
 		
 		if (files.js){
 			self.JS = Array.from(files.js)
@@ -892,7 +911,7 @@ var AssetLoader = new Class({
 			}
 		if (files.css){
 			Array.from(files.css).each(function(file){
-				file = (files.Path || '') + (files.CSSPath || '') + file.href || file;
+				file = this.options.path + this.options.csspath + file.href || file;
 				if (!AssetLoader.styles.contains(file)) Asset.css(file /*, {onload: }*/);
 				});
 			}
@@ -913,12 +932,12 @@ var AssetLoader = new Class({
 			loaded();
 			this.JS.length
 				? this.loadJS()
-				: this.onComplete();
+				: this.options.onComplete();
 			return;
 		};
 		if (AssetLoader.loading[file.src]){
 			AssetLoader.loading[file.src].push(loaded);
-			if (!this.JS.length) AssetLoader.loading[file.src].push(self.onComplete);
+			if (!this.JS.length) AssetLoader.loading[file.src].push(self.options.onComplete);
 			return;
 		};
 		AssetLoader.loading[file.src] = [];
@@ -938,7 +957,7 @@ var AssetLoader = new Class({
 						AssetLoader.scripts.push(file.src);
 						self.JS.length
 							? self.loadJS()
-							: self.onComplete();
+							: self.options.onComplete();
 						}
 					, readystatechange: function(){
 						if ('loaded,complete'.contains(this.readyState)) loaded.call(this);
