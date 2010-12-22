@@ -396,120 +396,7 @@ MooRTE.Utilities = {
 			, js: 'StickyWinModalUI.js'
 			, onComplete: function(){ console.log('done2') }
 		});
-		
-		/*
-		if (MooRTE.Utilities.assetLoader.busy)
-			return MooRTE.Utilities.assetLoader.delay(750, this, args);
-		
-		var head = $(document.head)
-		  , hrefs = head
-					.getElements('link')
-					.map(function(el){return el.get('href')})
-		  , srcs = head
-					.getElements('script[src]')
-					.map(function(el){return el.get('src')})
-		  , scripts = Array.from(args.scripts)
-						.filter(function(script){return !srcs.contains(script)});
-		
-		if (!scripts.length || window[args['class']]) return args.onComplete(); 
-		
-		MooRTE.Utilities.assetLoader.busy = true;
-		var loaded = function(){
-			  //me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-			  MooRTE.Utilities.assetLoader.busy = false;
-			  args.onComplete();
-		  }
-		  , aborted = function(){
-			  MooRTE.Utilities.assetLoader.busy = false;
-		  };
-			
-		if (args.styles) Array.from(args.styles).each(function(file){
-			file = MooRTE.path + file;
-			if (!hrefs.contains(file)) Asset.css(file );//, {onLoad: }
-		});
-		
-		if (scripts){
-			var last = args.scripts.length, count = 0;
-			Array.from(args.scripts).each(function(file){
-				file = MooRTE.path + file;
-				++count == last && args.onComplete
-					?  Asset.javascript(file, {onload:loaded, onabort:aborted}) 
-					: Asset.javascript(file);
-			});
-		};
-		*/
-		/*
-		console.log(args, scripts, args.styles);
-		
-		if (args.scripts){
-			var last = args.scripts.length, count = 0;
-			$splat(args.scripts).each(function(file){
-				++count == last && args.onComplete ?  Asset.javascript(path+file, {onload:loaded, onabort:aborted}) : Asset.javascript(path+file);
-			});
-		};
-		*/
-		 //if (!scripts.length || (args['class'] && window[args['class']])) return args.onComplete(); 
-		 //, path = MooRTE.Path
-		  //, me = args.me // + (args.folder || '')
-		/*
-		  , path = MooRTE.Path.slice(0,-1)
-		  , path = path.slice(0, path.lastIndexOf('/')+1)
-		  , path = MooRTE.pluginpath || path
-		  */
-		//if(args.me) Hash.erase(MooRTE.Elements[args.me], 'onLoad');
-		
-		
-		
-		  
-		
-		
-		
-		
-		
-		
-		/* new Loader({scripts:$splat(path+js), onComplete:onload, styles:$splat(path+css)});
-		   $splat(js).each(function(file){ Asset.javascript(path+file,{'onload':onload.bind(self)}	);})//+'?a='+Math.random()//(file==$splat(js).getLast() && onload ? onload : $empty)});	//,{ onload:(onload||$empty) }Array.getLast(js)		
-		*/
 	},
-	
-	/*
-		try{ Depender }catch(e){ var Not = 1 };
-		if (Not) return; //if (!Depender){ var Depender; return;}
-		
-		if (!this.assetsLoaded){
-			Depender.setOptions({
-				loadedSources: ['core'],
-				onRequire: function(args){
-					var self = args.self, size = self.getSize();
-					if (self.getStyle('position') == 'static') self.setStyle('position','relative');
-					self.grabTop(
-						new Element('img',{
-							'class': 'spinWait',
-							'styles': {'width':size.x, 'height':size.y},
-							src:'http://github.com/mootools/mootools-more/raw/master/Styles/Interface/Spinner/spinner.gif'
-						})
-					);
-				},
-				onRequirementLoaded: function(load, args){
-					args.self.getElement('.spinWait').destroy();
-				}
-			}).include(MooRTE.Path);
-			this.assetsLoaded = true;
-		}
-		return function(arg){
-			Depender.require({
-				self: arg.self,
-				scripts: arg.scripts,
-				callback: arg.onComplete
-			});
-			
-			var hrefs = $$('head')[0].getElements('link').map(function(el){return el.get('href')});
-			if (arg.styles) $splat(arg.styles).each(function(file){
-				//if (!hrefs.contains(MooRTE.Path + file)) Asset.css(path + file);
-			});
-		}
-		
-	}(),*/
 	
 	clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
@@ -903,6 +790,69 @@ MooRTE.Elements = {
    , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 };
 
+/*
+---
+description: Lazy Loader for CSS and JavaScript files.
+
+copyright:
+- December 2010 Sam Goody
+
+license: OSL v3.0 (http://www.opensource.org/licenses/osl-3.0.php)
+
+authors:
+- Sam Goody <siteroller - |at| - gmail>
+
+requires:
+- core
+
+provides: [AssetLoader, AssetLoader.load, AssetLoader.Path, AssetLoader.loaded]
+
+credits:
+- Unhappy with "More::Assets", Depender, and other attempts I've seen.
+- This was done to fill MooRTE needs; expect it to be buggy and incomplete, with odd design decisions.
+...
+*/
+/*
+Usage:
+- var loader = new AssetLoader('scripts.js') // Loads in one script or css file
+- var loader = new AssetLoader().load('script.js');
+- var loader = new AssetLoader().load({
+					JSPath: 'scripts/'
+					, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+					, js: [{src:'StickyWinModalUI.js'}]
+					, onComplete: function(){ console.log('done3') }
+				});
+				
+				
+options:
+	Path: prepended to every file that is included by the class.
+	JSPath: prepended to every JS file, after the Path (if exists).
+	CSSPath: prepended to every JS file, after the Path (if exists).
+	
+	onComplete: Run when all scripts have loaded. Does not wait for styles to load.
+
+	js: files
+	css: files
+	mixed: files
+	
+		Where 'files' can be a single file or an array of files.
+		Each file can be either:
+			string - the path to the JS/CSS file, relative to the html page.  eg 'Assets/myscripts.js'
+			object - the options that are passed into the script/link tag.  eg {src:'Assets/myscripts.js', events:{load: myFunc}}
+		When passed as js:files the files are assumed to be scripts, no matter what the file extension.
+		When passed as mixed:files, the filetypes are determined dynamically.
+		
+		eg: load({mixed:['myfile.css', 'myfile.js', {href:'myfile.php'}]});
+			Will assume the first file is CSS, the latter are js;
+			The first two based on the file extension, the last as links do not have a 'src' attribute.
+	
+	If a file is called multiple times, it will only be attached once. 
+	However the onLoad and onComplete function will run. 
+	
+	Although load() can be called more than once, the latter onComplete & Paths of the latter calls will obliterate the onComplete 
+	of the first two
+	
+*/
 var AssetLoader = new Class({
 	once: function(){
 		var head = $(document.head);
@@ -917,8 +867,11 @@ var AssetLoader = new Class({
 		AssetLoader.loading = {};
 		}
 	, initialize: function(files){
-		var self = this;
 		if (!AssetLoader.scripts) this.once();
+		this.load(files);
+		}
+	, load: function(files){
+		var self = this;	
 		if (Type.isString(files)){
 			var split = files.split('.');
 			switch(typeOf(split[split.length])){
@@ -993,81 +946,12 @@ var AssetLoader = new Class({
 					}
 				})
 			).inject(document.head);
-		console.log(script);
+		
 		if (nochain) this.loadJS();
 	}
 });
 
-/*	// console.log(this, Array.clone(this.JS))	
-		//Array.append(AssetLoader.loading[file.src],loaded);	 return;	//return this.loadJS.bind(this).delay('750');//AssetLoader.processing.push
-//delete file[prop];
-			//delete file.events[prop];
-, chain = file.chain == undefined ? true : file.chain;
-		  
-//console.log( Array.clone(self.JS))
-			//console.log(Array.from(files.js), AssetLoader.scripts, files.Path + files.JSPath + (files.src || files), Array.from(files.js)
-			//		.filter(function(script){return !AssetLoader.scripts.contains(files.Path + files.JSPath + (files.src || files))}))script.src || script
-				//if (!file.src) file = {src:files.Path + files.JSPath + file};
-		//if (!file.events) Object.append(file,{events:{}});////  , src = file.src || file //console.log(Object.clone(file))
-		//empty
-		  //file = Type.isObject(file) ? file : {src:file, events:{}};
-		  
-		  //console.log(file, file.onLoad)
-		  // var loaded = [file.onLoad, file.onload, file.events.onLoad, file.events.onload, function(){}].pick() //empty
-		  Type.isObject(file) ? file : {}, , abort: function(){
-					//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-					aborted();
-					}, empty = function(){}aborted = file.onabort || file.events.onAbort || empty
-		['load','abort','error'].each(function(){
-			
-		})//Asset.javascript(file.src, {
-		AssetLoader.busy = false;AssetLoader.busy = false;// AssetLoader.busy = true;// if (AssetLoader.busy) return AssetLoader.loadJS.delay(750, this, files);
-		// if (!AssetLoader.JS.length) return files.onComplete(); // || window[files['class']]
-		, loadCSS: function(){
-		if (args.styles) 
-	}, load: function(files){
-		
-		
-		
-	//var scripts 
-			// = scripts
-			// AssetLoader.JS.combine(scripts);
-			//AssetLoader.loadJS(AssetLoader.JS.length);
-		//if (AssetLoader.init) AssetLoader.init = AssetLoader.init();
-		
-, JSLoaded: function(){
-		//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-		AssetLoader.busy = false;
-		args.onComplete();
-	}
-	, JSAborted: function(){
-		AssetLoader.busy = false;
-	}
-AssetLoader.JSLoaded, onabort:AssetLoader.JSAborted
-		var count = 0
-		  , last = files.scripts.length;
-		
-		AssetLoader.JS.each(function(file){
-			file = AssetLoader.path + file;
-			++count == last && args.onComplete
-				? Asset.javascript(file, {onload:AssetLoader.JSLoaded, onabort:AssetLoader.JSAborted}) 
-				: Asset.javascript(file);
-		});
-{
-onComplete: function(){}
-scripts = 'myscript.js'
-scripts = ['myscript.js']
-scripts = {href:'myscript.js', onLoad:function(){} }}
-}
 
-new AssetLoader({
-	  onComplete: function(){ console.log('done') }
-	, css: ['file', {href:'file', onload:function(){ loaded }}]
-	, js: ['script.js', {src:'file.js', onload:function(){}}, 'anotherfile.js']
-	, JSPath: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts'
-	, CSSPath: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-	, chain: true
-})*/
 window.addEvent('domready', function(){
 	var mike = new AssetLoader({
 		JSPath: 'scripts/'
