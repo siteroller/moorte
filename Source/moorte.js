@@ -891,13 +891,7 @@ var AssetLoader = new Class({
 		}
 	, load: function(files){
 		var self = this;	
-		if (Type.isString(files)){
-			var split = files.split('.');
-			switch(typeOf(split[split.length])){
-				case 'JS': case 'js': files = {js:[files]}
-				case 'CSS': case 'css': files = {css:[files]}
-			}
-		}
+		
 		this.nochain = files.nochain;
 		this.onComplete = files.onComplete;
 		this.JSPath = this.options.path + this.options.jspath;
@@ -916,6 +910,18 @@ var AssetLoader = new Class({
 				});
 			}
 		}
+	, mixed: function(files){
+		var obj = {};
+		
+		if (Type.isString(files)){
+			//return 
+			var split = files.split('.');
+			switch(typeOf(split[split.length])){
+				case 'JS': case 'js': files = {js:[files]}
+				case 'CSS': case 'css': files = {css:[files]}
+			}
+		}
+	}
 	, loadJS: function(){
 		var self = this
 		  , file = this.JS.shift() || {src:1,loaded:1}
