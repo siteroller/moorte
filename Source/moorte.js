@@ -390,7 +390,15 @@ MooRTE.Utilities = {
 	},
 	
 	assetLoader: function(args){
-		if (MooRTE.Utilities.assetLoader.busy) 
+		new AssetLoader({
+			JSPath: 'scripts/'
+			, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+			, js: 'StickyWinModalUI.js'
+			, onComplete: function(){ console.log('done2') }
+		});
+		
+		/*
+		if (MooRTE.Utilities.assetLoader.busy)
 			return MooRTE.Utilities.assetLoader.delay(750, this, args);
 		
 		var head = $(document.head)
@@ -417,7 +425,7 @@ MooRTE.Utilities = {
 			
 		if (args.styles) Array.from(args.styles).each(function(file){
 			file = MooRTE.path + file;
-			if (!hrefs.contains(file)) Asset.css(file /*, {onLoad: }*/);
+			if (!hrefs.contains(file)) Asset.css(file );//, {onLoad: }
 		});
 		
 		if (scripts){
@@ -429,6 +437,7 @@ MooRTE.Utilities = {
 					: Asset.javascript(file);
 			});
 		};
+		*/
 		/*
 		console.log(args, scripts, args.styles);
 		
@@ -893,3 +902,186 @@ MooRTE.Elements = {
    // Deprecated
    , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 };
+
+var AssetLoader = new Class({
+	once: function(){
+		var head = $(document.head);
+		AssetLoader.scripts =
+			head
+				.getElements('script[src]')
+				.map(function(el){return el.get('src')});
+		AssetLoader.styles =
+			head
+				.getElements('link')
+				.map(function(el){return el.get('href')});
+		AssetLoader.loading = {};
+		}
+	, initialize: function(files){
+		var self = this;
+		if (!AssetLoader.scripts) this.once();
+		if (Type.isString(files)){
+			var split = files.split('.');
+			switch(typeOf(split[split.length])){
+				case 'JS': case 'js': files = {js:[files]}
+				case 'CSS': case 'css': files = {css:[files]}
+			}
+		}
+		this.nochain = files.nochain;
+		this.onComplete = files.onComplete;
+		this.JSPath = (files.Path || '') + (files.JSPath || '');
+		
+		if (files.js){
+			self.JS = Array.from(files.js)
+						.filter(function(script){
+							return !AssetLoader.scripts.contains(files.Path + files.JSPath + (script.src || script))
+							})
+			this.loadJS();
+			}
+		if (files.css){
+			Array.from(files.css).each(function(file){
+				file = (files.Path || '') + (files.CSSPath || '') + file.href || file;
+				if (!AssetLoader.styles.contains(file)) Asset.css(file /*, {onload: }*/);
+				});
+			}
+		}
+	, loadJS: function(){
+		var self = this
+		  , file = this.JS.shift() || {src:1,loaded:1}
+		  , nochain = this.nochain || file.nochain || false;
+		
+		file = Object.merge(
+			  {events:{}}
+			, file.src ? file : {}
+			, {src:this.JSPath + (file.src || file)}
+			);
+		
+		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
+		if (file.loaded || AssetLoader.scripts.contains(file.src)){
+			loaded();
+			this.JS.length
+				? this.loadJS()
+				: this.onComplete();
+			return;
+		};
+		if (AssetLoader.loading[file.src]){
+			AssetLoader.loading[file.src].push(loaded);
+			if (!this.JS.length) AssetLoader.loading[file.src].push(self.onComplete);
+			return;
+		};
+		AssetLoader.loading[file.src] = [];
+		
+		['onLoad','onload','chain'].each(function(prop){
+			delete file.events[prop] || file[prop];
+		});
+		
+		var script = new Element('script'
+			, Object.merge(file, {
+				type: 'text/javascript'
+				, events: {
+					load: function(){
+						//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+						loaded();
+						AssetLoader.loading[file.src].each(function(func){ func(); });
+						AssetLoader.scripts.push(file.src);
+						self.JS.length
+							? self.loadJS()
+							: self.onComplete();
+						}
+					, readystatechange: function(){
+						if ('loaded,complete'.contains(this.readyState)) loaded.call(this);
+						}
+					}
+				})
+			).inject(document.head);
+		console.log(script);
+		if (nochain) this.loadJS();
+	}
+});
+
+/*	// console.log(this, Array.clone(this.JS))	
+		//Array.append(AssetLoader.loading[file.src],loaded);	 return;	//return this.loadJS.bind(this).delay('750');//AssetLoader.processing.push
+//delete file[prop];
+			//delete file.events[prop];
+, chain = file.chain == undefined ? true : file.chain;
+		  
+//console.log( Array.clone(self.JS))
+			//console.log(Array.from(files.js), AssetLoader.scripts, files.Path + files.JSPath + (files.src || files), Array.from(files.js)
+			//		.filter(function(script){return !AssetLoader.scripts.contains(files.Path + files.JSPath + (files.src || files))}))script.src || script
+				//if (!file.src) file = {src:files.Path + files.JSPath + file};
+		//if (!file.events) Object.append(file,{events:{}});////  , src = file.src || file //console.log(Object.clone(file))
+		//empty
+		  //file = Type.isObject(file) ? file : {src:file, events:{}};
+		  
+		  //console.log(file, file.onLoad)
+		  // var loaded = [file.onLoad, file.onload, file.events.onLoad, file.events.onload, function(){}].pick() //empty
+		  Type.isObject(file) ? file : {}, , abort: function(){
+					//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+					aborted();
+					}, empty = function(){}aborted = file.onabort || file.events.onAbort || empty
+		['load','abort','error'].each(function(){
+			
+		})//Asset.javascript(file.src, {
+		AssetLoader.busy = false;AssetLoader.busy = false;// AssetLoader.busy = true;// if (AssetLoader.busy) return AssetLoader.loadJS.delay(750, this, files);
+		// if (!AssetLoader.JS.length) return files.onComplete(); // || window[files['class']]
+		, loadCSS: function(){
+		if (args.styles) 
+	}, load: function(files){
+		
+		
+		
+	//var scripts 
+			// = scripts
+			// AssetLoader.JS.combine(scripts);
+			//AssetLoader.loadJS(AssetLoader.JS.length);
+		//if (AssetLoader.init) AssetLoader.init = AssetLoader.init();
+		
+, JSLoaded: function(){
+		//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+		AssetLoader.busy = false;
+		args.onComplete();
+	}
+	, JSAborted: function(){
+		AssetLoader.busy = false;
+	}
+AssetLoader.JSLoaded, onabort:AssetLoader.JSAborted
+		var count = 0
+		  , last = files.scripts.length;
+		
+		AssetLoader.JS.each(function(file){
+			file = AssetLoader.path + file;
+			++count == last && args.onComplete
+				? Asset.javascript(file, {onload:AssetLoader.JSLoaded, onabort:AssetLoader.JSAborted}) 
+				: Asset.javascript(file);
+		});
+{
+onComplete: function(){}
+scripts = 'myscript.js'
+scripts = ['myscript.js']
+scripts = {href:'myscript.js', onLoad:function(){} }}
+}
+
+new AssetLoader({
+	  onComplete: function(){ console.log('done') }
+	, css: ['file', {href:'file', onload:function(){ loaded }}]
+	, js: ['script.js', {src:'file.js', onload:function(){}}, 'anotherfile.js']
+	, JSPath: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts'
+	, CSSPath: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+	, chain: true
+})*/
+window.addEvent('domready', function(){
+	var mike = new AssetLoader({
+		JSPath: 'scripts/'
+		, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+		, js: ['StickyWinModalUI.js']
+		, onComplete: function(){ console.log('done') }
+	});
+	var mike2 = function(){
+		new AssetLoader({
+			JSPath: 'scripts/'
+			, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+			, js: [{src:'StickyWinModalUI.js'}]
+			, onComplete: function(){ console.log('done3') }
+		});
+	}.delay('1000');
+	
+})
