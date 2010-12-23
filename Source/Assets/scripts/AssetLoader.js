@@ -60,10 +60,11 @@ options[mixed]
 	Each file can be either:
 		string - the path to the JS/CSS file, relative to the html page.  eg 'Assets/myscripts.js'
 		object - the options that are passed into the script/link tag.  eg {src:'Assets/myscripts.js', events:{load: myFunc}}
-			When an object, each of the Class Options can be overridden for that file.  eg {src:'Assets/myscripts.js', path:''}
-				
+			Each of the Class Options can be overridden within the file object.  eg {src:'Assets/myscripts.js', path:''}
+			
 	When passed as js:files the files are assumed to be scripts, no matter what the file extension.
-	When passed as mixed:files, the filetypes are determined dynamically.
+	When passed as mixed:files, the filetypes are determined dynamically. 
+	If unable to determine type, file is added to the AssetLoader.fails array.
 	
 	eg - load({mixed:['myfile.css', 'myfile.js', {href:'myfile.php'}]});
 	is the same as - load(['myfile.css', 'myfile.js', {href:'myfile.php'}]);
@@ -91,10 +92,9 @@ var AssetLoader = new Class({
 		, jspath: ''
 		, csspath: ''
 		, onComplete: ''
-		, chain: false
+		, chain: true
 	}
 	, initialize: function(options, files){
-		//log('Asset Loader Class initialized;', options, files);
 		if (!AssetLoader.scripts) this.once();
 		this.setOptions(options);
 		if (files) this.load(files);
@@ -103,11 +103,12 @@ var AssetLoader = new Class({
 		if (files.src || files.href || !Type.isObject(files)) files = this.mixed(files);
 		else if (files.mixed) Object.merge(files,this.mixed(files.mixed));
 		
-		if (files.js){
+		if (files.js && files.js.length){
 			this.JS = Array.from(files.js);
 			this.loadJS();
 			}
-		if (files.css) this.loadCSS(files.css);
+		if (files.css && files.css.length) this.loadCSS(files.css);
+		if (files.fail) AssetLoader.fails.append(files.no)
 		}
 	, once: function(){
 		var head = $(document.head);
@@ -119,22 +120,23 @@ var AssetLoader = new Class({
 			head
 				.getElements('link')
 				.map(function(el){return el.get('href')});
+		AssetLoader.fails = [];
 		AssetLoader.loading = {};
 		}.protect()
 	, mixed: function(files){
-		var obj = {js:[],css:[]};
+		var obj = {js:[],css:[],fail:[]};
 		Array.from(files).each(function(file){
-			/*if (file.src)obj.js.push(file);
-			else if (file.href)obj.css.push(file);
-			else obj[file.match(/(j|cs)s$/i)[0]].push(file);*/
-			obj[file.src ? 'js' : file.href ? 'css' : Array.from(file && file.match(/(j|cs)s$/i) || 'js')[0]].push(file)
+			obj[ file.src ? 'js'
+			   : file.href ? 'css'
+			   : Array.from(file.match && file.match(/(j|cs)s$/i) || 'fail')[0]
+			   ].push(file);
 		});
-		
 		return obj;
 		}.protect()
 	, loadJS: function(){
+		if (!this.JS.length)return alert('howd you do that?');
 		var self = this
-		  , file = this.JS.shift() || {src:1,loaded:1}
+		  , file = this.JS.shift() || {src:1}
 		  , chain = file.chain != undefined ? file.chain : this.options.chain;
 		
 		file = Object.merge(
@@ -142,9 +144,8 @@ var AssetLoader = new Class({
 			, file.src ? file : {}
 			, {src:((file.path || '') + (file.jspath || '') || this.options.path + this.options.jspath) + (file.js || file)}
 			);
-		log('file',file);
 		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
-		if (file.loaded || AssetLoader.scripts.contains(file.src)){
+		if (AssetLoader.scripts.contains(file.src)){
 			loaded();
 			this.JS.length
 				? this.loadJS()
@@ -182,7 +183,7 @@ var AssetLoader = new Class({
 				})
 			).inject(document.head);
 		
-		if (!chain) this.loadJS();
+		if (!chain && self.JS.length) this.loadJS();
 		}.protect()
 	, loadCSS: function(files){
 		Array.from(files).each(function(file){
@@ -205,29 +206,24 @@ var AssetLoader = new Class({
 			});
 		}.protect()
 });
-
 /*
-//.filter(function(script){
-//	return !AssetLoader.scripts.contains(files.Path + files.JSPath + (script.src || script))
-//	})
-
-*/
+// Test:
 window.addEvent('domready', function(){
-	/*var mike = new AssetLoader(
-		{ JSPath: 'scripts/'
-		, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-		, onComplete: function(){ console.log('done') }
+	var mike = new AssetLoader(
+		{ jspath: 'scripts/'
+		, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+		, onComplete: function(){ log('done') }
 		}
 		, {js: ['StickyWinModalUI.js']}
 	);
-	
 	var mike2 = function(){
-		new AssetLoader({
-			JSPath: 'scripts/'
-			, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-			, js: [{src:'StickyWinModalUI.js'}]
-			, onComplete: function(){ console.log('done3') }
-		});
+		new AssetLoader(
+		{ jspath: 'scripts/'
+		, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+		, onComplete: function(){ log('done') }
+		}
+		, [{js: ['StickyWinModalUI.js']}]
+		);
 	}.delay('1000');
-	*/
 })
+*/
