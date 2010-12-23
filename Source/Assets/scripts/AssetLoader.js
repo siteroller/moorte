@@ -13,7 +13,7 @@ authors:
 requires:
 - core
 
-provides: [AssetLoader, AssetLoader.load, AssetLoader.Path, AssetLoader.loaded]
+provides: [AssetLoader, AssetLoader.load, AssetLoader.options, AssetLoader.assets]
 
 credits:
 - Unhappy with "More::Assets", Depender, and other attempts I've seen.
@@ -73,7 +73,8 @@ options[mixed]
 
 	If a file is attached multiple times, it will only be included in the page once.
 	onLoad and onComplete will run each time it is attached.
-	initLoad will only run the first time the page is attached. 
+	initLoad will only run the first time the page is attached.
+	Note that the array of loaded files [AssetLoader.assets[loading/scripts/styles/failed] is only formed once, if you attach files using another method, it will be reattached by AssetLoader.
 		eg { src:'myfile.js'
 		   , initLoad: function(){alert('File being included for the first time.')}
 		   , onLoad: function(){alert('File included. Again!')}
