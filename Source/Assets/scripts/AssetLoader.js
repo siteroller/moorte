@@ -43,14 +43,14 @@ options[object]
 	JSPath: prepended to every JS file, after the Path (if exists).
 	CSSPath: prepended to every JS file, after the Path (if exists).
 	onComplete: Run when all scripts have loaded. Does not wait for styles to load.
-	nochain: whether scripts should load simultaneusly or not
+	chain: [default true] should scripts should load simultaneusly or not
 	
 Assets.load(options)
 returns
 	true if files are attached, before the are loaded.
-options[mixed]	
+options[mixed]
 	string/array
-		files	
+		files
 	object
 		js: files
 		css: files
@@ -78,6 +78,12 @@ options[mixed]
 		   , onLoad: function(){alert('File included. Again!')}
 		   }
 */
+function log(){
+	if (log.off) return;
+	Array.clone(arguments).each(function(arg){
+		if (console) console.log(arg);
+	})
+}
 var AssetLoader = new Class({
 	Implements: Options
 	, options: {
@@ -85,9 +91,10 @@ var AssetLoader = new Class({
 		, jspath: ''
 		, csspath: ''
 		, onComplete: ''
-		, nochain: false
+		, chain: false
 	}
 	, initialize: function(options, files){
+		//log('Asset Loader Class initialized;', options, files);
 		if (!AssetLoader.scripts) this.once();
 		this.setOptions(options);
 		if (files) this.load(files);
@@ -117,23 +124,25 @@ var AssetLoader = new Class({
 	, mixed: function(files){
 		var obj = {js:[],css:[]};
 		Array.from(files).each(function(file){
-			if (file.src) obj.js.push(file);
-			else if (file.href) obj.css.push(file);
-			else obj[file.match(/(j|cs)s$/i)[0]].push()
+			/*if (file.src)obj.js.push(file);
+			else if (file.href)obj.css.push(file);
+			else obj[file.match(/(j|cs)s$/i)[0]].push(file);*/
+			obj[file.src ? 'js' : file.href ? 'css' : Array.from(file && file.match(/(j|cs)s$/i) || 'js')[0]].push(file)
 		});
+		
 		return obj;
 		}.protect()
 	, loadJS: function(){
 		var self = this
 		  , file = this.JS.shift() || {src:1,loaded:1}
-		  , nochain = this.nochain || file.nochain || false;
+		  , chain = file.chain != undefined ? file.chain : this.options.chain;
 		
 		file = Object.merge(
 			  {events:{}}
 			, file.src ? file : {}
-			, {src:this.JSPath + (file.src || file)}
+			, {src:((file.path || '') + (file.jspath || '') || this.options.path + this.options.jspath) + (file.js || file)}
 			);
-		
+		log('file',file);
 		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
 		if (file.loaded || AssetLoader.scripts.contains(file.src)){
 			loaded();
@@ -173,13 +182,13 @@ var AssetLoader = new Class({
 				})
 			).inject(document.head);
 		
-		if (nochain) this.loadJS();
+		if (!chain) this.loadJS();
 		}.protect()
 	, loadCSS: function(files){
 		Array.from(files).each(function(file){
 			if (!file.href) file = {href:file};
 			var path = ((file.path || '') + file.csspath || this.options.path + this.options.csspath) + file.href;
-			['path','csspath','jspath','nochain'].each(function(rule){delete file[rule]});
+			['path','csspath','jspath','chain'].each(function(rule){delete file[rule]});
 			
 			if (!AssetLoader.styles.contains(file.href)){
 				AssetLoader.styles.push(file.href);
@@ -204,12 +213,14 @@ var AssetLoader = new Class({
 
 */
 window.addEvent('domready', function(){
-	var mike = new AssetLoader({
-		JSPath: 'scripts/'
+	/*var mike = new AssetLoader(
+		{ JSPath: 'scripts/'
 		, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-		, js: ['StickyWinModalUI.js']
 		, onComplete: function(){ console.log('done') }
-	});
+		}
+		, {js: ['StickyWinModalUI.js']}
+	);
+	
 	var mike2 = function(){
 		new AssetLoader({
 			JSPath: 'scripts/'
@@ -218,5 +229,5 @@ window.addEvent('domready', function(){
 			, onComplete: function(){ console.log('done3') }
 		});
 	}.delay('1000');
-	
+	*/
 })
