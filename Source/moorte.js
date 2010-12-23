@@ -388,21 +388,10 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);//3rdel
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
-	
-	assetLoader: function(args){
-		new AssetLoader({
-			JSPath: 'scripts/'
-			, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-			, js: 'StickyWinModalUI.js'
-			, onComplete: function(){ console.log('done2') }
-		});
-	},
-	
 	clipStickyWin: function(caller){
+		// ToDO: create the instance of the AssetLoader, once, afterwrds, just call the load function.
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
-			MooRTE.Utilities.assetLoader({
-				self: this,
-				scripts: 'StickyWinModalUI',
+			if (window.AssetLoader) new AssetLoader({
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
 						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
@@ -410,7 +399,7 @@ MooRTE.Utilities = {
 					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
 					MooRTE.Elements.clipPop.hide();
 				}
-			});
+			}, 'StickyWinModalUI.js');
 	},
 	
 	clean: function(html, options){
@@ -638,7 +627,7 @@ MooRTE.Elements = {
 								MooRTE.Elements.linkPop.show();
 						}
 					   , onLoad: function(){
-							MooRTE.Utilities.assetLoader({
+							if (window.AssetLoader) new AssetLoader({
 								self: this
 								, scripts: 'Assets/scripts/StickyWinModalUI.js'
 								, onComplete: function(){
@@ -789,208 +778,3 @@ MooRTE.Elements = {
    // Deprecated
    , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 };
-
-/*
----
-description: Lazy Loader for CSS and JavaScript files.
-
-copyright:
-- December 2010 Sam Goody
-
-license: OSL v3.0 (http://www.opensource.org/licenses/osl-3.0.php)
-
-authors:
-- Sam Goody <siteroller - |at| - gmail>
-
-requires:
-- core
-
-provides: [AssetLoader, AssetLoader.load, AssetLoader.Path, AssetLoader.loaded]
-
-credits:
-- Unhappy with "More::Assets", Depender, and other attempts I've seen.
-- This was done to fill MooRTE needs; expect it to be buggy and incomplete, with odd design decisions.
-...
-*/
-/*
-Usage:
-- var loader = new AssetLoader('scripts.js') // Loads in one script or css file
-- var loader = new AssetLoader().load('script.js');
-- var loader = new AssetLoader({
-					JSPath: 'scripts/'
-					, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-					, onComplete: function(){ console.log('all scripts have been loaded') }
-					});
-loader.load({
-						js: [{src:'StickyWinModalUI.js'}]
-						});
-				
-				
-Usage
-AssetLoader([options]);
-returns
-	The AssetLoader Class
-options[object]
-	Path: prepended to every file that is included by the class.
-	JSPath: prepended to every JS file, after the Path (if exists).
-	CSSPath: prepended to every JS file, after the Path (if exists).
-	onComplete: Run when all scripts have loaded. Does not wait for styles to load.
-	nochain: whether scripts should load simultaneusly or not
-	
-Assets.load(options)
-returns
-	true if files are attached, before the are loaded.
-options[mixed]	
-	string/array
-		files	
-	object
-		js: files
-		css: files
-		mixed: files
-
-	Where 'files' can be a single file or an array of files.
-	Each file can be either:
-		string - the path to the JS/CSS file, relative to the html page.  eg 'Assets/myscripts.js'
-		object - the options that are passed into the script/link tag.  eg {src:'Assets/myscripts.js', events:{load: myFunc}}
-	When passed as js:files the files are assumed to be scripts, no matter what the file extension.
-	When passed as mixed:files, the filetypes are determined dynamically.
-	
-	eg - load({mixed:['myfile.css', 'myfile.js', {href:'myfile.php'}]});
-	is the same as - load(['myfile.css', 'myfile.js', {href:'myfile.php'}]);
-		Will assume the first file is CSS, the latter are js;
-		The first two based on the file extension, the last as links do not have a 'src' attribute.
-
-If a file is called multiple times, the onLoad and onComplete will run after it is attached. It will only be attached once. 
-	
-*/
-var AssetLoader = new Class({
-	Implements: Options
-	, options: {
-		path: ''
-		, jspath: ''
-		, csspath: ''
-		, onComplete: ''
-		, nochain: false
-	}
-	, initialize: function(options, files){
-		if (!AssetLoader.scripts) this.once();
-		this.setOptions(options);
-		if (files) this.load(files);
-		}
-	, once: function(){
-		var head = $(document.head);
-		AssetLoader.scripts =
-			head
-				.getElements('script[src]')
-				.map(function(el){return el.get('src')});
-		AssetLoader.styles =
-			head
-				.getElements('link')
-				.map(function(el){return el.get('href')});
-		AssetLoader.loading = {};
-		}
-	, load: function(files){
-		var self = this;	
-		
-		this.nochain = files.nochain;
-		this.onComplete = files.onComplete;
-		this.JSPath = this.options.path + this.options.jspath;
-		
-		if (files.js){
-			self.JS = Array.from(files.js)
-						.filter(function(script){
-							return !AssetLoader.scripts.contains(files.Path + files.JSPath + (script.src || script))
-							})
-			this.loadJS();
-			}
-		if (files.css){
-			Array.from(files.css).each(function(file){
-				file = this.options.path + this.options.csspath + file.href || file;
-				if (!AssetLoader.styles.contains(file)) Asset.css(file /*, {onload: }*/);
-				});
-			}
-		}
-	, mixed: function(files){
-		var obj = {};
-		
-		if (Type.isString(files)){
-			//return 
-			var split = files.split('.');
-			switch(typeOf(split[split.length])){
-				case 'JS': case 'js': files = {js:[files]}
-				case 'CSS': case 'css': files = {css:[files]}
-			}
-		}
-	}
-	, loadJS: function(){
-		var self = this
-		  , file = this.JS.shift() || {src:1,loaded:1}
-		  , nochain = this.nochain || file.nochain || false;
-		
-		file = Object.merge(
-			  {events:{}}
-			, file.src ? file : {}
-			, {src:this.JSPath + (file.src || file)}
-			);
-		
-		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
-		if (file.loaded || AssetLoader.scripts.contains(file.src)){
-			loaded();
-			this.JS.length
-				? this.loadJS()
-				: this.options.onComplete();
-			return;
-		};
-		if (AssetLoader.loading[file.src]){
-			AssetLoader.loading[file.src].push(loaded);
-			if (!this.JS.length) AssetLoader.loading[file.src].push(self.options.onComplete);
-			return;
-		};
-		AssetLoader.loading[file.src] = [];
-		
-		['onLoad','onload','chain'].each(function(prop){
-			delete file.events[prop] || file[prop];
-		});
-		
-		var script = new Element('script'
-			, Object.merge(file, {
-				type: 'text/javascript'
-				, events: {
-					load: function(){
-						//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-						loaded();
-						AssetLoader.loading[file.src].each(function(func){ func(); });
-						AssetLoader.scripts.push(file.src);
-						self.JS.length
-							? self.loadJS()
-							: self.options.onComplete();
-						}
-					, readystatechange: function(){
-						if ('loaded,complete'.contains(this.readyState)) loaded.call(this);
-						}
-					}
-				})
-			).inject(document.head);
-		
-		if (nochain) this.loadJS();
-	}
-});
-
-
-window.addEvent('domready', function(){
-	var mike = new AssetLoader({
-		JSPath: 'scripts/'
-		, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-		, js: ['StickyWinModalUI.js']
-		, onComplete: function(){ console.log('done') }
-	});
-	var mike2 = function(){
-		new AssetLoader({
-			JSPath: 'scripts/'
-			, Path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
-			, js: [{src:'StickyWinModalUI.js'}]
-			, onComplete: function(){ console.log('done3') }
-		});
-	}.delay('1000');
-	
-})
