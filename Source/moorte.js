@@ -235,9 +235,8 @@ MooRTE.Utilities = {
 		if (g) document.designMode = 'on';
 		document.execCommand(args[0], args[2]||null, args[1]||false);
 		if (g) document.designMode = 'off';
-	},
-	
-	shortcuts: function(e){
+	}
+	, shortcuts: function(e){
 		if(e.key=='enter'){ 
 			if(!Browser.ie)return;
 			e.stop();
@@ -249,9 +248,8 @@ MooRTE.Utilities = {
 			btn = MooRTE.activeBar.getElement('.rte'+shorts[e.key]);
 			btn.fireEvent('mousedown', btn);
 		};
-	},
-	
-	updateBtns: function(e){
+	}
+	, updateBtns: function(e){
 		var val, update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){
@@ -267,9 +265,8 @@ MooRTE.Utilities = {
 		update.custom.each(function(){
 			vals[2].bind(vals[1])(vals[0]);
 		});
-	},
-	
-	addElements: function(buttons, place, relative, name){
+	}
+	, addElements: function(buttons, place, relative, name){
 		if (!place) place = MooRTE.activeBar.getFirst();
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), btns = []; 
@@ -357,9 +354,8 @@ MooRTE.Utilities = {
 			e.removeClass('rteHide')
 		})
 			
-	},
-	
-	eventHandler: function(onEvent, caller, name){
+	}
+	, eventHandler: function(onEvent, caller, name){
 		// UNTESTED: Function rewritten do to removal of $unlink in v1.3  //if(!event) return;
 		// Must check if function or string is modified now that ulink is gone. Should be OK.
 		var event = MooRTE.Elements[name][onEvent];
@@ -374,9 +370,8 @@ MooRTE.Utilities = {
 					? MooRTE.Range.wrapText(event, caller)
 					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
-	},
-	
-	group: function(elements, name){
+	}
+	, group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
 		Object.each(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]'), function(el){ 
@@ -387,8 +382,8 @@ MooRTE.Utilities = {
 		this.addClass('rteSelected rteAdd'+name);
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);//3rdel
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
-	},
-	clipStickyWin: function(caller){
+	}
+	, clipStickyWin: function(caller){
 		// ToDO: create the instance of the AssetLoader, once, afterwrds, just call the load function.
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) new AssetLoader({
@@ -400,9 +395,8 @@ MooRTE.Utilities = {
 					MooRTE.Elements.clipPop.hide();
 				}
 			}, 'StickyWinModalUI.js');
-	},
-	
-	clean: function(html, options){
+	}
+	, clean: function(html, options){
 	
 		options = Object.append({
 			xhtml   : false, 
@@ -497,9 +491,8 @@ MooRTE.Utilities = {
 		} while (cleaned != html); // && ++loopStop <3
 		
 		return html.trim();
-	},
-	
-	fontsize: function(dir, size){
+	}
+	, fontsize: function(dir, size){
 		if (size == undefined) size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
 		
 		if (size == +size) size = +size + dir;
@@ -513,7 +506,6 @@ MooRTE.Utilities = {
 		}
 		MooRTE.Utilities.exec('fontsize', size);		
 	}
-	
 };
 
 Element.implement({
