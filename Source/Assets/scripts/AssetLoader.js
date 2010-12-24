@@ -135,15 +135,19 @@ var AssetLoader = new Class({
 		return obj;
 		}.protect()
 	, loadJS: function(){
-		if (!this.JS.length)return alert('howd you do that?');
+		if (!this.JS.length) return alert('err #138');
+		files = this.JS;
 		var self = this
-		  , file = this.JS.shift() || {src:1}
+		  , file = this.JS.shift()
 		  , chain = file.chain != undefined ? file.chain : this.options.chain;
 		
 		file = Object.merge(
 			  {events:{}}
 			, file.src ? file : {}
-			, {src:((file.path || '') + (file.jspath || '') || this.options.path + this.options.jspath) + (file.js || file)}
+			, { src: [file.path,files.path,this.options.path].pick() 
+				  + [file.jspath, files.jspath,this.options.jspath].pick() 
+				  + (file.src || file)
+			  }
 			);
 		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
 		if (AssetLoader.scripts.contains(file.src)){
