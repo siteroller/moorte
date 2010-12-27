@@ -20,27 +20,118 @@ credits:
 - This was done to fill MooRTE needs; expect it to be buggy and incomplete, with odd design decisions.
 ...
 */
+
 function log(){
 	if (log.off) return;
 	Array.clone(arguments).each(function(arg){
 		if (console) console.log(arg);
 	})
 }
-var AssetLoader = new Class({
-	Implements: Options
-	, options: {
-		path: ''
-		, jspath: ''
-		, csspath: ''
-		, onComplete: ''
-		, chain: true
-	}
+var AssetLoader  = 
+	{ options: 
+		{ path: ''
+		, mixed: {}
+		, javascript: {}
+		, css: { chain: false }
+		, all: { path: ''
+			   , onComplete: ''
+		       , chain: true
+		       }
+		}
+	, properties:
+		{ script: { type: 'text/javascript' }
+		, link: { rel: 'stylesheet'
+				, media: 'screen'
+				, type: 'text/css'
+				}
+		, img: {}
+		}
+	, load: function(files, options, type){
+		files = Array.from(files)
+		if (!files.length) return false; //alert('err: No Files Passed');
+		
+		var self = AssetLoader
+		  , file = files.shift();
+		
+		options = Object.merge({}, self.options.all, self.options[type], options);
+		file = Object.merge({events:{}}, Type.isObject(file) ? file : {});
+		
+		var chain = [file.chain, options.chain].pick()
+		  , loaded = file.onload || file.onLoad || file.events.onLoad || function(){}
+		  , path = file[type == 'link' ? 'href' : 'src'] = self.path + (file.path || options.path) + (file.src || file.href); // (file.src || file.href)
+		
+		if (AssetLoader.loaded[path]){
+			loaded.bind(AssetLoader.loaded[path])();
+			files.length
+				? self.load(files, options, type)
+				: options.onComplete();
+			return; // ToDo: Should return an object
+		};
+		if (AssetLoader.loading[path]){
+			AssetLoader.loading[path].push(loaded);
+			if (!files.length) AssetLoader.page.loading[path].push(options.onComplete);
+			return; // ToDo: Should return an object
+		};
+		AssetLoader.loading[path] = [];
+		
+		['onLoad','onload','chain','path'].each(function(prop){
+			delete file.events[prop] || file[prop];
+		});
+		
+		var asset = new Element(type, Object.merge(self.properties[type], file));
+		function loadEvent(){
+			//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+			loaded().bind(asset);
+			AssetLoader.loading[path].each(func);
+			delete AssetLoader.loading[path];
+			AssetLoader.loaded.push(path);
+			if (files.length) self.load(files, options, type);
+			else {
+				options.onComplete();
+				options.onInit();
+			}
+		};
+		if (type != 'img') asset.addEvent('load', loadEvent).inject(document.head);
+		if (!chain && self.JS.length) this.loadJS();
+	  }
+	, loaded: {}
+	, loading: {}
+	, build: function(){
+		$$('script[src]').each(function(el){AssetLoader[el.get('src')] = el});
+		$$('link').each(function(el){AssetLoader[el.get('href')] = el});
+		return function(){};
+	  }
+	, sort: function(files){
+		var obj = {js:[],css:[],fail:[]};
+		Array.from(files).each(function(file){
+			obj[ file.src ? 'js'
+			   : file.href ? 'css'
+			   : Array.from(file.match && file.match(/(j|cs)s$/i) || 'fail')[0]
+			   ].push(file);
+		});
+		return obj;
+	  }
+	};
+
+Object.each({javascript:'script', css:'link', image:'img', images:'img'}, function(val, key){
+	AssetLoader[key] = function(file, options){
+		AssetLoader.load(file, options, val);
+	};
+});
+window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});
+var Asset = AssetLoader;
+/*
+, javascript: function(files, options){
+		var o = AssetLoader.options;
+		//if (files.length) 
+		AssetLoader.loadJS(files, Object.merge({}, o.all, o.javascript, options));
+	  }
 	, initialize: function(options, files){
 		if (!AssetLoader.scripts) this.once();
 		this.setOptions(options);
 		if (files) this.load(files);
-		}
-	, load: function(files){
+	  }
+, load: function(files){
 		if (files.src || files.href || !Type.isObject(files)) files = this.mixed(files);
 		else if (files.mixed) Object.merge(files,this.mixed(files.mixed));
 		
@@ -50,87 +141,8 @@ var AssetLoader = new Class({
 			}
 		if (files.css && files.css.length) this.loadCSS(files.css);
 		if (files.fail) AssetLoader.fails.append(files.no)
-		}
-	, once: function(){
-		var head = $(document.head);
-		AssetLoader.scripts =
-			head
-				.getElements('script[src]')
-				.map(function(el){return el.get('src')});
-		AssetLoader.styles =
-			head
-				.getElements('link')
-				.map(function(el){return el.get('href')});
-		AssetLoader.fails = [];
-		AssetLoader.loading = {};
-		}.protect()
-	, mixed: function(files){
-		var obj = {js:[],css:[],fail:[]};
-		Array.from(files).each(function(file){
-			obj[ file.src ? 'js'
-			   : file.href ? 'css'
-			   : Array.from(file.match && file.match(/(j|cs)s$/i) || 'fail')[0]
-			   ].push(file);
-		});
-		return obj;
-		}.protect()
-	, loadJS: function(){
-		if (!this.JS.length) return alert('err #138');
-		files = this.JS;
-		var self = this
-		  , file = this.JS.shift()
-		  , chain = file.chain != undefined ? file.chain : this.options.chain;
-		
-		file = Object.merge(
-			  {events:{}}
-			, file.src ? file : {}
-			, { src: [file.path,files.path,this.options.path].pick() 
-				  + [file.jspath, files.jspath,this.options.jspath].pick() 
-				  + (file.src || file)
-			  }
-			);
-		var loaded = file.onload || file.onLoad || file.events.onLoad || function(){};
-		if (AssetLoader.scripts.contains(file.src)){
-			loaded();
-			this.JS.length
-				? this.loadJS()
-				: this.options.onComplete();
-			return;
-		};
-		if (AssetLoader.loading[file.src]){
-			AssetLoader.loading[file.src].push(loaded);
-			if (!this.JS.length) AssetLoader.loading[file.src].push(self.options.onComplete);
-			return;
-		};
-		AssetLoader.loading[file.src] = [];
-		
-		['onLoad','onload','chain'].each(function(prop){
-			delete file.events[prop] || file[prop];
-		});
-		
-		var script = new Element('script'
-			, Object.merge(file, {
-				type: 'text/javascript'
-				, events: {
-					load: function(){
-						//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-						loaded();
-						AssetLoader.loading[file.src].each(function(func){ func(); });
-						AssetLoader.scripts.push(file.src);
-						self.JS.length
-							? self.loadJS()
-							: self.options.onComplete();
-						}
-					, readystatechange: function(){
-						if ('loaded,complete'.contains(this.readyState)) loaded.call(this);
-						}
-					}
-				})
-			).inject(document.head);
-		
-		if (!chain && self.JS.length) this.loadJS();
-		}.protect()
-	, loadCSS: function(files){
+	  }
+, loadCSS: function(files){
 		Array.from(files).each(function(file){
 			if (!file.href) file = {href:file};
 			var path = ((file.path || '') + file.csspath || this.options.path + this.options.csspath) + file.href;
@@ -150,8 +162,9 @@ var AssetLoader = new Class({
 				};
 			});
 		}.protect()
-});
-/*
+
+
+
 // Test:
 window.addEvent('domready', function(){
 	var mike = new AssetLoader(

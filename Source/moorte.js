@@ -619,10 +619,9 @@ MooRTE.Elements = {
 								MooRTE.Elements.linkPop.show();
 						}
 					   , onLoad: function(){
-							if (window.AssetLoader) new AssetLoader({
+							if (window.AssetLoader) new AssetLoader.javascript('StickyWinModalUI.js', {
 								self: this
-								, jspath: 'scripts/'
-								, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/'
+								, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
 								, onComplete: function(){
 									var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
 												<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
@@ -641,9 +640,8 @@ MooRTE.Elements = {
 										];
 									MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
 									MooRTE.Elements.linkPop.hide();
-								}	
-							}, 'StickyWinModalUI.js'
-							)
+								}
+							})
 					}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
    , 'Upload Photo' :{ img: 15
 					   , onLoad: function(){

@@ -4,11 +4,11 @@
  - AssetLoader.**images**( files [, options] );
  - AssetLoader.**mixed**( files [, options] );
 
-Usage is the same for all methods (see [Exceptions](#Exceptions)).
+Usage is the same for all methods (see [Exceptions](#Exceptions)). 
 Examples and documentation mostly use .css() 
    
 ###Returns:
-[Array] A reference to downloaded files.
+[object] Reference to downloaded files, sorted by type. eg {images: [...]}
  
 ###Usage:
     AssetLoader.css(files [, options]); 
@@ -18,14 +18,14 @@ Examples and documentation mostly use .css()
 Each file can be either: 
  
  - [string] Path to the file, relative to the html page.
- - [object] Object that would be used if creating the element using new Element('link', object).
-   - Aside from regular properties, object can include any Options plus a custom [onInit](#onInit) function.
+ - [object] "Properties object". As if using new Element('link', properties).
+   - Along with properties, object can include Options plus a custom [onInit](#onInit) function.
 
 **Options** [object] - Properties that should be applied to all files.
 
  - chain: Wait till this file is loaded before loading the next file[true], or begin loading the next file immediately [false].
  - onComplete: Function to run once all files are loaded.
- - Path: path that should be prepended to all file paths.		
+ - Path: Prepended to the file's path. AssetLoader.css('style.css',{path:'Assets/'}) loads 'Assets/style.css'	
 
 			
 ###Examples:
@@ -43,13 +43,13 @@ When both have loaded, the page will alert 'Done!'.*
 	   {'class':newStyles', onComplete: function(){ alert('Done!') }}
 	);
 	
-3: *All but styleTwo.css will have a class 'lazy'. 
-The paths of all files will begin with 'Assets/', eg. 'Assets/styleOne.js' 
-myImage.jpg will not load until styleTwo.css has loaded, as styleTwo has chain:true.*
+3: *All but styleTwo.css will have a class 'lazy'.* 
+*The paths of all files will begin with 'Assets/', eg. 'Assets/styleOne.js'* 
+*myImage.jpg will not load until styleTwo.css has loaded, as styleTwo has chain:true.*
 
 	var files = [ 
-		'styleOne.js',
-		{href:'styleOne.css'},
+		'myScript.js',
+		'styleOne.css',
 		{href:'styleTwo.css', chain:true, 'class':''},
 		'myImage.jpg'
 	];
@@ -75,13 +75,13 @@ onInit was created to allow a function that should only be run once.
  - scripts and styles are included in the page. Images are not.
 
 ###Notes:
- - This class will replace the Asset Class that is part of MoTools More, and is 100% backwards compatible. 
-    All methods can be called as Asset. Eg. Asset.css() instead of AssetLoader.css(); 
-	If you want Asset to exist as its own comment, you must comment out the last line: Asset = AssetLoader;
- - DO NOT add events using addEvent(), instead pass them in using the onLoad event.
- - If a file is passed into 'mixed' that it cannot handle, it will returned as a failed file.
- - The array of loaded files [AssetLoader.assets[loading/scripts/styles/failed] is only formed once.
-    if you attach files using another method, take care to update the object.
+ - This class will replace the Asset Class that is part of MoTools More, and is 100% backwards compatible.  
+    All methods can be called as Asset. Eg. Asset.css() instead of AssetLoader.css();  
+	If you want Asset to exist as its own, you must comment out the last line: Asset = AssetLoader;
+ - DO NOT add events using addEvent(), instead pass events in using the onLoad, etc.
+ - If a file is passed into 'mixed' that it does not recognise, it will returned as type "failed".
+ - Once the page has loaded, the array of loaded files [AssetLoader.loaded] is referenced without checking the page for changes.  
+   if you attach files using another method, take care to update the object.
 		eg { src:'myfile.js'
 		   , onInit: function(){alert('File being included for the first time.')}
 		   , onLoad: function(){alert('File included. Again!')}
