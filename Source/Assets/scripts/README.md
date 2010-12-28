@@ -5,14 +5,15 @@ MooTools More includes a class call Assets.
 Assets is wonderful if you need to lazy load one file.  
 
 But it misses on lazy loading the way the world needs:
+
  - Multiple assets (eg. 2+ javascript files).
  - Multiple asset types (2 js, 2 css)
  - sequential or simultaneous downloads (wait till one loads before continuing).
  - per file properties and options
  - Handling for when a file is re-attached
 
-So we decided to fill the gap with the AssetLoader class: the better Assets class.
-Syntax is the same, and it's 100% backwards compatible with Assets.
+So we decided to fill the gap with the AssetLoader class: the better Assets class.  
+Syntax is the same, and it's 100% backwards compatible with Assets.  
 In fact, uncomment the last line and it will replace any calls to Asset you may already have.
 
 	var Assets = AssetLoader;
@@ -109,3 +110,16 @@ onInit was created to allow a function that should only be run once.
 		   , onInit: function(){alert('File being included for the first time.')}
 		   , onLoad: function(){alert('File included. Again!')}
 		   }
+		   
+## Community
+
+Issues? Ideas? Wanna Join? [We need help!]
+
+ - The AssetLoader was created as part of [MooRTE](https://github.com/siteroller/moorte).  
+ Open threads regarding the color picker on the [MooRTE Google Group](http://groups.google.com/group/moorte).
+ - Or email us:
+
+        var name = "siteroller";
+        var company = "gmail.com";
+        var email = name + '@' + company;
+        // There's gotta be a better way to keep spammers at bay, no?!
