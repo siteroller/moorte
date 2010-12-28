@@ -1,9 +1,32 @@
-###Methods:
+#AssetLoader
+The assets lazy loader.  
+
+MooTools More includes a class call Assets.
+Assets is wonderful if you need to lazy load one file.  
+
+But it misses on lazy loading the way the world needs:
+ - Multiple assets (eg. 2+ javascript files).
+ - Multiple asset types (2 js, 2 css)
+ - sequential or simultaneous downloads (wait till one loads before continuing).
+ - per file properties and options
+ - Handling for when a file is re-attached
+
+So we decided to fill the gap with the AssetLoader class: the better Assets class.
+Syntax is the same, and it's 100% backwards compatible with Assets.
+In fact, uncomment the last line and it will replace any calls to Asset you may already have.
+
+	var Assets = AssetLoader;
+
+AssetLoader does NOT require Assets.js.
+
+##Methods:
  - AssetLoader.**javascript**( files [, options] );
  - AssetLoader.**css**( files [, options] );
  - AssetLoader.**images**( files [, options] );
  - AssetLoader.**mixed**( files [, options] );
 
+
+##HowTo:
 Usage is the same for all methods (see [Exceptions](#Exceptions)). 
 Examples and documentation mostly use .css() 
    

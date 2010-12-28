@@ -1,14 +1,9 @@
 /*
 ---
 description: Lazy Loader for CSS and JavaScript files.
-
-copyright:
-- December 2010 Sam Goody
-
+copyright: December 2010 Sam Goody
 license: OSL v3.0 (http://www.opensource.org/licenses/osl-3.0.php)
-
-authors:
-- Sam Goody <siteroller - |at| - gmail>
+authors: Sam Goody <siteroller - |at| - gmail>
 
 requires:
 - core
@@ -19,10 +14,6 @@ provides: [ AssetLoader.javascript
 		  , AssetLoader.mixed  
 		  ,	AssetLoader.path
 		  ]
-
-credits:
-- Unhappy with "More::Assets", Depender, and other attempts I've seen.
-- This was done to fill MooRTE needs; expect it to be buggy and incomplete, with odd design decisions.
 ...
 */
 
