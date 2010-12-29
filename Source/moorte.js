@@ -493,7 +493,9 @@ MooRTE.Utilities = {
 		return html.trim();
 	}
 	, fontsize: function(dir, size){
-		if (size == undefined) size = window.document.queryCommandValue('fontsize') || MooRTE.Range.parent().getStyle('font-size')
+		if (size == undefined)
+			size = window.document.queryCommandValue('fontsize') 
+				|| MooRTE.Range.parent().getStyle('font-size');
 		
 		if (size == +size) size = +size + dir;
 		else {
@@ -619,7 +621,7 @@ MooRTE.Elements = {
 								MooRTE.Elements.linkPop.show();
 						}
 					   , onLoad: function(){
-							if (window.AssetLoader) new AssetLoader.javascript('StickyWinModalUI.js', {
+							if (window.Assets) new Assets.javascript('StickyWinModalUI.js', {
 								self: this
 								, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
 								, onComplete: function(){

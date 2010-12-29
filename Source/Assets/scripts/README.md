@@ -1,10 +1,11 @@
 #AssetLoader
-The assets lazy loader.  
+Assets lazy loader.  
 
+###Background
 MooTools More includes a class call Assets.
 Assets is wonderful if you need to lazy load one file.  
 
-But it misses on lazy loading the way the world needs:
+But it misses many essentials:
 
  - Multiple assets (eg. 2+ javascript files).
  - Multiple asset types (2 js, 2 css)
@@ -12,7 +13,7 @@ But it misses on lazy loading the way the world needs:
  - per file properties and options
  - Handling for when a file is re-attached
 
-So we decided to fill the gap with the AssetLoader class: the better Assets class.  
+So we decided to fill the gap with AssetLoader: the *better* Assets class.  
 Syntax is the same, and it's 100% backwards compatible with Assets.  
 In fact, uncomment the last line and it will replace any calls to Asset you may already have.
 
@@ -116,7 +117,7 @@ onInit was created to allow a function that should only be run once.
 Issues? Ideas? Wanna Join? [We need help!]
 
  - The AssetLoader was created as part of [MooRTE](https://github.com/siteroller/moorte).  
- Open threads regarding the color picker on the [MooRTE Google Group](http://groups.google.com/group/moorte).
+ Open threads regarding the AssetLoader on the [MooRTE Google Group](http://groups.google.com/group/moorte).
  - Or email us:
 
         var name = "siteroller";

@@ -19,8 +19,10 @@ The basic buttons (bold, italic, etc) require mootools-core.
 
 Many other buttons buttons rely on 3rd party scripts.
 [Eg. the popup in the "hyperlink" button uses StickyWin, the "Upload Button" uses FancyUpload, etc.]
-They require Depender.js, which is used to load in each of these third-party scripts as needed.
-See the Depender docs for the correct setup of these docs. The Demo folder of the download is setup correctly. 
+They require some sort of lazy loader to load in third-party scripts as needed.
+The MooRTE download comes with our AssetLoader class; an improved version of Assets.js from MooTools more.  
+It also includes a compressed copy of many of the popular plugin scripts, each one copyright of their respective authors.
+
 
 ## How to use
 
@@ -58,10 +60,11 @@ See the Depender docs for the correct setup of these docs. The Demo folder of th
 Issues? Ideas? Wanna Join? [We need help!]
 
  - Open threads regarding the color picker on the [MooRTE Google Group](http://groups.google.com/group/moorte).
- - Watch the [GitHUB page](http://github.com/siteroller/colorpicker) for updates.
- - Leave issues on the [GitHUB Issue Tracker](http://github.com/siteroller/colorpicker/issues).
- - Check out the [Mootools Forge Page](http://mootools.net/forge/p/colorroller%20-%20mootools%20color%20picker).  
-    - As [the Forge is buggy](http://blog.siteroller.net/mootools-forge-gotchas), the info and downloads on this page are probably out of date.
+ - Watch the [GitHUB page](http://github.com/siteroller/moorte) for updates.
+ - Leave issues on the [GitHUB Issue Tracker](http://github.com/siteroller/moorte/issues).
+ - Check out the [Mootools Forge Page](http://mootools.net/forge/p/moorte).  
+    - The Forge [had some issues](http://blog.siteroller.net/mootools-forge-gotchas) that have since [been fixed](http://github.com/Guille/PluginsKit/issues#issue/4).  
+	Nonetheless, please do not rely on the forge page for up-to-date info.
  - Or email us:
 
         var name = "moorte";
@@ -71,16 +74,22 @@ Issues? Ideas? Wanna Join? [We need help!]
 		
 ## Customization:
 
-### MooRTE.Path
+### Assets.path
 
-This is the path to your sources.json file.<br>
-By default, is "js/sources.json"
+This is NOT part of MooRTE, but rather part of the lazy loading class used for third party scripts.  
+  
+The easiest way to get going with MooRTE is to include AssetLoader.js (from Assets/scripts) which will lazy load third party scripts as needed.
+You must tell AssetLoader where to find these other third party scripts!
 
-If you have your own folder structure, modify this path, or no plugins will work! 
+By default, it assumes a path of "Assets/scripts", RELATIVE TO THE WEB PAGE calling it.
+That means:
+	If the user is on a page "/public_html/mysite.com/subfolder/index.php".
+	But the folder with all of the MooRTE dependencies is at "/MooRTE/Assets/scripts"
+	You must set: Assets.path = "/MooRTE/Assets/scripts";
 
-    MooRTE.Path = 'Javascripts/2010/mootools/classes/experiments/moorte/scripts.json';
-    $('myEl').moorte();`
+Either that, or include the path in each file oir with each call, as per the directions for the AssetLoader class.
 
+BREAKING CHANGE: Older versions had a MooRTE.Path which has been deprecated.
 
 ### MooRTE.Elements
 
@@ -96,15 +105,15 @@ To create a button (some random options, all are optional)
 		})
 	});
 
-If your function relies on a 3rd party script, it should be included in the onLoad event as follows:
-'scripts' may either be a path to your script, or the class name used by Depender (if you know how to set that up).
+If you use AssetLoader.js and your function relies on a 3rd party script, it should be included in the onLoad event as follows:
+'scripts' may be a path to one or more scripts, see the AssetLoader page for details.
 	MooRTE.Elements.extend({
 		myButton:{
 			onLoad: function(){
-				MooRTE.Utilities.assetLoader({
-					scripts: 'StickyWinModalUI',
-					onComplete: function(){ alert("done") }
-				})
+				Assets(
+					scripts: 'StickyWinModalUI.js',
+					{onComplete: function(){ alert("done") }}
+				)
 			}
 		}
 	});

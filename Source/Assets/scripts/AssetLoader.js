@@ -25,72 +25,78 @@ function log(){
 }
 var AssetLoader  = 
 	{ options: 
-		{ path: ''
-		, script: { chain: true }
+		{ path:     ''
+		, script:   { chain: true }
 		, defaults: { path: ''
-			   , onComplete: function(){}
-			   , onProgress: function(){}
-			   , onInit: function(){}
-		       , chain: false
-		       }
+					, onComplete: function(){}
+					, onProgress: function(){}
+					, onInit: function(){}
+					, chain: false
+					}
 		}
 	, properties:
 		{ script: { type: 'text/javascript' }
-		, link: { rel: 'stylesheet'
-				, media: 'screen'
-				, type: 'text/css'
-				}
-		, img: {}
+		, link:   { rel: 'stylesheet'
+				  , media: 'screen'
+				  , type: 'text/css'
+				  }
+		, img:    {}
 		}
-	, load: function(files, options, type){
-		if (!files.length) return false; //alert('err: No Files Passed');
+	, load: function(files, options, type, obj){
+		AssetLoader.build();
+		if (!files.length) return alert('err: No Files Passed'); //false;
 		
 		var file = files.shift()
-		  , path = [file.path, options.path, AssetLoader.path].pick() + [file.src, file.href, file].pick(); // (file.src || file.href)
+		  , path = [file.path, options.path, AssetLoader.path].pick() + [file.src, file.href, file].pick();
 		
-		AssetLoader.build();
 		if (type == 'mixed') type = AssetLoader.type(file);
-		file = Object.merge({events:{}}, file); // If file is not an object, FF ignores it. Webkit creates it equal to undefined. Either way it is not passed to the object
+		file = Object.merge({events:{}}, file);
 		file[type == 'link' ? 'href' : 'src'] = path;
 		options = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
 		
 		var chain = [file.chain, options.chain].pick()
-		  , loaded = file.onload || file.onLoad || file.events.onLoad || function(){}
-
-		if (AssetLoader.loaded[type][path]){
-			loaded.call(AssetLoader.loaded[type][path]);
-			files.length
-				? AssetLoader.load(files, options, type)
-				: options.onComplete();
-			return; // ToDo: Should return an object
-		};
-		if (AssetLoader.loading[path]){
-			AssetLoader.loading[path].push(loaded);
-			if (!files.length) AssetLoader.loading[path].push(options.onComplete);
-			return; // ToDo: Should return an object
-		};
-		AssetLoader.loading[path] = [];
-		
+		  , loaded = file.onload || file.onLoad || file.events.load || function(){};
 		['onLoad','onload','chain','path'].each(function(prop){
 			delete file.events[prop] || file[prop];
 		});
 		
+		var exists = AssetLoader.loaded[type][path]
+		if (exists){
+			loaded.call(exists);
+			files.length
+				? AssetLoader.load(files, options, type, obj)
+				: options.onComplete();
+			obj[type].push(exists);
+			return obj;
+		};
+		exists = AssetLoader.loading[path];
+		if (exists){
+			exists.push(loaded);
+			if (!files.length) exists.push(options.onComplete);
+			return;
+		};
+		AssetLoader.loading[path] = [];
+		
 		var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
+		
 		function loadEvent(){
-			//me.setStyles({'background-image':curImg, 'background-position':curPos}); 
 			loaded.call(asset);
 			AssetLoader.loading[path].each(function(func){func()});
 			delete AssetLoader.loading[path];
 			AssetLoader.loaded[type][path] = this;
 			options.onProgress.call(this, this);
-			if (files.length) AssetLoader.load(files, options, type);
+			if (files.length) AssetLoader.load(files, options, type, obj);
 			else {
 				options.onComplete();
 				options.onInit();
 			}
 		};
-		if (type != 'img') asset.addEvent('load', loadEvent).inject(document.head);
-		if (!chain && files.length) this.load(files, options, type);
+		obj[type].push(asset);
+		type == 'img'
+			? asset.onload = loadEvent
+			: asset.addEvent('load', loadEvent).inject(document.head);
+		if (!chain && files.length) AssetLoader.load(files, options, type, obj);
+		return obj;
 	  }
 	, loaded: {}
 	, loading: {}
@@ -108,15 +114,18 @@ var AssetLoader  =
 		if (/(jpg|jpeg|bmp|gif|png)$/.test(file)) return 'img';
 		return 'fail';
 	  }
+	  , wait:function(){
+		  me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+	  }	
 	};
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
 	AssetLoader[key] = function(files, options){
-		AssetLoader.load(Array.from(files), options, val);
+		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]});
 	};
 });
 window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});
-var Asset = AssetLoader;
+var Assets = AssetLoader;
 /*
 // Test:
 window.addEvent('domready', function(){
