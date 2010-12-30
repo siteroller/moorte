@@ -50,13 +50,13 @@ var AssetLoader  =
 		  , path = [file.path, options.path, AssetLoader.path].pick() + [file.src, file.href, file].pick();
 		
 		if (type == 'mixed') type = AssetLoader.type(file);
-		file = Object.merge({events:{}}, file);
+		var opts = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
+		file = Object.merge({events:{}}, opts, file);
 		file[type == 'link' ? 'href' : 'src'] = path;
-		options = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
-		
-		var chain = [file.chain, options.chain].pick()
-		  , loaded = file.onload || file.onLoad || file.events.load || function(){};
-		['onLoad','onload','chain','path'].each(function(prop){
+				
+		var chain = file.chain
+		  , loaded = file.onload || file.onLoad || file.events.load || file.onProgress;
+		['onLoad','onload','onComplete','onProgress','chain','path'].each(function(prop){
 			delete file.events[prop] || file[prop];
 		});
 		
@@ -65,14 +65,14 @@ var AssetLoader  =
 			loaded.call(exists);
 			files.length
 				? AssetLoader.load(files, options, type, obj)
-				: options.onComplete();
+				: opts.onComplete();
 			obj[type].push(exists);
 			return obj;
 		};
 		exists = AssetLoader.loading[path];
 		if (exists){
 			exists.push(loaded);
-			if (!files.length) exists.push(options.onComplete);
+			if (!files.length) exists.push(opts.onComplete);
 			return;
 		};
 		AssetLoader.loading[path] = [];
@@ -84,11 +84,10 @@ var AssetLoader  =
 			AssetLoader.loading[path].each(function(func){func()});
 			delete AssetLoader.loading[path];
 			AssetLoader.loaded[type][path] = this;
-			options.onProgress.call(this, this);
 			if (files.length) AssetLoader.load(files, options, type, obj);
 			else {
-				options.onComplete();
-				options.onInit();
+				opts.onComplete();
+				opts.onInit();
 			}
 		};
 		obj[type].push(asset);
