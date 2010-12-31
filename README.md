@@ -18,8 +18,9 @@ Anyone who has previously downloaded MooRTE is requested to please update.
 The basic buttons (bold, italic, etc) require mootools-core.
 
 Many other buttons buttons rely on 3rd party scripts.
-[Eg. the popup in the "hyperlink" button uses StickyWin, the "Upload Button" uses FancyUpload, etc.]
-They require some sort of lazy loader to load in third-party scripts as needed.
+[Eg. the popup in the "hyperlink" button uses StickyWin, the "Upload Button" uses FancyUpload, etc.]  
+  
+They require some sort of lazy loader to load in third-party scripts as needed.  
 The MooRTE download comes with our AssetLoader class; an improved version of Assets.js from MooTools more.  
 It also includes a compressed copy of many of the popular plugin scripts, each one copyright of their respective authors.
 
@@ -78,7 +79,7 @@ Issues? Ideas? Wanna Join? [We need help!]
 
 This is NOT part of MooRTE, but rather part of the lazy loading class used for third party scripts.  
   
-The easiest way to get going with MooRTE is to include AssetLoader.js (from Assets/scripts) which will lazy load third party scripts as needed.
+The easiest way to get going with MooRTE is to include AssetLoader.js (from Assets/scripts) which will lazy load third party scripts as needed.  
 You must tell AssetLoader where to find these other third party scripts!
 
 By default, it assumes a path of "Assets/scripts", RELATIVE TO THE WEB PAGE calling it.
@@ -87,7 +88,7 @@ That means:
 	But the folder with all of the MooRTE dependencies is at "/MooRTE/Assets/scripts"
 	You must set: Assets.path = "/MooRTE/Assets/scripts";
 
-Either that, or include the path in each file oir with each call, as per the directions for the AssetLoader class.
+Either that, or include the path in each file or with each call, as per the directions for the AssetLoader class.
 
 BREAKING CHANGE: Older versions had a MooRTE.Path which has been deprecated.
 
@@ -105,7 +106,7 @@ To create a button (some random options, all are optional)
 		})
 	});
 
-If you use AssetLoader.js and your function relies on a 3rd party script, it should be included in the onLoad event as follows:
+If you use AssetLoader.js and your function relies on a 3rd party script, it should be included in the onLoad event as follows:  
 'scripts' may be a path to one or more scripts, see the AssetLoader page for details.
 	MooRTE.Elements.extend({
 		myButton:{
@@ -120,6 +121,7 @@ If you use AssetLoader.js and your function relies on a 3rd party script, it sho
 	
 	
 To define a custom toolbar:
+
 + If the toolbar must show when a button on the menu is clicked, the button should have an onClick event.
 + If the toolbar should should also show when menu button is loaded, the onLoad should reference the onClick.
 + The toolbar should be passed in as an array where the first item is 'group' and the buttons object is the second.

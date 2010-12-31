@@ -42,7 +42,7 @@ var AssetLoader  =
 				  }
 		, img:    {}
 		}
-	, load: function(files, options, type, obj){
+	, load: function(files, options, type, obj, index){
 		AssetLoader.build();
 		if (!files.length) return alert('err: No Files Passed'); //false;
 		
@@ -55,7 +55,8 @@ var AssetLoader  =
 		options = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
 		
 		var chain = [file.chain, options.chain].pick()
-		  , loaded = file.onload || file.onLoad || file.events.load || function(){};
+		  , loaded = file.onload || file.onLoad || file.events.load || options.onload
+				  || options.onLoad || (options.events && options.events.load) || options.onProgress;
 		['onLoad','onload','chain','path'].each(function(prop){
 			delete file.events[prop] || file[prop];
 		});
@@ -64,7 +65,7 @@ var AssetLoader  =
 		if (exists){
 			loaded.call(exists);
 			files.length
-				? AssetLoader.load(files, options, type, obj)
+				? AssetLoader.load(files, options, type, obj, index)
 				: options.onComplete();
 			obj[type].push(exists);
 			return obj;
@@ -78,14 +79,13 @@ var AssetLoader  =
 		AssetLoader.loading[path] = [];
 		
 		var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
-		
+
 		function loadEvent(){
-			loaded.call(asset);
+			loaded.call(asset, ++index[0], files.length, path);
 			AssetLoader.loading[path].each(function(func){func()});
 			delete AssetLoader.loading[path];
 			AssetLoader.loaded[type][path] = this;
-			options.onProgress.call(this, this);
-			if (files.length) AssetLoader.load(files, options, type, obj);
+			if (files.length) AssetLoader.load(files, options, type, obj, index);
 			else {
 				options.onComplete();
 				options.onInit();
@@ -95,7 +95,7 @@ var AssetLoader  =
 		type == 'img'
 			? asset.onload = loadEvent
 			: asset.addEvent('load', loadEvent).inject(document.head);
-		if (!chain && files.length) AssetLoader.load(files, options, type, obj);
+		if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
 		return obj;
 	  }
 	, loaded: {}
@@ -121,7 +121,7 @@ var AssetLoader  =
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
 	AssetLoader[key] = function(files, options){
-		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]});
+		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]}, [0]);
 	};
 });
 window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});

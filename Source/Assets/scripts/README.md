@@ -48,9 +48,9 @@ Each file can be either:
 
 **Options** [object] - Properties that should be applied to all files.
 
- - chain: Wait till this file is loaded before loading the next file[true], or begin loading the next file immediately [false].
- - onComplete: Function to run once all files are loaded.
- - Path: Prepended to the file's path. AssetLoader.css('style.css',{path:'Assets/'}) loads 'Assets/style.css'	
+ - chain [boolean]: Wait till this file is loaded before loading the next file[true], or begin loading the next file immediately [false].
+ - onComplete [function] : Function to run once all files are loaded.
+ - Path [string]: Prepended to the file's path. AssetLoader.css('style.css',{path:'Assets/'}) loads 'Assets/style.css'	
 
 			
 ###Examples:
@@ -100,11 +100,12 @@ onInit was created to allow a function that should only be run once.
  - scripts and styles are included in the page. Images are not.
 
 ###Notes:
- - This class will replace the Asset Class that is part of MoTools More, and is 100% backwards compatible.  
-    All methods can be called as Asset. Eg. Asset.css() instead of AssetLoader.css();  
-	If you want Asset to exist as its own, you must comment out the last line: Asset = AssetLoader;
+ - This class can replace the Asset Class that is part of MoTools More, and is 100% backwards compatible.  
+   Comment out the last line: Asset = AssetLoader.  Methods can then be called as Assets.css() instead of AssetLoader.css();  
  - DO NOT add events using addEvent(), instead pass events in using the onLoad, etc.
  - If a file is passed into 'mixed' that it does not recognise, it will returned as type "failed".
+ - More-Assets has an onProgress option. This is functionaly the same as using onLoad in the options. Either syntax should work.
+   More-Assets has a method Assets.image() that accepts only one image. This is treaded by AssetLoader the same as AssetLoader.images(); 
  - Once the page has loaded, the array of loaded files [AssetLoader.loaded] is referenced without checking the page for changes.  
    if you attach files using another method, take care to update the object.
 		eg { src:'myfile.js'
