@@ -17,12 +17,6 @@ provides: [ AssetLoader.javascript
 ...
 */
 
-function log(){
-	if (log.off) return;
-	Array.clone(arguments).each(function(arg){
-		if (console) console.log(arg);
-	})
-}
 var AssetLoader  = 
 	{ options: 
 		{ path:     ''
@@ -42,7 +36,8 @@ var AssetLoader  =
 				  }
 		, img:    {}
 		}
-	, load: function(files, options, type, obj, index){
+	, load: function(files, options, type, obj, listCount, readyCount){
+		listCount++;
 		AssetLoader.build();
 		if (!files.length) return alert('err: No Files Passed'); //false;
 		
@@ -65,7 +60,7 @@ var AssetLoader  =
 		
 		var exists = AssetLoader.loaded[type][path];
 		if (exists){
-			loaded.call(exists);
+			loaded.call(exists, ++readyCount[0], listCount, path);
 			files.length
 				? AssetLoader.load(files, options, type, obj, index)
 				: opts.onComplete();
@@ -83,7 +78,7 @@ var AssetLoader  =
 		var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
 
 		function loadEvent(){
-			loaded.call(asset, ++index[0], files.length, path);
+			loaded.call(asset, ++readyCount[0], listCount, path);
 			AssetLoader.loading[path].each(function(func){func()});
 			delete AssetLoader.loading[path];
 			AssetLoader.loaded[type][path] = this;
@@ -123,24 +118,37 @@ var AssetLoader  =
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
 	AssetLoader[key] = function(files, options){
-		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]}, [0]);
+		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]}, [0], [0]);
 	};
 });
 window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});
 var Assets = AssetLoader;
-/*
+/*/
+function log(){
+	if (log.off) return;
+	Array.clone(arguments).each(function(arg){
+		if (console) console.log(arg);
+	})
+}
+/*/
+/*/
 // Test:
 window.addEvent('domready', function(){
-	AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
+AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
+/*/
+/*/
 	var mike = new AssetLoader.mixed
 		( [{src: 'scripts/StickyWinModalUI.js'}]
 		, { onComplete: function(){ log('done first') } }
-		);
+		); 
+/*/
+/*/
 	var mike2 = function(){
 		new AssetLoader.mixed
 		( ['scripts/StickyWinModalUI.js']
-		, { onComplete: function(){ log('done later') } }
+		, { onload: function(){log('coming along now'); log(arguments); log(this)}
+		, onComplete: function(){ log('done later'); } }
 		);
 	}.delay('1000');
-})
 /*/
+// })
