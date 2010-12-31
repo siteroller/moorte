@@ -50,17 +50,20 @@ var AssetLoader  =
 		  , path = [file.path, options.path, AssetLoader.path].pick() + [file.src, file.href, file].pick();
 		
 		if (type == 'mixed') type = AssetLoader.type(file);
-		var opts = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
-		file = Object.merge({events:{}}, opts, file);
+		var opts = Object.merge(AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
+		file = Object.merge({events:{}}, file.big ? {} : file, opts);
 		file[type == 'link' ? 'href' : 'src'] = path;
 		
 		var chain = file.chain
 		  , loaded = file.onload || file.onLoad || file.events.load || file.onProgress;
-		['path','chain','onInit','onProgress','onComplete','onLoad','onload'].each(function(prop){
-			delete file.events[prop] || file[prop];
+		
+		Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
+		['onLoad','onload'].each(function(prop){
+			delete file[prop]; 
+			delete file.events[prop]; 
 		});
 		
-		var exists = AssetLoader.loaded[type][path]
+		var exists = AssetLoader.loaded[type][path];
 		if (exists){
 			loaded.call(exists);
 			files.length
