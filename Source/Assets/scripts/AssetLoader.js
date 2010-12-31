@@ -92,6 +92,10 @@ var AssetLoader  =
 		type == 'img'
 			? asset.onload = loadEvent
 			: asset.addEvent('load', loadEvent).inject(document.head);
+		if (type == 'script') asset.addEvent('readystatechange', function(){
+			if ('loaded,complete'.contains(this.readyState)) loadEvent();
+		});
+		
 		if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
 		return obj;
 	  }
@@ -99,7 +103,7 @@ var AssetLoader  =
 	, loading: {}
 	, build: function(){
 		Object.each({script:'src',link:'href',img:'src'},function(path,tag){
-			AssetLoader.loaded[tag] = {}
+			AssetLoader.loaded[tag] = {};
 			$$(tag+'['+path+']').each(function(el){AssetLoader.loaded[tag][el.get(path)] = el});
 		});
 		return function(){};
@@ -113,7 +117,7 @@ var AssetLoader  =
 	  }
 	  , wait:function(){
 		  me.setStyles({'background-image':curImg, 'background-position':curPos}); 
-	  }	
+	  }
 	};
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
