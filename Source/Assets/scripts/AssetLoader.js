@@ -37,24 +37,23 @@ var AssetLoader  =
 		, img:    {}
 		}
 	, load: function(files, options, type, obj, index){
-        var i = ++index[1];
         AssetLoader.build();
         if (!files.length) return alert('err: No Files Passed'); //false;
 		
         var file = files.shift()
-          , path = [file.path, options.path, AssetLoader.path].pick() + [file.src, file.href, file].pick();
+          , path = ([file.path, options.path, AssetLoader.path].pick() || '') + [file.src, file.href, file].pick();
 		
         if (type == 'mixed') type = AssetLoader.type(file);
         var opts = Object.merge(AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
         file = Object.merge({events:{}}, file.big ? {} : file, opts);
         file[type == 'link' ? 'href' : 'src'] = path;
-		
-        var chain = file.chain
         
-        var event = {};
+        // Remove defaults and events so that they are placed as properties of element.
+        var event = {}
+          , chain = file.chain;  
         ['load','error','abort'].each(function(prop){
            [prop, 'on'+prop, 'on'+prop.capitalize()].some(function(item,i){
-              var where = i ? file.events : file
+              var where = i ? file.events : file;
               if (!where[item]) return false;         
               event[prop] = where[item];
               delete where[item];
@@ -63,7 +62,9 @@ var AssetLoader  =
         var loaded = event.load || file.onProgress;
         Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
 
-		  var exists = AssetLoader.loaded[type][path];
+		  var i = ++index[1]
+          , exists = AssetLoader.loaded[type][path];
+
         if (exists){
            loaded.call(exists, ++index[0], i, path);
            files.length
@@ -73,7 +74,7 @@ var AssetLoader  =
            return obj;
         };
         exists = AssetLoader.loading[path];
-        if (exists){
+        if (exists){ 
            exists.push(loaded);
            if (!files.length) exists.push(opts.onComplete);
            return;
@@ -83,9 +84,10 @@ var AssetLoader  =
         var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
         var loadEvent = function(){
            loaded.call(asset, ++index[0], i, path);
-           AssetLoader.loading[path].each(function(func){func()});
+           AssetLoader.loading[path].each(function(func){func.call(asset, index[0], i, path);});
            delete AssetLoader.loading[path];
            AssetLoader.loaded[type][path] = this;
+           
            if (files.length) AssetLoader.load(files, options, type, obj, index);
            else {
               opts.onComplete();
@@ -104,7 +106,6 @@ var AssetLoader  =
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
         return obj;
 	  }
-   
 	, loaded: {}
 	, loading: {}
 	, build: function(){
@@ -128,10 +129,10 @@ var AssetLoader  =
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
 	AssetLoader[key] = function(files, options){
-		AssetLoader.load(Array.from(files), options, val, {img:[],link:[],script:[],fail:[]}, [0,0]);
+      AssetLoader.load(Array.from(files), options, val, {img:[],link:[],script:[],fail:[]}, [-1,-1]);
 	};
 });
-window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});
+window.addEvent('domready', function(){ AssetLoader.build = AssetLoader.build()});
 var Assets = AssetLoader;
 /*/
 function log(){
@@ -141,17 +142,18 @@ function log(){
 	})
 }
 /*/
-/*/
+//*/
 // Test:
 window.addEvent('domready', function(){
 AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
-/*/
-/*/
+//*/
+//*/
 	var mike = new AssetLoader.mixed
-		( [{src: 'scripts/StickyWinModalUI.js'}]
-		, { onComplete: function(){ log('done first') } }
+		//( [{src: 'scripts/StickyWinModalUI.js'}]
+		( 'scripts/StickyWinModalUI.js'
+		, { onComplete: function(){ console.log('done first') } }
 		); 
-/*/
+//*/
 /*/
 	var mike2 = function(){
 		new AssetLoader.mixed
@@ -161,4 +163,4 @@ AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
 		);
 	}.delay('1000');
 /*/
-// })
+ })
