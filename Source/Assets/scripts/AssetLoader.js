@@ -36,8 +36,8 @@ var AssetLoader  =
 				  }
 		, img:    {}
 		}
-	, load: function(files, options, type, obj, listCount, readyCount){
-		listCount++;
+	, load: function(files, options, type, obj, index){
+		var i = ++index[1];
 		AssetLoader.build();
 		if (!files.length) return alert('err: No Files Passed'); //false;
 		
@@ -60,7 +60,7 @@ var AssetLoader  =
 		
 		var exists = AssetLoader.loaded[type][path];
 		if (exists){
-			loaded.call(exists, ++readyCount[0], listCount, path);
+			loaded.call(exists, ++index[0], i, path);
 			files.length
 				? AssetLoader.load(files, options, type, obj, index)
 				: opts.onComplete();
@@ -78,7 +78,7 @@ var AssetLoader  =
 		var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
 
 		function loadEvent(){
-			loaded.call(asset, ++readyCount[0], listCount, path);
+			loaded.call(asset, ++index[0], i, path);
 			AssetLoader.loading[path].each(function(func){func()});
 			delete AssetLoader.loading[path];
 			AssetLoader.loaded[type][path] = this;
@@ -94,6 +94,7 @@ var AssetLoader  =
 			: asset.addEvent('load', loadEvent).inject(document.head);
 		if (type == 'script') asset.addEvent('readystatechange', function(){
 			if ('loaded,complete'.contains(this.readyState)) loadEvent();
+			// Do we need to check the this.LoadStatus property?http://www.data-tech.com/help/imactivex/imactx8~imagecontrol~readystatechange_ev.html
 		});
 		
 		if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
@@ -122,7 +123,7 @@ var AssetLoader  =
 
 Object.each({javascript:'script', css:'link', image:'img', images:'img', mixed:'mixed'}, function(val, key){
 	AssetLoader[key] = function(files, options){
-		AssetLoader.load(Array.from(files), options, val, {fail:[],img:[],link:[],script:[]}, [0], [0]);
+		AssetLoader.load(Array.from(files), options, val, {img:[],link:[],script:[],fail:[]}, [0,0]);
 	};
 });
 window.addEvent('load', function(){ AssetLoader.build = AssetLoader.build()});
