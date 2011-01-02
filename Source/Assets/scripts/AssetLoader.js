@@ -50,14 +50,19 @@ var AssetLoader  =
         file[type == 'link' ? 'href' : 'src'] = path;
 		
         var chain = file.chain
-          , loaded = file.onload || file.onLoad || file.events.load || file.onProgress;
-		
-        Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
-        ['onLoad','onload'].each(function(prop){
-           delete file[prop]; 
-           delete file.events[prop]; 
+        
+        var event = {};
+        ['load','error','abort'].each(function(prop){
+           [prop, 'on'+prop, 'on'+prop.capitalize()].some(function(item,i){
+              var where = i ? file.events : file
+              if (!where[item]) return false;         
+              event[prop] = where[item];
+              delete where[item];
+           })
         });
-		
+        var loaded = event.load || file.onProgress;
+        Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
+
 		  var exists = AssetLoader.loaded[type][path];
         if (exists){
            loaded.call(exists, ++index[0], i, path);
