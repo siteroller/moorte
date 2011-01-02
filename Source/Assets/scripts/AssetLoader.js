@@ -44,7 +44,7 @@ var AssetLoader  =
           , path = ([file.path, options.path, AssetLoader.path].pick() || '') + [file.src, file.href, file].pick();
 		
         if (type == 'mixed') type = AssetLoader.type(file);
-        var opts = Object.merge(AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
+        var opts = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
         file = Object.merge({events:{}}, file.big ? {} : file, opts);
         file[type == 'link' ? 'href' : 'src'] = path;
         
@@ -84,7 +84,7 @@ var AssetLoader  =
         var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
         var loadEvent = function(){
            loaded.call(asset, ++index[0], i, path);
-           AssetLoader.loading[path].each(function(func){func.call(asset, index[0], i, path);});
+           AssetLoader.loading[path].each(function(func){func.call(asset, index[0], i, path)});
            delete AssetLoader.loading[path];
            AssetLoader.loaded[type][path] = this;
            
@@ -142,25 +142,25 @@ function log(){
 	})
 }
 /*/
-//*/
+/*/
 // Test:
 window.addEvent('domready', function(){
 AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
-//*/
-//*/
+/*/
+/*/
 	var mike = new AssetLoader.mixed
 		//( [{src: 'scripts/StickyWinModalUI.js'}]
 		( 'scripts/StickyWinModalUI.js'
 		, { onComplete: function(){ console.log('done first') } }
 		); 
-//*/
+/*/
 /*/
 	var mike2 = function(){
 		new AssetLoader.mixed
 		( ['scripts/StickyWinModalUI.js']
 		, { onload: function(){log('coming along now'); log(arguments); log(this)}
-		, onComplete: function(){ log('done later'); } }
+		, onComplete: function(){ console.log('done later'); } }
 		);
 	}.delay('1000');
 /*/
- })
+// })
