@@ -77,7 +77,7 @@ var AssetLoader  =
         if (exists){ 
            exists.push(loaded);
            if (!files.length) exists.push(opts.onComplete);
-           return;
+           return obj;
         };
         AssetLoader.loading[path] = [];
 
@@ -109,21 +109,21 @@ var AssetLoader  =
 	, loaded: {}
 	, loading: {}
 	, build: function(){
-		Object.each({script:'src',link:'href',img:'src'},function(path,tag){
-			AssetLoader.loaded[tag] = {};
-			$$(tag+'['+path+']').each(function(el){AssetLoader.loaded[tag][el.get(path)] = el});
-		});
-		return function(){};
-	  }
+        Object.each({script:'src',link:'href',img:'src'},function(path,tag){
+           AssetLoader.loaded[tag] = {};
+           $$(tag+'['+path+']').each(function(el){AssetLoader.loaded[tag][el.get(path)] = el});
+        });
+        return function(){};
+     }
 	, type: function(file){
-		var file = file.src || file;
-		if (file.href || /css$/.test(file)) return 'link';
-		if (/js$/.test(file)) return 'script';
-		if (/(jpg|jpeg|bmp|gif|png)$/.test(file)) return 'img';
-		return 'fail';
+        var file = file.src || file;
+        if (file.href || /css$/.test(file)) return 'link';
+        if (/js$/.test(file)) return 'script';
+        if (/(jpg|jpeg|bmp|gif|png)$/.test(file)) return 'img';
+        return 'fail';
 	  }
-	  , wait:function(){
-		  me.setStyles({'background-image':curImg, 'background-position':curPos}); 
+	, wait:function(){
+          me.setStyles({'background-image':curImg, 'background-position':curPos}); 
 	  }
 	};
 
