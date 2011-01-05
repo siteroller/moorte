@@ -1,7 +1,7 @@
 /*
 ---
-description: Lazy Loader for CSS and JavaScript files.
-copyright: December 2010 Sam Goody
+description: Lazy Loader for CSS, image and JavaScript files.
+copyright: Sam Goody, December 2010.
 license: OSL v3.0 (http://www.opensource.org/licenses/osl-3.0.php)
 authors: Sam Goody <siteroller - |at| - gmail>
 
@@ -12,60 +12,58 @@ provides: [ AssetLoader.javascript
 		  , AssetLoader.css
 		  , AssetLoader.images
 		  , AssetLoader.mixed  
-		  ,	AssetLoader.path
+		  , AssetLoader.path
 		  ]
+        
+credits: Syntax and some hacks based on the More-Assets Class, which this is meant to replace.
 ...
 */
 
 var AssetLoader  = 
 	{ options: 
-		{ path:     ''
-		, script:   { chain: true }
-		, defaults: { path: ''
-					, chain: false
-					, onInit: function(){}
-					, onComplete: function(){}
-					, onProgress: function(){}
-					}
+		{ script:  { chain: true }
+		, defaults:{ chain: false
+                 , onInit: function(){}
+                 , onComplete: function(){}
+                 , onProgress: function(){}
+                 , path: ''
+                 }
+      , path:    ''
 		}
 	, properties:
-		{ script: { type: 'text/javascript' }
-		, link:   { rel: 'stylesheet'
-				  , media: 'screen'
-				  , type: 'text/css'
-				  }
-		, img:    {}
+		{ script:{ type: 'text/javascript' }
+		, link:  { rel: 'stylesheet'
+               , media: 'screen'
+               , type: 'text/css'
+               }
+		, img:   {}
 		}
 	, load: function(files, options, type, obj, index){
         AssetLoader.build();
         if (!files.length) return alert('err: No Files Passed'); //false;
 		
         var file = files.shift()
+          , chain = file.chain  
           , path = ([file.path, options.path, AssetLoader.path].pick() || '') + [file.src, file.href, file].pick();
 		
         if (type == 'mixed') type = AssetLoader.type(file);
-        var opts = Object.merge({}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
-        file = Object.merge({events:{}}, file.big ? {} : file, opts);
+        var opts = Object.merge({events:{}}, AssetLoader.options.defaults, AssetLoader.options[type] || {}, options);
+        file = Object.merge(file.big ? {} : file, opts);
         file[type == 'link' ? 'href' : 'src'] = path;
         
-        // Remove defaults and events so that they are placed as properties of element.
-        var event = {}
-          , chain = file.chain;  
         ['load','error','abort'].each(function(prop){
            [prop, 'on'+prop, 'on'+prop.capitalize()].some(function(item,i){
               var where = i ? file.events : file;
               if (!where[item]) return false;         
-              event[prop] = where[item];
+              opts[prop] = where[item];
               delete where[item];
            })
         });
-        var loaded = event.load || file.onProgress;
+        var loaded = opts.load || file.onProgress;
         Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
 
-		  var i = ++index[1]
-          , exists = AssetLoader.loaded[type][path];
-
-        if (exists){
+		  var exists, i = ++index[1];
+        if (exists = AssetLoader.loaded[type][path]){
            loaded.call(exists, ++index[0], i, path);
            files.length
               ? AssetLoader.load(files, options, type, obj, index)
@@ -73,8 +71,7 @@ var AssetLoader  =
            obj[type].push(exists);
            return obj;
         };
-        exists = AssetLoader.loading[path];
-        if (exists){ 
+        if (exists = AssetLoader.loading[path]){
            exists.push(loaded);
            if (!files.length) exists.push(opts.onComplete);
            return obj;
@@ -95,12 +92,13 @@ var AssetLoader  =
            }
         };
         obj[type].push(asset);
-           type == 'img'
-              ? asset.onload = loadEvent
-              : asset.addEvent('load', loadEvent).inject(document.head);
-           if (type == 'script') asset.addEvent('readystatechange', function(){
+        type == 'img'
+           ? asset.onload = loadEvent
+           : asset.addEvent('load', loadEvent).inject(document.head);
+        if (type == 'script') asset.addEvent('readystatechange', function(){
            if ('loaded,complete'.contains(this.readyState)) loadEvent();
-		     // Do we need to check the this.LoadStatus property?http://www.data-tech.com/help/imactivex/imactx8~imagecontrol~readystatechange_ev.html
+		     // Do we need the LoadStatus property:
+           // http://www.data-tech.com/help/imactivex/imactx8~imagecontrol~readystatechange_ev.html
 		  });
 		
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
@@ -117,9 +115,9 @@ var AssetLoader  =
      }
 	, type: function(file){
         var file = file.src || file;
-        if (file.href || /css$/.test(file)) return 'link';
-        if (/js$/.test(file)) return 'script';
-        if (/(jpg|jpeg|bmp|gif|png)$/.test(file)) return 'img';
+        if (file.href || /css$/i.test(file)) return 'link';
+        if (/js$/i.test(file)) return 'script';
+        if (/(jpg|jpeg|bmp|gif|png)$/i.test(file)) return 'img';
         return 'fail';
 	  }
 	, wait:function(){
