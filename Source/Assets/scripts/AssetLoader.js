@@ -93,14 +93,33 @@ var AssetLoader  =
               opts.onComplete();
            }
         };
+        
+        var ie = Browser.ie && !Browser.ie9
+           , image = new Image();
         events.each(function(event){
-           if (!Browser.ie || Browser.ie9 || type != 'img') asset.addEvent(event, callEvent.pass(event));
-           else asset.onload = callEvent.pass(event);
+           if (ie && type == 'img'){
+              // would have been
+              asset['on'+event] = callEvent.pass(event);
+              
+              // copied from Assets.js
+              if (!image) return;
+              if (!element.parentNode){
+                 element.width = image.width;
+                 element.height = image.height;
+              }
+              image = image.onload = image.onabort = image.onerror = null;
+              event.delay(1, element, element);
+              element.fireEvent(name, element, 1);
+              
+              // perhaps:
+              
+           } else asset.addEvent(event, callEvent.pass(event));
         });
-        if (type != 'img') asset.inject(document.head);
-        if (type == 'script' && Browser.ie && !Browser.ie9) asset.addEvent('readystatechange', function(){
+        if (ie && type == 'script') asset.addEvent('readystatechange', function(){
            if ('loaded,complete'.contains(this.readyState)) callEvent('load');
         });
+        if (type != 'img') asset.inject(document.head);
+        
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
         return obj;
 	  }
@@ -140,19 +159,19 @@ function log(){
 	})
 }
 /*/
-/*/
-/ Test:
+//*/
+// Test:
 window.addEvent('domready', function(){
 AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
-/*/
-/*/
+//*/
+//*/
 	var mike = new AssetLoader.mixed
 		//( [{src: 'scripts/StickyWinModalUI.js'}]
 		( 'scripts/StickyWinModalUI.js'
 		, { onComplete: function(){ console.log('done first') } }
 		); 
-/*/
-/*/
+//*/
+//*/
 	var mike2 = function(){
 		new AssetLoader.mixed
 		( ['scripts/StickyWinModalUI.js']
@@ -160,5 +179,6 @@ AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
 		, onComplete: function(){ console.log('done later'); } }
 		);
 	}.delay('1000');
-/*/
-// })
+//*/
+//
+ })
