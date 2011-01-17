@@ -60,7 +60,7 @@ var AssetLoader  =
               delete where[item];
            });
         });
-        if (!opt.load) opts.load = file.onProgress;
+        if (!opts.load) opts.load = file.onProgress;
         Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
 
         var exists, i = ++index[1];
@@ -73,9 +73,8 @@ var AssetLoader  =
            return obj;
         };
         if (exists = AssetLoader.loading[path]){
-           Object.map(exists, function(methods, event){ return methods.push(opts[event]) })
-           //exists.push(events.load);
-           if (!files.length) exists.push(opts.onComplete);
+           Object.map(exists, function(methods, event){ return methods.push(opts[event]) });
+           if (!files.length) exists.load.push(opts.onComplete);
            return obj;
         };
         AssetLoader.loading[path] = {load:[],abort:[],error:[]};
@@ -100,31 +99,8 @@ var AssetLoader  =
         });
         if (type != 'img') asset.inject(document.head);
         if (type == 'script' && Browser.ie && !Browser.ie9) asset.addEvent('readystatechange', function(){
-           if ('loaded,complete'.contains(this.readyState)) loadEvent();
+           if ('loaded,complete'.contains(this.readyState)) callEvent('load');
         });
-        
-        /*
-        var loadEvent = function(){
-           loaded.call(asset, ++index[0], i, path);
-           AssetLoader.loading[path].each(function(func){func.call(asset, index[0], i, path)});
-           delete AssetLoader.loading[path];
-           AssetLoader.loaded[type][path] = this;
-           
-           if (files.length)
-		      AssetLoader.load(files, options, type, obj, index);
-           else {
-              opts.onInit(); // Why is this only run if !files.length?
-              opts.onComplete();
-           }
-        };
-		*/
-        obj[type].push(asset);
-        type == 'img'
-           ? asset.onload = loadEvent
-           : asset.addEvent('load', loadEvent).inject(document.head);
-        
-	
-        	
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
         return obj;
 	  }
@@ -165,7 +141,7 @@ function log(){
 }
 /*/
 /*/
-// Test:
+/ Test:
 window.addEvent('domready', function(){
 AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
 /*/
