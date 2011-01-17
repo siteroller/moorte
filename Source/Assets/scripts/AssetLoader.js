@@ -23,19 +23,19 @@ var AssetLoader  =
 	{ options: 
 		{ script:  { chain: true }
 		, defaults:{ chain: false
-                 , onInit: function(){}
-                 , onComplete: function(){}
-                 , onProgress: function(){}
-                 , path: ''
-                 }
-      , path:    ''
+                   , onInit: function(){}
+                   , onComplete: function(){}
+                   , onProgress: function(){}
+                   , path: ''
+                   }
+                   , path:    ''
 		}
 	, properties:
 		{ script:{ type: 'text/javascript' }
 		, link:  { rel: 'stylesheet'
-               , media: 'screen'
-               , type: 'text/css'
-               }
+                 , media: 'screen'
+                 , type: 'text/css'
+                 }
 		, img:   {}
 		}
 	, load: function(files, options, type, obj, index){
@@ -51,20 +51,21 @@ var AssetLoader  =
         file = Object.merge(file.big ? {} : file, opts);
         file[type == 'link' ? 'href' : 'src'] = path;
         
-        ['load','error','abort'].each(function(prop){
+        var events = ['load','error','abort'];
+        events.each(function(prop){
            [prop, 'on'+prop, 'on'+prop.capitalize()].some(function(item,i){
               var where = i ? file.events : file;
               if (!where[item]) return false;         
               opts[prop] = where[item];
               delete where[item];
-           })
+           });
         });
-        var loaded = opts.load || file.onProgress;
+        if (!opt.load) opts.load = file.onProgress;
         Object.each(AssetLoader.options.defaults, function(v,k){ delete file[k] });
 
-		  var exists, i = ++index[1];
+        var exists, i = ++index[1];
         if (exists = AssetLoader.loaded[type][path]){
-           loaded.call(exists, ++index[0], i, path);
+           opts.load.call(exists, ++index[0], i, path);
            files.length
               ? AssetLoader.load(files, options, type, obj, index)
               : opts.onComplete();
@@ -72,35 +73,58 @@ var AssetLoader  =
            return obj;
         };
         if (exists = AssetLoader.loading[path]){
-           exists.push(loaded);
+           Object.map(exists, function(methods, event){ return methods.push(opts[event]) })
+           //exists.push(events.load);
            if (!files.length) exists.push(opts.onComplete);
            return obj;
         };
-        AssetLoader.loading[path] = [];
+        AssetLoader.loading[path] = {load:[],abort:[],error:[]};
 
         var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
+        var callEvent = function(event){
+           opts[event].call(asset, ++index[0], i, path);
+           AssetLoader.loading[path][event].each(function(func){func.call(asset, index[0], i, path)});
+           delete AssetLoader.loading[path];
+           AssetLoader.loaded[type][path] = this;
+           
+           if (files.length)
+              AssetLoader.load(files, options, type, obj, index);
+           else {
+              opts.onInit();
+              opts.onComplete();
+           }
+        };
+        events.each(function(event){
+           if (!Browser.ie || Browser.ie9 || type != 'img') asset.addEvent(event, callEvent.pass(event));
+           else asset.onload = callEvent.pass(event);
+        });
+        if (type != 'img') asset.inject(document.head);
+        if (type == 'script' && Browser.ie && !Browser.ie9) asset.addEvent('readystatechange', function(){
+           if ('loaded,complete'.contains(this.readyState)) loadEvent();
+        });
+        
+        /*
         var loadEvent = function(){
            loaded.call(asset, ++index[0], i, path);
            AssetLoader.loading[path].each(function(func){func.call(asset, index[0], i, path)});
            delete AssetLoader.loading[path];
            AssetLoader.loaded[type][path] = this;
            
-           if (files.length) AssetLoader.load(files, options, type, obj, index);
+           if (files.length)
+		      AssetLoader.load(files, options, type, obj, index);
            else {
+              opts.onInit(); // Why is this only run if !files.length?
               opts.onComplete();
-              opts.onInit();
            }
         };
+		*/
         obj[type].push(asset);
         type == 'img'
            ? asset.onload = loadEvent
            : asset.addEvent('load', loadEvent).inject(document.head);
-        if (type == 'script') asset.addEvent('readystatechange', function(){
-           if ('loaded,complete'.contains(this.readyState)) loadEvent();
-		     // Do we need the LoadStatus property:
-           // http://www.data-tech.com/help/imactivex/imactx8~imagecontrol~readystatechange_ev.html
-		  });
-		
+        
+	
+        	
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
         return obj;
 	  }

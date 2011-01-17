@@ -146,7 +146,6 @@ var MooRTE = new Class({
 	}
 });
 
-if (!MooRTE.path) MooRTE.path = 'CMS/library/thirdparty/MooRTE/Source/'; //js/sources.json
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
@@ -592,11 +591,11 @@ MooRTE.Elements = {
 						onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 					}
    , save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
-						var content = $H({ 'page': window.location.pathname }), next = 0; content.content=[]; 
+						var content = { 'page': window.location.pathname }, next = 0; content.content=[]; 
 						this.getParent('.MooRTE').retrieve('fields').each(function(el){
 							content['content'][next++] = MooRTE.Utilities.clean(el);
 						});
-						new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(content.toQueryString());
+						new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(Object.toQueryString(content));
 					}}
    , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}
    , DisplayHTML	:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
