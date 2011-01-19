@@ -620,7 +620,7 @@ MooRTE.Elements = {
 								MooRTE.Elements.linkPop.show();
 						}
 					   , onLoad: function(){
-							if (window.Assets) new Assets.javascript('StickyWinModalUI.js', {
+							if (window.Asset) new Asset.javascript('StickyWinModalUI.js', {
 								self: this
 								, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
 								, onComplete: function(){
