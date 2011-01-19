@@ -53,7 +53,7 @@ var AssetLoader  =
         
         var events = ['load','error','abort'];
         events.each(function(event){
-           [prop, 'on'+event, 'on'+event.capitalize()].some(function(item,i){
+           [event, 'on'+event, 'on'+event.capitalize()].some(function(item,i){
               var where = i ? file.events : file;
               if (!where[item]) return false; // ToDo: Delete this line!         
               opts[event] = where[item];
@@ -166,26 +166,3 @@ AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
 //*/
 //
  })
-/*        var ie = Browser.ie && !Browser.ie9
-           , image = new Image();
-         if (ie && type == 'img'){
-              // would have been
-              asset['on'+event] = callEvent.pass(event);
-              
-              // copied from Assets.js
-              if (!image) return;
-              if (!element.parentNode){
-                 element.width = image.width;
-                 element.height = image.height;
-              }
-              image = image.onload = image.onabort = image.onerror = null;
-              event.delay(1, element, element);
-              element.fireEvent(name, element, 1);
-              
-              // perhaps:
-              if(img.complete) imgLoaded();
-              else img.addEvent(event, callEvent.pass(event));
-
-           } else 
-          */
-        
