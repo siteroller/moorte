@@ -52,11 +52,11 @@ var AssetLoader  =
         file[type == 'link' ? 'href' : 'src'] = path;
         
         var events = ['load','error','abort'];
-        events.each(function(prop){
-           [prop, 'on'+prop, 'on'+prop.capitalize()].some(function(item,i){
+        events.each(function(event){
+           [prop, 'on'+event, 'on'+event.capitalize()].some(function(item,i){
               var where = i ? file.events : file;
-              if (!where[item]) return false;         
-              opts[prop] = where[item];
+              if (!where[item]) return false; // ToDo: Delete this line!         
+              opts[event] = where[item];
               delete where[item];
            });
         });
@@ -79,8 +79,9 @@ var AssetLoader  =
         };
         AssetLoader.loading[path] = {load:[],abort:[],error:[]};
 
-        var asset = new Element(type, Object.merge(AssetLoader.properties[type], file));
-        var callEvent = function(event){
+        var asset = new Element(type);
+        function callEvent(event){
+           asset.removeEvent('load');
            opts[event].call(asset, ++index[0], i, path);
            AssetLoader.loading[path][event].each(function(func){func.call(asset, index[0], i, path)});
            delete AssetLoader.loading[path];
@@ -93,33 +94,16 @@ var AssetLoader  =
               opts.onComplete();
            }
         };
-        
-        var ie = Browser.ie && !Browser.ie9
-           , image = new Image();
         events.each(function(event){
-           if (ie && type == 'img'){
-              // would have been
-              asset['on'+event] = callEvent.pass(event);
-              
-              // copied from Assets.js
-              if (!image) return;
-              if (!element.parentNode){
-                 element.width = image.width;
-                 element.height = image.height;
-              }
-              image = image.onload = image.onabort = image.onerror = null;
-              event.delay(1, element, element);
-              element.fireEvent(name, element, 1);
-              
-              // perhaps:
-              
-           } else asset.addEvent(event, callEvent.pass(event));
+           if (opts[event]) asset.addEvent(event, callEvent.pass(event));
         });
-        if (ie && type == 'script') asset.addEvent('readystatechange', function(){
+        if (type == 'script' && Browser.ie && !Browser.ie9) asset.addEvent('readystatechange', function(){
            if ('loaded,complete'.contains(this.readyState)) callEvent('load');
         });
-        if (type != 'img') asset.inject(document.head);
+        asset.set(Object.merge(AssetLoader.properties[type], file));
         
+        if (type != 'img') asset.inject(document.head);
+        else if (Browser.ie && asset.complete) callEvent('load');
         if (!chain && files.length) AssetLoader.load(files, options, type, obj, index);
         return obj;
 	  }
@@ -182,3 +166,26 @@ AssetLoader.path = 'CMS/library/thirdparty/MooRTE/Source/Assets/';
 //*/
 //
  })
+/*        var ie = Browser.ie && !Browser.ie9
+           , image = new Image();
+         if (ie && type == 'img'){
+              // would have been
+              asset['on'+event] = callEvent.pass(event);
+              
+              // copied from Assets.js
+              if (!image) return;
+              if (!element.parentNode){
+                 element.width = image.width;
+                 element.height = image.height;
+              }
+              image = image.onload = image.onabort = image.onerror = null;
+              event.delay(1, element, element);
+              element.fireEvent(name, element, 1);
+              
+              // perhaps:
+              if(img.complete) imgLoaded();
+              else img.addEvent(event, callEvent.pass(event));
+
+           } else 
+          */
+        
