@@ -255,7 +255,7 @@ MooRTE.Utilities = {
 
 		update.state.each(function(vals){
 			if (vals[2])
-				vals[2].bind(vals[1])(vals[0]);
+				vals[2].call(vals[1], vals[0]);
 			else {
 				var state = false;
 				try { state = window.document.queryCommandState(vals[0]) }
@@ -266,10 +266,10 @@ MooRTE.Utilities = {
 			}
 		});
 		update.value.each(function(vals){
-			if (val = window.document.queryCommandValue(vals[0])) vals[2].bind(vals[1])(vals[0], val);
+			if (val = window.document.queryCommandValue(vals[0])) vals[2].call(vals[1], vals[0], val);
 		});
 		update.custom.each(function(){
-			vals[2].bind(vals[1])(vals[0]);
+			vals[2].call(vals[1], vals[0]);
 		});
 	}
 	, addElements: function(buttons, place, relative, name){
@@ -367,7 +367,7 @@ MooRTE.Utilities = {
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
-				event.bind(caller)(name,onEvent); break;
+				event.call(caller, name, onEvent); break;
 			case 'array':
 				event = Array.clone(event);
 				event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
