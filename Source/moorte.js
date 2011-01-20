@@ -254,38 +254,15 @@ MooRTE.Utilities = {
 		var val, update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){
-			if(vals[2]) {
+			if (vals[2])
 				vals[2].bind(vals[1])(vals[0]);
-			} else {
-				// insertorderedlist,insertunorderedlist, has been disabled on line 263, for throwing errors in FF when textfield is empty.
-				var state;
-				try {
-					state = window.document.queryCommandState(vals[0]);
-				} catch (e) {
-					/* FIXME:
-					 * Firefox 3.6 has been returning this error the first time the
-					 * editable area is clicked on, and the first time it is typed
-					 * into:
-					 * "Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIDOMNSHTMLDocument.queryCommandState]"
-					 *
-					 * This is a workaround, assuming that on failure, the state is
-					 * false.
-					 *
-					 * A google search returns the following links, but no solution:
-					 * http://tinymce.moxiecode.com/punbb/viewtopic.php?id=5124
-					 * http://tinymce.moxiecode.com/punbb/viewtopic.php?id=4960
-					 * http://tinymce.moxiecode.com/punbb/viewtopic.php?id=10863
-					 * http://www.zimbra.com/forums/developers/669-dwthtmleditor-exception-when-started-hidden-tab.html
-					 * http://drupal.org/node/123857
-					 */
-					state = false;
-				}
-				// window.document.queryCommandState(vals[0]) ? vals[1].addClass('rteSelected') : vals[1].removeClass('rteSelected');
-				if (state) {
-					vals[1].addClass('rteSelected');
-				} else {
-					vals[1].removeClass('rteSelected');
-				}
+			else {
+				var state = false;
+				try { state = window.document.queryCommandState(vals[0]) }
+				catch(e){}
+				vals[1][(state ? 'add' : 'remove') + 'Class']('rteSelected');
+				// Try/Catch works around issue #2.
+				// insertorderedlist & insertunorderedlist have been disabled on line 263 for FF errs when textfield is empty.
 			}
 		});
 		update.value.each(function(vals){
