@@ -80,18 +80,19 @@ var MooRTE = new Class({
 			
 			el.store('bar', rte)
 				.addEvents({ keydown: MooRTE.Utilities.shortcuts
-						   , keyup  : MooRTE.Utilities.updateBtns
-						   , mouseup: MooRTE.Utilities.updateBtns
-						   , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
-				});
+					        , keyup  : MooRTE.Utilities.updateBtns
+					        , mouseup: MooRTE.Utilities.updateBtns
+					        , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
+					        });
 			rte.addEvent('mouseup', MooRTE.Utilities.updateBtns);
 		});
 		rte.store('fields', els);
 		
-		MooRTE.activeBar = (MooRTE.activeField = els[0]).retrieve('bar');
+		MooRTE.activeField = els[0];
+		MooRTE.activeBar = MooRTE.activeField.retrieve('bar');
+		
 		if (l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
 		else if (l=='b') rte.addClass('rtePageBottom');
-		
 		if (Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
 		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
 	}
@@ -236,13 +237,13 @@ MooRTE.Utilities = {
 		if (g) document.designMode = 'off';
 	}
 	, shortcuts: function(e){
-		if(e.key=='enter'){ 
-			if(!Browser.ie)return;
+		if (e.key=='enter'){
+			if (!Browser.ie) return;
 			e.stop();
 			return MooRTE.Range.insert('<br/>');
 		}
 		var be, btn, shorts = MooRTE.activeBar.retrieve('shortcuts');	
-		if(e && e.control && shorts.has(e.key)){
+		if (e && e.control && shorts.has(e.key)){
 			e.stop();
 			btn = MooRTE.activeBar.getElement('.rte'+shorts[e.key]);
 			btn.fireEvent('mousedown', btn);
