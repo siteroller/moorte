@@ -370,7 +370,8 @@ MooRTE.Utilities = {
 				event.call(caller, name, onEvent); break;
 			case 'array':
 				event = Array.clone(event);
-				event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+				event.push(name, onEvent);
+				MooRTE.Utilities[event.shift()].apply(caller, event); break;
 			case 'string':
 				onEvent == 'source' && onEvent.substr(0,2) != 'on'
 					? MooRTE.Range.wrapText(event, caller)
@@ -691,7 +692,7 @@ MooRTE.Elements = {
 							if(ta){
 								this.addClass('rteSelected');
 								ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
-							} else MooRTE.Utilities.group.run(['source',btn],this);
+							} else MooRTE.Utilities.group.apply(this, ['source', btn]);
 						}
 					}}
    , source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
