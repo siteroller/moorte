@@ -77,7 +77,7 @@ var MooRTE = new Class({
 						rte.addClass('rteHide'); 
 					}
 				});
-			
+
 			el.store('bar', rte)
 				.addEvents({ keydown: MooRTE.Utilities.shortcuts
 					        , keyup  : MooRTE.Utilities.updateBtns
@@ -195,7 +195,7 @@ MooRTE.Range = {
 		if (!Browser.ie){
 			var start = area.selectionStart, RE = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value')), El = element+RE[2]+'</'+element.match(/^<(\w+)/)[1]+'>';
 			area.set('value', RE[1]+El+RE[3]).selectionEnd = start + El.length;
-		} else { 
+		} else {
 			var El = new Element(element||'span', {html:range.get()});
 			range.pasteHTML(El);
 		}
@@ -519,8 +519,11 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if (!cmd || (cmd == 'create')){
+		var removed
+		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
+		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		
+		if (!params.cmd || (params.cmd == 'create')){
 			if (removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
@@ -528,7 +531,7 @@ Element.implement({
 			return bar ? this.removeClass('rteHide') : new MooRTE(Object.append(params.options||{},{'elements':this}));
 		} else {
 			if (!bar) return false;
-			switch (cmd.toLowerCase()){
+			switch (params.cmd.toLowerCase()){
 				case 'remove':
 					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
 					new Element('span').replaces(bar).destroy(); break;
