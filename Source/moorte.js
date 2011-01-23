@@ -77,7 +77,9 @@ var MooRTE = new Class({
 						rte.addClass('rteHide'); 
 					}
 				});
-
+			
+			if (Browser.firefox) el.innerHTML += '<p><br></p>';
+			
 			el.store('bar', rte)
 				.addEvents({ keydown: MooRTE.Utilities.shortcuts
 					        , keyup  : MooRTE.Utilities.updateBtns
@@ -135,12 +137,14 @@ var MooRTE = new Class({
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
 	}
 	, textArea: function (el){
-		var form, div = new Element('div', {
+		var div = new Element('div', {
 			text:el.get('value'),
 			'class':'rteTextArea '+el.get('class'), 
 			'styles':{width:el.getSize().x}
 		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).inject(el,'before');
-		if(form = el.addClass('rteHide').getParent('form')) form.addEvent('submit',function(e){
+		
+		var form = el.addClass('rteHide').getParent('form');
+		if (form) form.addEvent('submit',function(e){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		});
 		return div;
@@ -183,7 +187,7 @@ MooRTE.Range = {
 		try {
 			Browser.ie 
 				? range.pasteHTML(El.set('html', range.htmlText).outerHTML) 
-				: range.surroundContents(El); 
+				: range.surroundContents(El);
 		} catch(e) {
 			if (e.code == 1) return false; // "Bad Boundary Points"
 		}
@@ -202,11 +206,11 @@ MooRTE.Range = {
 		return MooRTE.Range;
 	}
 	, replace: function(node, range){
-		if(!range) range = MooRTE.Range.create();
+		if (!range) range = MooRTE.Range.create();
 		if (Browser.ie){
 			var id = document.uniqueID;
 			range.pasteHTML("<span id='" + id + "'></span>");
-			node.replaces($(id));
+			node.replaces(document.id(id));
 		} else {
 			MooRTE.Utilities.exec('inserthtml', node); return;  //ToDo: is this really supposed to return?!
 			range.deleteContents();  // Consider using Range.insert() instead of the following (Olav's method).
@@ -229,12 +233,16 @@ MooRTE.Range = {
 
 MooRTE.Utilities = {
 	exec: function(args){
-		args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
-		//console.log(args[0], args[2]||null, args[1]||false)
-		var g = (Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase()));
-		if (g) document.designMode = 'on';
+		args = Array.from(args);
 		document.execCommand(args[0], args[2]||null, args[1]||false);
-		if (g) document.designMode = 'off';
+		//args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
+		//console.log(args[0], args[2]||null, args[1]||false)
+		//var g = Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase());
+		//console.log(g);
+		//if (g) document.designMode = 'on';
+		//document.execCommand(args[0], args[2]||null, args[1]||false);
+		//if (g) document.designMode = 'off';
+		//console.log('phew')
 	}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
@@ -251,26 +259,28 @@ MooRTE.Utilities = {
 		};
 	}
 	, updateBtns: function(e){
-		var val, update = MooRTE.activeBar.retrieve('update');
+		var val
+		  , update = MooRTE.activeBar.retrieve('update');
 
 		update.state.each(function(vals){
 			if (vals[2])
 				vals[2].call(vals[1], vals[0]);
 			else {
-				var state = false;
-				try { state = window.document.queryCommandState(vals[0]) }
-				catch(e){}
-				vals[1][(state ? 'add' : 'remove') + 'Class']('rteSelected');
+				try { val = window.document.queryCommandState(vals[0]) }
+				catch(e){ val = false }
+				vals[1][(val ? 'add' : 'remove') + 'Class']('rteSelected');
 				// Try/Catch works around issue #2.
 				// insertorderedlist & insertunorderedlist have been disabled on line 263 for FF errs when textfield is empty.
 			}
 		});
 		update.value.each(function(vals){
-			if (val = window.document.queryCommandValue(vals[0])) vals[2].call(vals[1], vals[0], val);
+			val = window.document.queryCommandValue(vals[0]);
+			if (val) vals[2].call(vals[1], vals[0], val);
 		});
 		update.custom.each(function(){
 			vals[2].call(vals[1], vals[0]);
 		});
+		//if (Browser.firefox && cursor is ahead of trailing <p><br><p>) bring it back
 	}
 	, addElements: function(buttons, place, relative, name){
 		if (!place) place = MooRTE.activeBar.getFirst();
@@ -298,13 +308,16 @@ MooRTE.Utilities = {
 		} while(loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
 		btns.each(function(btn){
-			var btnVals,btnClass;
-			if (typeOf(btn)=='object'){btnVals = Object.values(btn)[0]; btn = Object.keys(btn)[0];}
-			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			btn=btnClass.shift();
-			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
-			
-			if(!e || name == 'rteGroup_Auto'){
+			var btnVals;
+			if (typeOf(btn)=='object'){
+				btnVals = Object.values(btn)[0];
+				btn = Object.keys(btn)[0];
+			}
+			var btnClass = btn.split('.'); //[btn,btnClass] = btn.split('.'); - Code sunk by IE6
+			btn = btnClass.shift();
+			// var e = parent.getElement('[class~='+name+']'||'.rte'+btn); 
+			var e = parent.getElement('[class~='+name+']') || parent.getElement('.rte'+btn);
+			if (!e || name == 'rteGroup_Auto'){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,'.contains(btn.toLowerCase()+',');// insertorderedlist,insertunorderedlist,
 				
@@ -313,17 +326,17 @@ MooRTE.Utilities = {
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
-					events:{
+					events: {
 						mousedown: function(e){
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
 							  , source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
-							
+							//console.log(val)
 							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
 							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
 							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
 							
-							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							// Works around https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
 							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
 							var holder = MooRTE.Range.parent();
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
