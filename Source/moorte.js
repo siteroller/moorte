@@ -155,12 +155,10 @@ MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
 		if (!sel) return null;
-		return MooRTE.ranges[range || 'a1'] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
-		//var sel = window.getSelection ? window.getSelection() : window.document.selection;
-		//MooRTE.activeBar.retrieve('ranges').set([rangeName || 1] = sel.rangeCount > 0 ? sel.getRangeAt(0) : (sel.createRange ? sel.createRange() : null);
+		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
-	, set: function(rangeName){
-		var range = MooRTE.ranges[rangeName || 'a1'];
+	, set: function(range){
+		range = MooRTE.ranges[range || 'a1'];
 		if (range.select) range.select();
 		else {
 			var sel = window.getSelection();
@@ -169,10 +167,11 @@ MooRTE.Range = {
 		}
 		return MooRTE.Range;
 	}
-	, get: function(what, range){
+	, get: function(type, range){
 		if (!range) range = MooRTE.Range.create();
-		return !Browser.ie ? range.toString() :
-			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
+		return type == 'text' 
+			? range.text || range.toString()
+			: range.htmlText; // ToDo: Fix - Currently no HTML response for non-IE browsers
 	}
 	, insert: function(what, range){ //html option that says if text or html?
 		if (Browser.ie){
@@ -197,11 +196,13 @@ MooRTE.Range = {
 		var area = caller.getParent('.RTE').getElement('textarea');
 		if (!(element.substr(0,1)=='<')) element = '<span style="'+element+'">';
 		if (!Browser.ie){
-			var start = area.selectionStart, RE = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value')), El = element+RE[2]+'</'+element.match(/^<(\w+)/)[1]+'>';
-			area.set('value', RE[1]+El+RE[3]).selectionEnd = start + El.length;
+			var start = area.selectionStart
+			  , reg = new RegExp('(.{'+start+'})(.{'+(area.selectionEnd-start)+'})(.*)', 'm').exec(area.get('value'))
+			  , el = element + reg[2] + '</' + element.match(/^<(\w+)/)[1] + '>';
+			area.set('value', reg[1] + el + reg[3]).selectionEnd = start + el.length;
 		} else {
-			var El = new Element(element||'span', {html:range.get()});
-			range.pasteHTML(El);
+			var el = new Element(element||'span', {html:range.get()});
+			range.pasteHTML(el);
 		}
 		return MooRTE.Range;
 	}
@@ -280,7 +281,9 @@ MooRTE.Utilities = {
 		update.custom.each(function(){
 			vals[2].call(vals[1], vals[0]);
 		});
-		//if (Browser.firefox && cursor is ahead of trailing <p><br><p>) bring it back
+		if (Browser.firefox) ;
+		//console.log(MooRTE.Range.create());
+		//if (Browser.firefox) // && cursor is ahead of trailing <p><br><p>) bring it back
 	}
 	, addElements: function(buttons, place, relative, name){
 		if (!place) place = MooRTE.activeBar.getFirst();
@@ -305,7 +308,7 @@ MooRTE.Utilities = {
 					case 'object': Object.each(item, function(val,key){ btns.push(obj(key,val)) }); break;			
 				}
 			})
-		} while(loop && ++loopStop < 5); //Remove loopstop variable after testing!!
+		} while (loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
 		btns.each(function(btn){
 			var btnVals;
