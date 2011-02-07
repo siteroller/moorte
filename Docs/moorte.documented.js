@@ -110,12 +110,35 @@ MooRTE.Range = {
 		return MooRTE.Range;
 	},
 	
-	//Get function returns the text or html of the passed in range.  If none passed, returns the current range.
-	get: function(what, range){
-		if(!range) range = MooRTE.Range.create();
-		return !Browser.Engine.trident ? range.toString() :
-			(what.toLowerCase() == 'html' ? range.htmlText : range.text);
-	},
+	// content element is used to store content for the MooRTE.Range.get function
+	, content: new Element('div')
+	/* function get - returns the contents of a Range.
+		Arguments:
+		type [String, optional. Defaults to 'html']
+			'text' - Returns the text of the selection without any markup.
+			'html' - Returns the html of the Range as a string. Invalid Markup is fixed in W3C browsers.
+			'node' - Returns an element (IE) or a DocumentFragment (W3C Browsers) containing the Range's content.
+		range [Range Object, optional. Defaults to the current range, stored in MooRTE.ranges.a1]
+		
+		This method is described at length, with variations, on the Siteroller Blog.
+	*/
+	, get: function(type, range){
+	
+		if (!range) range = MooRTE.Range.create();
+		
+		switch (type){
+			case 'text': return range.text || range.toString();
+			case 'node':
+				if (range.cloneContents) return range.cloneContents();
+				return MooRTE.Range.content.set('html', range.htmlText);
+			default: case 'html': var content = range.htmlText;
+				if (!content){
+					var html = range.cloneContents();
+					MooRTE.Range.content.empty().appendChild(html);
+					content = MooRTE.Range.content.innerHTML;
+				}; 
+				return content;
+		}
 	
 	wrap:function(element, options, range){
 		if(!range) range = MooRTE.Range.create();
