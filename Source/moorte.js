@@ -420,7 +420,7 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	}
 	, clipStickyWin: function(caller){
-		// ToDO: create the instance of the AssetLoader, once, afterwrds, just call the load function.
+		// ToDo: create the instance of the AssetLoader, once, afterwrds, just call the load function.
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) new AssetLoader({
 				onComplete: function(command){
@@ -508,7 +508,9 @@ MooRTE.Utilities = {
 		var washer;
 		if (typeOf(html)=='element'){
 			washer = html;
-			if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
+			var bar = washer.retrieve('bar');
+			if (washer.contains(bar) && washer != bar) washer.moorte('remove');
+			//if(washer.hasChild(washer.retrieve('bar'))) washer.moorte('remove');
 		} else washer = $('washer') || new Element('div',{id:'washer'}).inject(document.body);
 
 		washer.getElements('p:empty'+(options.remove ? ','+options.remove : '')).destroy();
@@ -749,7 +751,7 @@ MooRTE.Elements = {
 						if(this.hasClass('rteSelected')){
 							bar.eliminate('source');
 							this.removeClass('rteSelected');
-							if(el.hasChild(el.retrieve('bar'))) el.moorte('remove');
+							if(el.contains(el.retrieve('bar'))) el.moorte('remove'); //was hasChild
 							el.set('html',ta.addClass('rteHide').get('value')).moorte();
 						} else {
 							bar.store('source','source');
