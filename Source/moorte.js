@@ -164,9 +164,10 @@ MooRTE.Range = {
 		switch (type){
 			case 'text': return range.text || range.toString();
 			case 'node': return range.cloneContents 
-								? range.cloneContents() 
-								: new Element('div', {html:range.htmlText});
-			default: case 'html': var content = range.htmlText;
+				? range.cloneContents() 
+				: new Element('div', {html:range.htmlText});
+			default: case 'html': 
+				var content = range.htmlText;
 				if (!content){
 					var html = range.cloneContents();
 					MooRTE.Range.content.empty().appendChild(html);
@@ -551,29 +552,42 @@ Element.implement({
 		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
 		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
-		if (!params.cmd || 'create,show,restore'.contains(params.cmd)){
+		if (!params.cmd || 'create,show,restore'.contains(params.cmd.toLowerCase())){
 			if (removed = this.retrieve('removed')){
-				bar.inject(removed[0], removed[1]);
+				bar.inject(removed[0], removed[1])
+					.retrieve('fields').each(function(el){
+						el.hasClass('rteTextArea')
+							? el.addClass('rteShow').removeClass('rteHide').getNext('textarea').addClass('rteHide').removeClass('rteShow')
+							: el.set('contentEditable', true);
+					});
 				this.eliminate('removed');
 			}
-			return bar ? this.removeClass('rteHide') : new MooRTE(Object.append(params.options||{},{'elements':this}));
+			return bar
+				? this.removeClass('rteHide') 
+				: new MooRTE(Object.append(params.options||{},{'elements':this}));
 		} else {
 			if (!bar) return false;
 			switch (params.cmd.toLowerCase()){
-				case 'remove':
-					bar.retrieve('fields').each(function(el){
-						el.set('contentEditable',false);
-					});
-					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
-					bar.dispose(); //new Element('span').replaces(bar).destroy(); break;
-				break;
-				case 'destroy': 
-					bar.retrieve('fields').each(function(el){
-						el.removeEvents().eliminate('bar').set('contentEditable',false);
-						if(el.hasClass('rteTextArea'))el.getNext('textarea').removeClass('rteHide'); el.destroy();
-					});
-					bar.destroy(); break; 
 				case 'hide': bar.addClass('rteHide'); break;
+				case 'remove':
+					var location = bar.getPrevious() 
+						? [bar.getPrevious(),'after'] 
+						: [bar.getParent(),'top'];
+					this.store('removed', location);
+					bar.dispose().retrieve('fields').each(function(el){
+						el.hasClass('rteTextArea')
+							? el.addClass('rteHide').removeClass('rteShow').getNext('textarea').addClass('rteShow').removeClass('rteHide')
+							: el.removeEvents().set('contentEditable',false);
+					});
+				break;
+				case 'destroy':
+					bar.retrieve('fields').each(function(el){
+						if (el.hasClass('rteTextArea')){
+							el.getNext('textarea').removeClass('rteHide');
+							el.destroy();
+						} else el.eliminate('bar').removeEvents().set('contentEditable',false);
+					});
+					bar.destroy();
 			}
 		}
 	}
