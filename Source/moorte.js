@@ -521,7 +521,7 @@ MooRTE.Utilities = {
 		if (Browser.webkit) cleanup.append(appleCleanup);
 
 		// var loopStop = 0;  //while testing.
-		do {	
+		do {
 			var cleaned = html;
 			cleanup.each(function(reg){ html = html.replace(reg[0], reg[1]); });		
 		} while (cleaned != html); // && ++loopStop <3
@@ -557,8 +557,15 @@ Element.implement({
 				bar.inject(removed[0], removed[1])
 					.retrieve('fields').each(function(el){
 						el.hasClass('rteTextArea')
-							? el.addClass('rteShow').removeClass('rteHide').getNext('textarea').addClass('rteHide').removeClass('rteShow')
-							: el.set('contentEditable', true);
+							? el
+								.addClass('rteShow')
+								.removeClass('rteHide')
+								.getNext('textarea')
+								.addClass('rteHide')
+								.removeClass('rteShow')
+							: el
+								.set('contentEditable', true)
+								.cloneEvents(el.retrieve('elEvents'));
 					});
 				this.eliminate('removed');
 			}
@@ -576,8 +583,16 @@ Element.implement({
 					this.store('removed', location);
 					bar.dispose().retrieve('fields').each(function(el){
 						el.hasClass('rteTextArea')
-							? el.addClass('rteHide').removeClass('rteShow').getNext('textarea').addClass('rteShow').removeClass('rteHide')
-							: el.removeEvents().set('contentEditable',false);
+							? el
+								.addClass('rteHide')
+								.removeClass('rteShow')
+								.getNext('textarea')
+								.addClass('rteShow')
+								.removeClass('rteHide')
+							: el
+								.store('elEvents', new Element('div').cloneEvents(el))
+								.removeEvents()
+								.set('contentEditable',false);
 					});
 				break;
 				case 'destroy':
