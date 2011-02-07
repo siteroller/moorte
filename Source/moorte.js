@@ -157,6 +157,24 @@ MooRTE.Range = {
 		if (!sel) return null;
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
+	, content: new Element('div')
+	, get: function(type, range){
+		if (!range) range = MooRTE.Range.create();
+		
+		switch (type){
+			case 'text': return range.text || range.toString();
+			case 'node': return range.cloneContents 
+								? range.cloneContents() 
+								: new Element('div', {html:range.htmlText});
+			default: case 'html': var content = range.htmlText;
+				if (!content){
+					var html = range.cloneContents();
+					MooRTE.Range.content.empty().appendChild(html);
+					content = MooRTE.Range.content.innerHTML;
+				}; 
+				return content;
+		}
+	}
 	, set: function(range){
 		range = MooRTE.ranges[range || 'a1'];
 		if (range.select) range.select();
@@ -166,12 +184,6 @@ MooRTE.Range = {
 			sel.addRange(range);
 		}
 		return MooRTE.Range;
-	}
-	, get: function(type, range){
-		if (!range) range = MooRTE.Range.create();
-		return type == 'text' 
-			? range.text || range.toString()
-			: range.htmlText; // ToDo: Fix - Currently no HTML response for non-IE browsers
 	}
 	, insert: function(what, range){ //html option that says if text or html?
 		if (Browser.ie){
@@ -539,7 +551,7 @@ Element.implement({
 		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
 		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
-		if (!params.cmd || (params.cmd == 'create')){
+		if (!params.cmd || 'create,show,restore'.contains(params.cmd)){
 			if (removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
 				this.eliminate('removed');
@@ -549,8 +561,12 @@ Element.implement({
 			if (!bar) return false;
 			switch (params.cmd.toLowerCase()){
 				case 'remove':
+					bar.retrieve('fields').each(function(el){
+						el.set('contentEditable',false);
+					});
 					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
-					new Element('span').replaces(bar).destroy(); break;
+					bar.dispose(); //new Element('span').replaces(bar).destroy(); break;
+				break;
 				case 'destroy': 
 					bar.retrieve('fields').each(function(el){
 						el.removeEvents().eliminate('bar').set('contentEditable',false);
