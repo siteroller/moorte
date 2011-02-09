@@ -635,7 +635,7 @@ MooRTE.Elements = {
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
-   , div				:{ element:'div'}
+   , div				:{ element:'div' }
    , bold		 	:{ img:1, shortcut:'b', source:'<b>' }
    , italic		 	:{ img:2, shortcut:'i', source:'<i>' }
    , underline	 	:{ img:3, shortcut:'u', source:'<u>' }
@@ -660,12 +660,12 @@ MooRTE.Elements = {
    , superscript	:{ img:17 }
    , outdent		:{ img:11 }
    , indent			:{ img:12 }
-   , insertorderedlist:{img:14, title:'Numbered List'}
-   , insertunorderedlist:{img:15, title:'Bulleted List'}
-   , selectall   	:{ img:25, title:'Select All (Ctrl + A)'}
-   , removeformat	:{ img:26, title:'Clear Formatting'}
-   , undo        	:{ img:31, title:'Undo (Ctrl + Z)'}
-   , redo         :{ img:32, title:'Redo (Ctrl+Y)'}
+   , insertorderedlist:  { img:14, title:'Numbered List' }
+   , insertunorderedlist:{ img:15, title:'Bulleted List' }
+   , selectall   	:{ img:25, title:'Select All (Ctrl + A)' }
+   , removeformat	:{ img:26, title:'Clear Formatting' }
+   , undo        	:{ img:31, title:'Undo (Ctrl + Z)' }
+   , redo         :{ img:32, title:'Redo (Ctrl+Y)' }
    , inserthorizontalrule:{img:56, title:'Insert Horizontal Line'}
    , cut				:{ img:20
 						 , title:'Cut (Ctrl+X)'
@@ -706,21 +706,26 @@ MooRTE.Elements = {
 								).send(Object.toQueryString(content));
 							}
 						 }
-   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}
-   , DisplayHTML	:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
-						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 
-						var size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-						this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
-					}}
+   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML'] }
+   , DisplayHTML	:{ element: 'textarea'
+						 , unselectable:'off'
+						 , 'class': 'displayHtml'
+						 , init:function(){ 
+								var el= this.getParent('.MooRTE').retrieve('fields')
+								  , p = el.getParent()
+								  , size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
+								this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+							}
+						 }
    , colorpicker	:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
-						//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
-						//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-						//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
-						//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
-						var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
-						for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-						var hex = [c[0],c[2],c[1]].rgbToHex();
-					}}
+							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
+							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
+							//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
+							var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
+							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
+							var hex = [c[0],c[2],c[1]].rgbToHex();
+						 }}
    , hyperlink		:{ img:46
 					   , title:'Create hyperlink'
 					   , onClick:function(){
@@ -752,8 +757,8 @@ MooRTE.Elements = {
 									MooRTE.Elements.linkPop.hide();
 								}
 							})
-					}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , 'Upload Photo' :{ img: 15
+						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
+   , 'Upload Photo':{ img: 15
 					   , onLoad: function(){
 							MooRTE.Utilities.assetLoader({ //new Loader({
 								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
@@ -779,7 +784,7 @@ MooRTE.Elements = {
 							})
 						}							
 					}
-   , blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ element:'span' }
    , viewSource		:{ img:35, onClick:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
