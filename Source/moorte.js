@@ -27,12 +27,12 @@ Join our group at: http://groups.google.com/group/moorte
 ...
 */
 
-function obj(key, val){
+Browser.webkit = Browser.safari || Browser.chrome;
+Object.extend('set', function(key, val){
 	var obj = {};
 	obj[key] = val;
 	return obj;
-}
-Browser.webkit = Browser.safari || Browser.chrome;
+});
 
 var MooRTE = new Class({
 	
@@ -78,7 +78,7 @@ var MooRTE = new Class({
 					}
 				});
 			
-			if (Browser.firefox) el.innerHTML += '<p><br></p>';
+			if (Browser.firefox) el.innerHTML += '&nbsp;<p id="rteMozFix"><br></p>';
 			
 			el.store('bar', rte)
 				.addEvents({ keydown: MooRTE.Utilities.shortcuts
@@ -157,6 +157,7 @@ MooRTE.Range = {
 		if (!sel) return null;
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
+	, selection: window.getSelection()
 	, content: new Element('div')
 	, get: function(type, range){
 		if (!range) range = MooRTE.Range.create();
@@ -294,9 +295,10 @@ MooRTE.Utilities = {
 		update.custom.each(function(){
 			vals[2].call(vals[1], vals[0]);
 		});
-		if (Browser.firefox) ;
-		//console.log(MooRTE.Range.create());
-		//if (Browser.firefox) // && cursor is ahead of trailing <p><br><p>) bring it back
+		if (Browser.firefox && MooRTE.Range.selection.anchorNode.id == 'rteMozFix'){
+			MooRTE.Range.selection.extend(MooRTE.Range.selection.anchorNode.parentNode, 0);
+			//MooRTE.Range.selection.collapseToStart();
+		}
 	}
 	, addElements: function(buttons, place, relative, name){
 		if (!place) place = MooRTE.activeBar.getFirst();
@@ -318,7 +320,7 @@ MooRTE.Utilities = {
 				switch(typeOf(item)){
 					case 'string': btns.push(item); break;
 					case 'array' : item.each(function(val){btns.push(val)}); loop = (item.length==1); break;	//item.each(buttons.push);
-					case 'object': Object.each(item, function(val,key){ btns.push(obj(key,val)) }); break;			
+					case 'object': Object.each(item, function(val,key){ btns.push(Object.set(key,val)) }); break;			
 				}
 			})
 		} while (loop && ++loopStop < 5); //Remove loopstop variable after testing!!
