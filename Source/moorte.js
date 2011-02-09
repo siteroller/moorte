@@ -621,58 +621,91 @@ Elements.implement({
 
 MooRTE.Elements = {
 
-   // Groups (Flyouts) - Sample groups.  Groups are created dynamically by the download builder. 
+   // Groups are Samples - They can be created manually, or dynamically by the download builder.
+	// Groups (Menus)
      Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] }
    , File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] }
    , Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] }//'Upload Photo'
    , View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] }
 
-   // Groups (Flyouts) - All groups should be created dynamically by the download builder. 
+   // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
-   , div			:{element:'div'}
-   , bold		 	:{img:1, shortcut:'b', source:'<b>' }
-   , italic		 	:{img:2, shortcut:'i', source:'<i>' }
-   , underline	 	:{img:3, shortcut:'u', source:'<u>' }
-   , strikethrough	:{img:4}
-   , justifyleft	:{img:6, title:'Justify Left', onUpdate:function(cmd,val){
-						var t = MooRTE.activeField.retrieve('bar').getElement('.rtejustify'+(val=='justify'?'full':val)); 
-						t.getParent().getParent().setStyle('background-position', t.addClass('rteSelected').getStyle('background-position'));
-					}}
-   , justifyfull	:{img:7, title:'Justify Full'  }
-   , justifycenter	:{img:8, title:'Justify Center'}
-   , justifyright	:{img:9, title:'Justify Right' }
-   , subscript		:{img:18}
-   , superscript	:{img:17}
-   , outdent		:{img:11}
-   , indent			:{img:12}
+   , div				:{ element:'div'}
+   , bold		 	:{ img:1, shortcut:'b', source:'<b>' }
+   , italic		 	:{ img:2, shortcut:'i', source:'<i>' }
+   , underline	 	:{ img:3, shortcut:'u', source:'<u>' }
+   , strikethrough:{ img:4 }
+   , justifyleft	:{ img:6
+						 , title:'Justify Left'
+						 , onUpdate:function(cmd,val){
+								var t = MooRTE
+											.activeField
+											.retrieve('bar')
+											.getElement('.rtejustify' + (val == 'justify' ? 'full' : val))
+								  , pos = t.addClass('rteSelected').getStyle('background-position');
+								t.getParent()
+									.getParent()
+									.setStyle('background-position', pos);
+							}
+						 }
+   , justifyfull	:{ img:7, title:'Justify Full'  }
+   , justifycenter:{ img:8, title:'Justify Center'}
+   , justifyright	:{ img:9, title:'Justify Right' }
+   , subscript		:{ img:18 }
+   , superscript	:{ img:17 }
+   , outdent		:{ img:11 }
+   , indent			:{ img:12 }
    , insertorderedlist:{img:14, title:'Numbered List'}
    , insertunorderedlist:{img:15, title:'Bulleted List'}
-   , selectall   	:{img:25, title:'Select All (Ctrl + A)'}
-   , removeformat	:{img:26, title:'Clear Formatting'}
-   , undo        	:{img:31, title:'Undo (Ctrl + Z)'}
-   , redo         	:{img:32, title:'Redo (Ctrl+Y)'}
+   , selectall   	:{ img:25, title:'Select All (Ctrl + A)'}
+   , removeformat	:{ img:26, title:'Clear Formatting'}
+   , undo        	:{ img:31, title:'Undo (Ctrl + Z)'}
+   , redo         :{ img:32, title:'Redo (Ctrl+Y)'}
    , inserthorizontalrule:{img:56, title:'Insert Horizontal Line'}
-   , cut			:{ img:20, title:'Cut (Ctrl+X)', onLoad:MooRTE.Utilities.clipStickyWin,
-						onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-					}
-   , copy        	:{ img:21, title:'Copy (Ctrl+C)', onLoad:MooRTE.Utilities.clipStickyWin,
-						onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-					}
-   , paste       	:{img:22, title:'Paste (Ctrl+V)', onLoad:MooRTE.Utilities.clipStickyWin, //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
-						onClick:function(action){ Browser.firefox || Browser.webkit ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-					}
-   , save			:{ img:27, src:'http://siteroller.net/test/save.php', onClick:function(){
-						var content = { 'page': window.location.pathname }, next = 0; content.content=[]; 
-						this.getParent('.MooRTE').retrieve('fields').each(function(el){
-							content['content'][next++] = MooRTE.Utilities.clean(el);
-						});
-						new Request({url:MooRTE.Elements.save.src, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}}).send(Object.toQueryString(content));
-					}}
+   , cut				:{ img:20
+						 , title:'Cut (Ctrl+X)'
+						 , onLoad:MooRTE.Utilities.clipStickyWin
+						 , onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+						 }
+   , copy			:{ img:21
+						 , title:'Copy (Ctrl+C)'
+						 , onLoad:MooRTE.Utilities.clipStickyWin
+						 ,	onClick: function(action){ 
+								Browser.firefox 
+									? MooRTE.Elements.clipPop.show() 
+									: MooRTE.Utilities.exec(action); 
+							}
+						 }
+   , paste			:{ img:22
+						 , title: 'Paste (Ctrl+V)'
+						 , onLoad: MooRTE.Utilities.clipStickyWin //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
+						 , onClick: function(action){ 
+								Browser.firefox || Browser.webkit 
+									? MooRTE.Elements.clipPop.show() 
+									: MooRTE.Utilities.exec(action); 
+							}
+						 }
+   , save			:{ img:27
+						 , src:'http://siteroller.net/test/save.php'
+						 , onClick:function(){
+								var content = { 'page': window.location.pathname }
+								  , next = 0; 
+								content.content = []; 
+								this.getParent('.MooRTE').retrieve('fields').each(function(el){
+									content['content'][next++] = MooRTE.Utilities.clean(el);
+								});
+								new Request(
+									{ url: MooRTE.Elements.save.src
+									, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}
+									}
+								).send(Object.toQueryString(content));
+							}
+						 }
    , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML']}
    , DisplayHTML	:{ element:'textarea', 'class':'displayHtml', unselectable:'off', init:function(){ 
 						var el=this.getParent('.MooRTE').retrieve('fields'), p = el.getParent(); 

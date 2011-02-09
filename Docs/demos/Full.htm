@@ -2,15 +2,14 @@
 <html>
 	<head>
 		<title>MooRTE Full Demo</title>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
-		<script type="text/javascript" src="js/MooTools/more/depender.js"></script>
-		<script type="text/javascript" src="../Source/moorte.js"></script>
-		<link   type="text/css" rel="stylesheet" href="js/MooRTE/Source/moorte.css">
+		<link   type="text/css" rel="stylesheet" href="../../Source/Assets/moorte.css">
+		<script type="text/javascript" src="../../Source/Assets/scripts/mootools.13.js"></script>
+		<script type="text/javascript" src="../../Source/Assets/scripts/AssetLoader.js"></script>
+		<script type="text/javascript" src="../../Source/moorte.js"></script>
 		<script>
-			/* Defined groups can be overwritten by changing the button in the group array as follows:
-				MooRTE.Elements.extend({
-					Main   :{ text:'Main'  , 'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] },
-					File   :{ text:'File'  , 'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] },
+			/* Defined groups can be overwritten by changing the button in the group array:
+				Object.append(MooRTE.Elements, {
+					Main: { text:'Main', ..your properties here.. }
 				});
 			*/
 			window.addEvent('domready',function(){
