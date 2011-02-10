@@ -285,7 +285,7 @@ MooRTE.Utilities = {
 				catch(e){ val = false }
 				vals[1][(val ? 'add' : 'remove') + 'Class']('rteSelected');
 				// Try/Catch works around issue #2.
-				// insertorderedlist & insertunorderedlist have been disabled on line 263 for FF errs when textfield is empty.
+				// Note1.
 			}
 		});
 		update.value.each(function(vals){
@@ -314,7 +314,7 @@ MooRTE.Utilities = {
 	
 		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. It was then removed, probably by mistake, till 2009-12-09 13:18:15 
 		var loopStop = loop = 0; //Remove loopstop variable after testing!!
-		do{
+		do {
 			if (btns[0]) buttons = btns, btns = [];
 			Array.from(buttons).each(function(item){
 				switch(typeOf(item)){
@@ -327,17 +327,18 @@ MooRTE.Utilities = {
 
 		btns.each(function(btn){
 			var btnVals;
-			if (typeOf(btn)=='object'){
+			if (Type.isObject(btn)){
 				btnVals = Object.values(btn)[0];
 				btn = Object.keys(btn)[0];
 			}
 			var btnClass = btn.split('.'); //[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn = btnClass.shift();
-			// var e = parent.getElement('[class~='+name+']'||'.rte'+btn); 
-			var e = parent.getElement('[class~='+name+']') || parent.getElement('.rte'+btn);
+
+			var e = parent.getElement('[class~='+name+']');//|| parent.getElement('.rte'+btn );
+			// console.log('addElements called. buttons:',buttons,', btn is:',btn,', e is:',e,', func args are:',arguments);
 			if (!e || name == 'rteGroup_Auto'){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,'.contains(btn.toLowerCase()+',');// insertorderedlist,insertunorderedlist,
+				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
 				
 				var properties = Object.append({
 					href:'javascript:void(0)',
@@ -349,7 +350,6 @@ MooRTE.Utilities = {
 							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
 							  , source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
-							//console.log(val)
 							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
 							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
 							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
@@ -384,8 +384,9 @@ MooRTE.Utilities = {
 				//if (val.shortcut) parent.retrieve('shortcuts',{}).set(val.shortcut,btn);
 				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
-				if (btnVals) MooRTE.Utilities.addElements(btnVals, e);
-				else if (val.contains) MooRTE.Utilities.addElements(val.contains, e);
+
+				var sub = btnVals || val.contains;
+				if (sub) MooRTE.Utilities.addElements(sub, e);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
 			e.removeClass('rteHide')
@@ -885,3 +886,6 @@ MooRTE.Elements = {
    // Deprecated
    , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
 };
+
+
+// Note1: insertorderedlist & insertunorderedlist restored to btn loop in MooRTE.Elements. Had been removed due to FF errs when textfield was empty.
