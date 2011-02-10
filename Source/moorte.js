@@ -250,14 +250,6 @@ MooRTE.Utilities = {
 	exec: function(args){
 		args = Array.from(args);
 		document.execCommand(args[0], args[2]||null, args[1]||false);
-		//args = Array.from(arguments).flatten();  // Deprecated? Used to be able to pass in array, I think we use .pass([array]) for that now.
-		//console.log(args[0], args[2]||null, args[1]||false)
-		//var g = Browser.firefox && 'ju,in,ou'.contains(args[0].substr(0,2).toLowerCase());
-		//console.log(g);
-		//if (g) document.designMode = 'on';
-		//document.execCommand(args[0], args[2]||null, args[1]||false);
-		//if (g) document.designMode = 'off';
-		//console.log('phew')
 	}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
