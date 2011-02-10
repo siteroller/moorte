@@ -1,3 +1,4 @@
+All this should be moved to the issues section on GitHUB when someone who has access is bored.
 
 Known Issues:
 1. Regex to convert string to object: Easy but tedious to fix - If these are important to anyone, let me know!
