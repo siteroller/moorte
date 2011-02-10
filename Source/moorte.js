@@ -157,8 +157,6 @@ MooRTE.Range = {
 		if (!sel) return null;
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
-	, selection: window.getSelection()
-	, content: new Element('div')
 	, get: function(type, range){
 		if (!range) range = MooRTE.Range.create();
 		
@@ -245,6 +243,11 @@ MooRTE.Range = {
 			: range.commonAncestorContainer;
 	}
 };
+
+(function(){
+		if (Browser.firefox) MooRTE.Range.selection = window.getSelection();
+		if (!Browser.ie) MooRTE.Range.content = new Element('div');
+}());
 
 MooRTE.Utilities = {
 	exec: function(args){
