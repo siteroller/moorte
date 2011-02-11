@@ -399,8 +399,7 @@ MooRTE.Utilities = {
 				event.push(name, onEvent);
 				MooRTE.Utilities[event.shift()].apply(caller, event); break;
 			case 'object':
-				Object.every(event, function(val,key){
-					val = Type.isArray(val) ? Array.clone(val) : Type.isObject(val) ? Object.clone(val) : val;
+				Object.every(Object.clone(event), function(val,key){
 					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
 				}); break;
 			case 'string':
