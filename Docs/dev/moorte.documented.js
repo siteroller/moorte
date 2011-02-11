@@ -294,15 +294,29 @@ MooRTE.Utilities = {
 			
 	},
 	
-	eventHandler: function(onEvent, caller, name){
-		var event;
-		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
-		switch($type(event)){
-			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': MooRTE.Utilities.eventHandler(event, caller, name); break;
-			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+	, eventHandler: function(onEvent, caller, name){
+		// UNTESTED: Function completely rewritten for v1.3
+		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		var event = MooRTE.Elements[name][onEvent];
+		switch(typeOf(event)){
+			case 'function':
+				event.call(caller, name, onEvent); break;
+			case 'array': // Deprecated, for backwards compatibility only.
+				event = Array.clone(event);
+				event.push(name, onEvent);
+				MooRTE.Utilities[event.shift()].apply(caller, event); break;
+			case 'object':
+				Object.every(event, function(val,key){
+					// key - the function name, eg. "group". val - the arguments, eg "{Toolbar:['start','Html/Text']}"
+					// name - the key in the Elements array, eg "View", onEvent - the event, eg."onClick"
+					val = Type.isArray(val) ? Array.clone(val) : Type.isObject(val) ? Object.clone(val) : val;
+					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
+				}); break;
+			case 'string':
+				onEvent == 'source' && onEvent.substr(0,2) != 'on'
+					? MooRTE.Range.wrapText(event, caller)
+					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
-	},
 	
 	group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');

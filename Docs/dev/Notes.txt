@@ -4,8 +4,9 @@ Known Issues:
 1. Regex to convert string to object: Easy but tedious to fix - If these are important to anyone, let me know!
 	a) will not ignore escaped qoutes.  Use double/single quotes. 
 	b) Objects nested more than one layer deep will not become objects (a:b:c will become {a:{b:c}}), but so will a:b:c:d, which will become a:{b:{c:d}}
-2. Throws an error sometimes when inline
-3. When inline - clicking the bar should not make it dissapear!!
+2. When Inline:
+	a) Throws an error sometimes
+	b) Clicking the bar makes the RTE dissapear!!
 
 Ideapad:
 a) Add variable to signify whether or not buttons should be run.
@@ -14,23 +15,20 @@ c) Editing functions should not work out of the scope of the toolbar's fields (I
 d) inline toolbar class should be added to button hash, for the who want all their toolbars on the same line (like toolbars in word)
 e) create a structure to add or remove elements with a .mooInline().  Adding should be made available for all elements that are passed if option is set.
 f) default styles for 'a' etc should be added to api docs
-g) add object of functions it should check on each update key {widetBtn:function(){widteVar?true:false;}}
 h) add an onExpand, onExpandHidden and onCollapse, and a onCollapse function
 i) and a expanded() when all are, or a different set of rules for init on menus?
-j) onIint:expand() and expandHidden should expand.
+j) onInit:expand() and expandHidden should expand.
 k) Add a tab button.
 l) Add an onHide() handler
 m) add the logic of hides to the API.
 n) Logic for overflow [buttons that dont fit] should be added to either each button in the Hash, or globally.  Options should be noted.
 o) Add invisible parameter to make invisible? or rely on adding the miHide class 
-p) Should each passed in element of an object be checked if it exists?  If yes, how will it define what already exists?  [ie. mitoolbar exists many times, but the right one is needed.]  
-	Perhaps, in the onLoad/onInit/onClick it should be able to take multiple classes inside parenthasis.  So toolbar(insertImage):['it0', 'it2(it3)'] should look for the element classed insertImage, and add a toolbar with that class if it does not exist. 
+p) In eventhandler, that which is now an array should rather be an object. Perhaps add a Object.first() method that returns an array with the first item.
 q) in index.htm it put the toolbar bottom left when floating.  should adjust for centering and for margins while floating.
 r) should it prevent text from being inserted before it while inline?
 s) pageTop & bottom should be inserted inline if float is false.
 t) All hashes are now global, which means that no two instances of the class can have the same button doing different things.
-Perhaps they should be namespaced so that buttons can be modified, and the buttons/updates will match whatever was set for that instance.
-u)
+	Perhaps they should be namespaced so that buttons can be modified, and the buttons/updates will match whatever was set for that instance.
 
 Design Decisions:
 a) Logic of button check:
@@ -43,4 +41,19 @@ b) What parameters should addCollection require?
 	Ideally should not require so much: 
 		Buttons(cannot just pass location, as this is more flexible, and any button can have button list in more than one place)
 		Containing div (key of object).  Optional, as it will use a plain div (with the styles of a tollbar from openwysiwyg) if none is passed.
-		Group which the containing div is a part of.  -  explain - should groups be maintained separat
+		Group which the containing div is a part of.  -  explain - should groups be maintained separately
+	b) When adding an element, what should happen if an element with the same name.class already exists?
+		Eg. addElements('div.Flyout:justify') will attempt to add a div.Flyout, which may exist from 'div.Flyout:indent'
+			a. Abort; do not create the element.
+				If so, we can have it abort only if all classes match. Support needed for 'div.Flyout.Indents'.
+				Or we can require another class or group name passed in a sa parameter.
+				For other cases, we would need to choose b or c:
+			b. Do not create the element, but continue to loop recursively if any children can be added 
+				(eg. In above example, you would now have div.Flyout containing justify and indent together.
+			c. Create a new element with the same class as the existing element.
+				This would be problematic, as all groups are built from the top matching the same class names.
+			d. Look for a flag with instructions.
+				This means adding another argument.
+			This thought was formerly above as follows:
+				p) Should each passed in element of an object be checked if it exists?  If yes, how will it define what already exists?  [ie. mitoolbar exists many times, but the right one is needed.]  
+					Perhaps, in the onLoad/onInit/onClick it should be able to take multiple classes inside parenthasis.  So toolbar(insertImage):['it0', 'it2(it3)'] should look for the element classed insertImage, and add a toolbar with that class if it does not exist. 

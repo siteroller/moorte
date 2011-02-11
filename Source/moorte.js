@@ -389,16 +389,20 @@ MooRTE.Utilities = {
 			
 	}
 	, eventHandler: function(onEvent, caller, name){
-		// UNTESTED: Function rewritten do to removal of $unlink in v1.3  //if(!event) return;
-		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		// Must check if function or string is modified now that $unlink is gone. Should be OK.
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
 				event.call(caller, name, onEvent); break;
-			case 'array':
+			case 'array': // Deprecated.
 				event = Array.clone(event);
 				event.push(name, onEvent);
 				MooRTE.Utilities[event.shift()].apply(caller, event); break;
+			case 'object':
+				Object.every(event, function(val,key){
+					val = Type.isArray(val) ? Array.clone(val) : Type.isObject(val) ? Object.clone(val) : val;
+					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
+				}); break;
 			case 'string':
 				onEvent == 'source' && onEvent.substr(0,2) != 'on'
 					? MooRTE.Range.wrapText(event, caller)
@@ -619,8 +623,8 @@ MooRTE.Elements = {
 
    // Groups are Samples - They can be created manually, or dynamically by the download builder.
 	// Groups (Menus)
-     Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:['group',{Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}] }
-   , File			:{text:'File',   'class':'rteText', onClick:['group',{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}] }
+     Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{group: {Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}} }
+   , File			:{text:'File',   'class':'rteText', onClick:{group: {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']} } }
    , Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] }//'Upload Photo'
    , View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] }
