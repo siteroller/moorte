@@ -328,10 +328,11 @@ MooRTE.Utilities = {
 			}
 			var btnClass = btn.split('.'); //[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn = btnClass.shift();
-
+			btnClass = btnClass.length ? ' rte' + btnClass.join(' rte') : '';
+			
 			var e = parent.getElement('[class~='+name+']');//|| parent.getElement('.rte'+btn );
-			// console.log('addElements called. buttons:',buttons,', btn is:',btn,', e is:',e,', func args are:',arguments);
-			if (!e || name == 'rteGroup_Auto'){
+			console.log('addElements called. buttons:',buttons,', btn is:',btn,', e is:',e,', func args are:',arguments);
+			if (!e){// || name == 'rteGroup_Auto'
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
 				
@@ -368,7 +369,7 @@ MooRTE.Utilities = {
 					});
 				
 				e = new Element(input && !val.element ? 'input' : val.element || 'a', properties)
-					.addClass((name||'') + ' rte' + btn + (btnClass ? ' rte' + btnClass : ''))
+					.addClass((name||'') + ' rte' + btn + btnClass)//(btnClass ? ' rte' + btnClass : ''))
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
