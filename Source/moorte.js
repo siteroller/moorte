@@ -105,7 +105,7 @@ var MooRTE = new Class({
 					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
 					.inject(document.body);
 		MooRTE.activeBar = rte; // not used!
-		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
+		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom'])//,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	}
 	, positionToolbar: function (el, rte){
@@ -296,11 +296,16 @@ MooRTE.Utilities = {
 			//MooRTE.Range.selection.collapseToStart();
 		}
 	}
-	, addElements: function(elements, place, relative, name){//useExistingEls
-		if (!place) place = MooRTE.activeBar.getFirst();
+	, addElements: function(elements, place, options){
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		if (!place) place = MooRTE.activeBar.getFirst();
+		else if (Type.isArray(place)){
+			var relative = place[1]; 
+			place = place[0];
+		}
+		if (!options) options = {};
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
-		
+
 		if (typeOf(elements) == 'string'){
 			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
 			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
@@ -335,13 +340,11 @@ MooRTE.Utilities = {
 				btn = Object.keys(btn)[0];
 			}
 			
-			var btnClass = '.rte' + btn.replace('.','.rte') + (name ? '.'+name : '')
+			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className : '')// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			  , btn = btn.split('.')[0]
-			  , e = parent.getElement(btnClass);
-// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
-// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
-// console.log(e)
-			if (!e || !name){
+			  , e = parent.getElement(btnClass);	// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
+
+			if (!e || !options.useExistingEls){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
 				
@@ -376,19 +379,16 @@ MooRTE.Utilities = {
 					.each(function(key){
 						delete properties[key];
 					});
-				
+console.log(place,relative)
 				e = new Element((input && !val.element ? 'input' : val.element || 'a') + btnClass, properties)
-					//.addClass((name||'') + ' rte' + btn + btnClass)//(btnClass ? ' rte' + btnClass : ''))
-					//.addClass(btnClass.replace('.',' ') + useExistingEls ? ' rteGroup_Auto' : ' ')
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
 					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
-						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'.contains(btn.toLowerCase()+',') ? 
-						'value' : (state ? 'state' : 'custom')
+						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'
+							.contains(btn.toLowerCase()+',') ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
-				//if (val.shortcut) parent.retrieve('shortcuts',{}).set(val.shortcut,btn);
-				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;
+				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}

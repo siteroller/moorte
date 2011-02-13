@@ -202,9 +202,21 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	addElements: function(buttons, place, relative, name){
-		if (!place) place = MooRTE.activeBar.getFirst();
+	// elements[mixed:string/object/array] - the elements to add.
+	// place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
+	// options [object] - default is { useExistingEls:false - when told to add an element similar to an existing one, do not use existing element.
+	//		, className:'' - any extra classes to add to the element. }
+	addElements: function(buttons, place, options){
+		// Not sure why this is the best place for this check:
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		if (!place) place = MooRTE.activeBar.getFirst();
+		else if (Type.isArray(place)){
+			// In all but IE6, this could be written as [place,relative] = place;
+			var relative = place[1]; 
+			place = place[0];
+		}
+		// If no options are passed in, create an empty object, which is the equivalent to setting defaults to false/''. 
+		if (!options) options = {};
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
 		
 		// elements can be an object/array or a string. eg {'div.Flyout':['indent','outdent']} or "{'div.Flyout':['indent','outdent']}"
