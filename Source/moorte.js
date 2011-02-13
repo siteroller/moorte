@@ -310,7 +310,7 @@ MooRTE.Utilities = {
 		}
 
 		var els = []
-		  , elsLoop = 0; 
+		  , elsLoop = 0;
 		do {
 			if (els.length) elements = els, els = [];
 			Array.from(elements).each(function(item){
@@ -318,11 +318,11 @@ MooRTE.Utilities = {
 					case 'string':
 						els.push(item); break;
 					case 'object':
-						Object.each(item, function(val,key){ 
+						Object.each(item, function(val,key){
 							els.push(Object.set(key,val))
 						}); break;
 					case 'array':
-						item.each(function(val){els.push(val)}); 
+						item.each(function(val){els.push(val)});
 						elsLoop = item.length;
 				}
 			});
@@ -338,7 +338,8 @@ MooRTE.Utilities = {
 			btn = btnClass.shift();
 			btnClass = btnClass.length ? ' rte' + btnClass.join(' rte') : '';
 			
-			var e = parent.getElement('[class~='+name+']');//|| parent.getElement('.rte'+btn );
+			var e = parent.getElement('.rte'+btn );//var e = parent.getElement('[class~='+name+']');
+			console.log(e,name, btn);
 			//console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 			if (!e){// || name == 'rteGroup_Auto'
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
@@ -389,11 +390,11 @@ MooRTE.Utilities = {
 				//if (val.shortcut) parent.retrieve('shortcuts',{}).set(val.shortcut,btn);
 				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
-
-				var sub = btnVals || val.contains;
-				if (sub) MooRTE.Utilities.addElements(sub, e);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
+			
+			var sub = btnVals || val.contains;
+			if (sub) MooRTE.Utilities.addElements(sub, e);
 			e.removeClass('rteHide')
 		})
 			
