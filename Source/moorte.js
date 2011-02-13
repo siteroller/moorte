@@ -27,6 +27,7 @@ Join our group at: http://groups.google.com/group/moorte
 ...
 */
 
+var loopStop = 0; // Testing only
 Browser.webkit = Browser.safari || Browser.chrome;
 Object.extend('set', function(key, val){
 	var obj = {};
@@ -295,32 +296,42 @@ MooRTE.Utilities = {
 			//MooRTE.Range.selection.collapseToStart();
 		}
 	}
-	, addElements: function(buttons, place, relative, name){
+	, addElements: function(elements, place, relative, name){
 		if (!place) place = MooRTE.activeBar.getFirst();
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), btns = []; 
-		if (typeOf(buttons) == 'string'){
-			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
-			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
-			buttons = JSON.decode('['+buttons+']');
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
+		
+		if (typeOf(elements) == 'string'){
+			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+			while (elements != (elements = elements.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
+			elements = JSON.decode('['+elements+']');
 		}
-	
-		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. It was then removed, probably by mistake, till 2009-12-09 13:18:15 
-		var loopStop = loop = 0; //Remove loopstop variable after testing!!
-		do {
-			if (btns[0]) buttons = btns, btns = [];
-			Array.from(buttons).each(function(item){
-				switch(typeOf(item)){
-					case 'string': btns.push(item); break;
-					case 'array' : item.each(function(val){btns.push(val)}); loop = (item.length==1); break;	//item.each(buttons.push);
-					case 'object': Object.each(item, function(val,key){ btns.push(Object.set(key,val)) }); break;			
-				}
-			})
-		} while (loop && ++loopStop < 5); //Remove loopstop variable after testing!!
 
-		btns.each(function(btn){
+		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. 
+		// It was then removed, probably by mistake, till 2009-12-09 13:18:15 
+		var els = []  // 'elements' becomes 'els'.
+		  , loop = 0; 
+		do {
+			if (els.length) elements = els, els = [];
+			Array.from(elements).each(function(item){
+				switch(typeOf(item)){
+					case 'string':
+						els.push(item); break;
+					case 'object':
+						Object.each(item, function(val,key){ 
+							els.push(Object.set(key,val)) 
+						}); break;
+					case 'array':
+						item.each(function(val){els.push(val)}); 
+						loop = item.length;	
+				}
+			});
+			if (++loopStop > 50) return alert('crashed in addElements array handling'); //Remove loopstop variable after testing!!
+		} while (loop);
+		
+		els.each(function(btn){
 			var btnVals;
 			if (Type.isObject(btn)){
 				btnVals = Object.values(btn)[0];
@@ -331,7 +342,7 @@ MooRTE.Utilities = {
 			btnClass = btnClass.length ? ' rte' + btnClass.join(' rte') : '';
 			
 			var e = parent.getElement('[class~='+name+']');//|| parent.getElement('.rte'+btn );
-			console.log('addElements called. buttons:',buttons,', btn is:',btn,', e is:',e,', func args are:',arguments);
+			//console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 			if (!e){// || name == 'rteGroup_Auto'
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
@@ -370,6 +381,7 @@ MooRTE.Utilities = {
 				
 				e = new Element(input && !val.element ? 'input' : val.element || 'a', properties)
 					.addClass((name||'') + ' rte' + btn + btnClass)//(btnClass ? ' rte' + btnClass : ''))
+					//.addClass(' rte' + btn + btnClass)
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
