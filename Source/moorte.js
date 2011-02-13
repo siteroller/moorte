@@ -296,7 +296,7 @@ MooRTE.Utilities = {
 			//MooRTE.Range.selection.collapseToStart();
 		}
 	}
-	, addElements: function(elements, place, relative, name){
+	, addElements: function(elements, place, relative, name){//useExistingEls
 		if (!place) place = MooRTE.activeBar.getFirst();
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
 		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
@@ -334,14 +334,14 @@ MooRTE.Utilities = {
 				btnVals = Object.values(btn)[0];
 				btn = Object.keys(btn)[0];
 			}
-			var btnClass = btn.split('.'); //[btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			btn = btnClass.shift();
-			btnClass = btnClass.length ? ' rte' + btnClass.join(' rte') : '';
 			
-			var e = parent.getElement('.rte'+btn );//var e = parent.getElement('[class~='+name+']');
-			console.log(e,name, btn);
-			//console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
-			if (!e){// || name == 'rteGroup_Auto'
+			var btnClass = '.rte' + btn.replace('.','.rte') + (name ? '.'+name : '')
+			  , btn = btn.split('.')[0]
+			  , e = parent.getElement(btnClass);
+// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
+// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
+// console.log(e)
+			if (!e || !name){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
 				
@@ -377,9 +377,9 @@ MooRTE.Utilities = {
 						delete properties[key];
 					});
 				
-				e = new Element(input && !val.element ? 'input' : val.element || 'a', properties)
-					.addClass((name||'') + ' rte' + btn + btnClass)//(btnClass ? ' rte' + btnClass : ''))
-					//.addClass(' rte' + btn + btnClass)
+				e = new Element((input && !val.element ? 'input' : val.element || 'a') + btnClass, properties)
+					//.addClass((name||'') + ' rte' + btn + btnClass)//(btnClass ? ' rte' + btnClass : ''))
+					//.addClass(btnClass.replace('.',' ') + useExistingEls ? ' rteGroup_Auto' : ' ')
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
@@ -395,7 +395,7 @@ MooRTE.Utilities = {
 			
 			var sub = btnVals || val.contains;
 			if (sub) MooRTE.Utilities.addElements(sub, e);
-			e.removeClass('rteHide')
+			e.removeClass('rteHide');
 		})
 			
 	}

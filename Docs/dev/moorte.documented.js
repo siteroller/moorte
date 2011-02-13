@@ -253,9 +253,24 @@ MooRTE.Utilities = {
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
 			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			btn=btnClass.shift();
-			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
 			
-			if(!e || name == 'rteGroup_Auto'){
+			// What should happen when attempting to add an element and a similar element already exists?
+			// For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
+			// Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
+			
+			// Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
+			// In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
+			// Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
+			// Fortunately, another bug in the code prevented other problems from arising ;)
+			
+			// Since the aforementioned commit we dropped the name argument. 
+			// Instead, a classname will only be added if it is in the item's title, but multiple classes are allowed. 
+			// eg. div refers to MooRTE.Elements['div']. div.Flyout refers to the same element with the added class rteFlyout. div.Flyout.AnotherClass will add two classes.
+			// By default, a new duplicate element is created. A 'existing' argument was added to tell MooRTE to use the existing element.
+			// Even when 'existing' is true, a new item will be created unless all passed in classes exist.
+			
+			var e = parent.getElement('.rte'+btn);
+			if (!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
