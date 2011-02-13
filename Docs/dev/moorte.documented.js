@@ -203,28 +203,52 @@ MooRTE.Utilities = {
 	},
 	
 	addElements: function(buttons, place, relative, name){
-		if(!place) place = MooRTE.activeBar.getFirst();
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
-		if($type(buttons) == 'string'){
-			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
-			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
-			buttons = JSON.decode('['+buttons+']');
-		}
-	
+		if (!place) place = MooRTE.activeBar.getFirst();
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
 		
-		//the following should be a loop.  When was the loop removed and why?!
-		if(btns[0]){ buttons = btns; btns = [];}
-		$splat(buttons).each(function(item){
-			switch($type(item)){
-				case 'string': btns.push(item); break;
-				case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
-				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
-			}
-		});
+		// elements can be an object/array or a string. eg {'div.Flyout':['indent','outdent']} or "{'div.Flyout':['indent','outdent']}"
+		// MooRTE allows an invalid JSON string with implied Object and Array braces. eg: "'div.Flyout':[indent,outdent]"
+		// The following turns it into valid JSON and converts it into an object or array.
+		if (typeOf(elements) == 'string'){
+			// surround strings with single quotes & convert double to single quoutes. 
+			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
+			// add curly braces to string:string - makes {string:string} 
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+			// add curly braces to string:object.  Eventually fix to allow recursion.
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+			// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
+			while (elements != (elements = elements.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
+			// convert JSON to JS object. 
+			elements = JSON.decode('['+elements+']');
+		}
+			
+		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. 
+		// The loop was then removed, probably by mistake, till 2009-12-09 13:18:15.
+		// As 'elements' may contained nested objects, we must convert it to an array.
+		// We use a new array 'els' instead of 'map', as map would not be able to handle multiple pushes, using each.
+		var els = []
+		  , elsLoop = 0; 
+		do {
+			if (els.length) elements = els, els = [];
+			Array.from(elements).each(function(item){
+				switch(typeOf(item)){
+					case 'string':
+						els.push(item); break;
+					case 'object':
+						Object.each(item, function(val,key){ 
+							els.push(Object.set(key,val)) 
+						}); break;
+					case 'array':
+						item.each(function(val){els.push(val)}); 
+						elsLoop = item.length;	
+				}
+			});
+			// While testing, we add in the loopstop variable
+			// if (++loopStop > 50) return alert('crashed in addElements array handling'); 
+		} while (elsLoop);
 
-		btns.each(function(btn){
+		els.each(function(btn){
 			var btnVals,btnClass;
 			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
 			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6

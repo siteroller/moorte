@@ -309,10 +309,8 @@ MooRTE.Utilities = {
 			elements = JSON.decode('['+elements+']');
 		}
 
-		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. 
-		// It was then removed, probably by mistake, till 2009-12-09 13:18:15 
-		var els = []  // 'elements' becomes 'els'.
-		  , loop = 0; 
+		var els = []
+		  , elsLoop = 0; 
 		do {
 			if (els.length) elements = els, els = [];
 			Array.from(elements).each(function(item){
@@ -321,15 +319,14 @@ MooRTE.Utilities = {
 						els.push(item); break;
 					case 'object':
 						Object.each(item, function(val,key){ 
-							els.push(Object.set(key,val)) 
+							els.push(Object.set(key,val))
 						}); break;
 					case 'array':
 						item.each(function(val){els.push(val)}); 
-						loop = item.length;	
+						elsLoop = item.length;
 				}
 			});
-			if (++loopStop > 50) return alert('crashed in addElements array handling'); //Remove loopstop variable after testing!!
-		} while (loop);
+		} while (elsLoop);
 		
 		els.each(function(btn){
 			var btnVals;
