@@ -339,11 +339,16 @@ MooRTE.Utilities = {
 				btnVals = Object.values(btn)[0];
 				btn = Object.keys(btn)[0];
 			}
+			 
+			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
+			  , e = place['get' + ({before:'Previous', after:'Next', top:'First'}[relative] || 'Last')](btnClass)
+			  , btn = btn.split('.')[0];
+			//, loc = {before:'Previous', after:'Next'}[relative] || 'First'
+			//, e = place['get' + loc](btnClass);
+			//, e = place['get'+ (relative == 'before' ? 'Previous' : relative == 'after' ? 'Next' : 'First')](btnClass);
+			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
+			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			
-			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className : '')// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			  , btn = btn.split('.')[0]
-			  , e = parent.getElement(btnClass);	// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
-
 			if (!e || !options.useExistingEls){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
