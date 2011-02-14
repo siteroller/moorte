@@ -304,7 +304,6 @@ MooRTE.Utilities = {
 			place = place[0];
 		}
 		if (!options) options = {};
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
 
 		if (typeOf(elements) == 'string'){
 			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
@@ -333,26 +332,25 @@ MooRTE.Utilities = {
 			});
 		} while (elsLoop);
 		
+		var bar = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
 		els.each(function(btn){
-			var btnVals;
 			if (Type.isObject(btn)){
-				btnVals = Object.values(btn)[0];
+				var btnVals = Object.values(btn)[0];
 				btn = Object.keys(btn)[0];
 			}
-			 
+
 			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
 			  , e = place['get' + ({before:'Previous', after:'Next', top:'First'}[relative] || 'Last')](btnClass)
 			  , btn = btn.split('.')[0];
-			//, loc = {before:'Previous', after:'Next'}[relative] || 'First'
-			//, e = place['get' + loc](btnClass);
-			//, e = place['get'+ (relative == 'before' ? 'Previous' : relative == 'after' ? 'Next' : 'First')](btnClass);
 			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
-			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			
+		
 			if (!e || !options.useExistingEls){
-				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
-				var state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
-				
+				var bgPos = 0
+				  , val = MooRTE.Elements[btn]
+				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
+				  , input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type)
+				  , state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
+
 				var properties = Object.append({
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
@@ -360,8 +358,8 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events: {
 						mousedown: function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
-							  , source = bar.retrieve('source')
+							MooRTE.activeBar = bar;
+							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
 							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
 							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
@@ -384,20 +382,20 @@ MooRTE.Utilities = {
 					.each(function(key){
 						delete properties[key];
 					});
-console.log(place,relative)
+
 				e = new Element((input && !val.element ? 'input' : val.element || 'a') + btnClass, properties)
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
-					parent.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
+					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'
 							.contains(btn.toLowerCase()+',') ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
-				if (val.shortcut) parent.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
+				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
-			
+
 			var sub = btnVals || val.contains;
 			if (sub) MooRTE.Utilities.addElements(sub, e);
 			e.removeClass('rteHide');

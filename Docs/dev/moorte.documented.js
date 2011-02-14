@@ -261,10 +261,28 @@ MooRTE.Utilities = {
 		} while (elsLoop);
 
 		els.each(function(btn){
-			var btnVals,btnClass;
-			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			btn=btnClass.shift();
+			if (Type.isObject(btn)){
+				var btnVals = Object.values(btn)[0];
+				btn = Object.keys(btn)[0];
+			}
+			
+			// The class is made up of any classes that are appended to the name of the element, 
+			// eg: div.Flyout.Group1 would get the MooRTE.Elements.div with the classes Flyout and Group1
+			// Additionally, we allow classes to be passed in using the options.className option. (multiple classes are seperated with a space.)
+			// The major difference, is that div.Flyout gets prepended with "rte", and className does not.
+			// ToDo: the className option will probably dropped before the next RC.
+			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
+			// Check if the element exists in the location it would be entered into.
+			// eg. if (place == $('myEl')) it will only look for elements already in $('myEl').
+			// This check is (by design) loose - it doesn't check that $('myEl') is the last item, even though the new element is scheduled to be placed as the last item.
+			// we could do an exact check using place['get'+(..'First')].matches(btnClass)
+			// but dont since I think it would interfere with those cases one actually does want to reuse an existing element. because when 
+			  , e = place['get' + ({before:'Previous', after:'Next', top:'First'}[relative] || 'Last')](btnClass)
+			//alternatively written:
+			//, loc = {before:'Previous', after:'Next'}[relative] || 'First', e = place['get' + loc](btnClass);	
+			//, e = place['get'+ (relative == 'before' ? 'Previous' : relative == 'after' ? 'Next' : 'First')](btnClass);
+			, btn = btn.split('.')[0];
+			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			
 			// What should happen when attempting to add an element and a similar element already exists?
 			// For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
@@ -275,11 +293,11 @@ MooRTE.Utilities = {
 			// Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
 			// Fortunately, another bug in the code prevented other problems from arising ;)
 			
-			// Since the aforementioned commit we dropped the name argument. 
-			// Instead, a classname will only be added if it is in the item's title, but multiple classes are allowed. 
-			// eg. div refers to MooRTE.Elements['div']. div.Flyout refers to the same element with the added class rteFlyout. div.Flyout.AnotherClass will add two classes.
-			// By default, a new duplicate element is created. A 'existing' argument was added to tell MooRTE to use the existing element.
-			// Even when 'existing' is true, a new item will be created unless all passed in classes exist.
+			// Since the aforementioned commit it by default will create a new element even if a similar one already exists.
+			// One can force moorte to use an existing element by setting the option - useExistingEls to true. 
+			// Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
+			// eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
+			// Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
 			
 			var e = parent.getElement('.rte'+btn);
 			if (!e){
@@ -293,8 +311,12 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
-							  , source = bar.retrieve('source')
+							// bar is the RTE - the parent element that contains the class 'MooRTE';
+							// There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
+							// var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							// So that bar will map to its own local variable, checked each time the button is pressed.
+							MooRTE.activeBar = bar;
+							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
 							
 							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
