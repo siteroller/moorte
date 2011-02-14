@@ -340,8 +340,10 @@ MooRTE.Utilities = {
 			}
 
 			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
-			  , e = place['get' + ({before:'Previous', after:'Next', top:'First'}[relative] || 'Last')](btnClass)
+			  , loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
+			  , e = place['get' + loc](btnClass)
 			  , btn = btn.split('.')[0];
+			//console.log(btnClass)
 			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 		
 			if (!e || !options.useExistingEls){
@@ -423,11 +425,14 @@ MooRTE.Utilities = {
 		}
 	}
 	, group: function(elements, name){
-		var self = this, parent = this.getParent('.RTE');
+		var self = this
+		  , bar = this.getParent('.RTE');
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
-		Object.each(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]'), function(el){ 
+		//console.log(elements, name);
+		Object.each(MooRTE.Elements[name].hides || self.getSiblings('*[class*=rteAdd]'), function(el){ 
 			el.removeClass('rteSelected');
-			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
+			//bar.getFirst('.rteGroup_' + el.get('class').match(/rteAdd([^ ]+?)\b/)[1]).addClass('rteHide');
+			bar.getFirst('.rteGroup_' + el.get('class').match(/rteAdd([^ ]+?)\b/)[1]).addClass('rteHide');
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
 		this.addClass('rteSelected rteAdd'+name);
@@ -435,7 +440,7 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	}
 	, clipStickyWin: function(caller){
-		// ToDo: create the instance of the AssetLoader, once, afterwrds, just call the load function.
+		// ToDo: create the instance of the AssetLoader once. Then just call the load function.
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) new AssetLoader({
 				onComplete: function(command){
