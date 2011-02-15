@@ -297,7 +297,7 @@ MooRTE.Utilities = {
 		}
 	}
 	, addElements: function(elements, place, options){
-		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source','contains']);
 		if (!place) place = MooRTE.activeBar.getFirst();
 		else if (Type.isArray(place)){
 			var relative = place[1]; 
@@ -343,7 +343,6 @@ MooRTE.Utilities = {
 			  , loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
 			  , e = place['get' + loc](btnClass)
 			  , btn = btn.split('.')[0];
-			//console.log(btnClass)
 			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 		
 			if (!e || !options.useExistingEls){
@@ -373,9 +372,14 @@ MooRTE.Utilities = {
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
 							if (!MooRTE.activeField.contains(holder)) return;
 							
-							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
+							//if (!val.onClick && !source && (!val.element || val.element == 'a'))
+							//	MooRTE.Utilities.exec(val.args||btn);
+							//else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
+							
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
+							!val.onClick && !source && (!val.element || val.element == 'a')
+								? MooRTE.Utilities.exec(val.args || btn)
+								: MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 						}
 					}
 				}, val);
@@ -437,7 +441,7 @@ MooRTE.Utilities = {
 		});
 		this.addClass('rteSelected rteAdd'+name);
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), {className:'rteGroup_'+name}); //[this.getParent('[class*=rteGroup_]'), 'after'] //3rdel
-		MooRTE.Utilities.eventHandler('onShow', this, name);	
+		MooRTE.Utilities.eventHandler('onShow', this, name);
 	}
 	, clipStickyWin: function(caller){
 		// ToDo: create the instance of the AssetLoader once. Then just call the load function.
@@ -809,7 +813,7 @@ MooRTE.Elements = {
 						if(this.hasClass('rteSelected')){
 							bar.eliminate('source');
 							this.removeClass('rteSelected');
-							if(el.contains(el.retrieve('bar'))) el.moorte('remove'); //was hasChild
+							if (el.contains(el.retrieve('bar'))) el.moorte('remove'); //was hasChild
 							el.set('html',ta.addClass('rteHide').get('value')).moorte();
 						} else {
 							bar.store('source','source');

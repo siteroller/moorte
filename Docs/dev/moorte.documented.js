@@ -390,10 +390,37 @@ MooRTE.Utilities = {
 					? MooRTE.Range.wrapText(event, caller)
 					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
-	
+	/*
+	*	function:
+	*		a. Inserts an element with a series of sub elements
+	*		b. Optionally links elements so that when one shows the others are hidden.
+	*	arguments:
+	*		elements[mixed] - The elements to add, as string/JSON/Array/Object.
+	*		name[string] - the MooRTE.Elements that created 'this'. eg: "Main", referring to MooRTE.Elements.Main 
+	*	this: refers to the element that was pressed to trigger the 'group' method, & which contains the group method in its onClick/onLoad property.
+	*	returns: false
+	*
+	*	Adds a class to the button triggering the group .rteAdd_+name
+	*	Calls the onShow eventhandler. By default, this is empty, but it can be configured by any plugin.
+	*	Calls addElements. Adds all elements and gives the topmost a class of .rteGroup_+name. 
+	*		eg. {group:'div.Flyout:[btn]'} will create <div class="rteGroup_div rteFlyout"><a class="rtebtn"></a></div> 
+	*		ToDo: Elements is added to whichever parent of 'this' is part of a group. Not sure what my logic was.
+	*	
+	*	This function will also hide other groups if either of the two conditions are met:
+	*		a. MooRTE.Elements[name] has an attribute 'hides'.
+	*			eg. MooRTE.Elements.Main has a hides:'div'. When Main is clicked it will show the group attached to it, and hide the els specified in hides.
+	* 		b. 'this' has siblings that also have created groups.
+	*			The crazy logic here is that if you have two items which trigger the showing of groups, they are probably tabs.
+	*			otherwise, you would have just included the submenu using 'contains'.
+	*			This logic isn't logical, and should be fixed before v0.6
+	*	ToDo: concept, perhaps eventHandler should allow an array/object of functions to be run, and hides will be a seperate function when hides is specified alongside group
+	*		Also, eventHandler should allow multiple arguments, no?!
+	*
+	*
+	*/
 	group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');
-		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
+		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){
 			el.removeClass('rteSelected');
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
 			MooRTE.Utilities.eventHandler('onHide', self, name);
@@ -402,8 +429,6 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
-	
-	
 	assetLoader:function(args){
 		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
