@@ -372,10 +372,6 @@ MooRTE.Utilities = {
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
 							if (!MooRTE.activeField.contains(holder)) return;
 							
-							//if (!val.onClick && !source && (!val.element || val.element == 'a'))
-							//	MooRTE.Utilities.exec(val.args||btn);
-							//else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
-							
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
 							!val.onClick && !source && (!val.element || val.element == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)
@@ -633,7 +629,7 @@ Element.implement({
 		}
 	}
 });
-Elements.implement({ 
+Elements.implement({
 	moorte:function(){
 		var opts = Array.link(arguments, { 'options': Object.type }).options;
 		return new MooRTE(Object.append(opts||{}, {'elements':this}));
