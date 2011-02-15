@@ -405,7 +405,7 @@ MooRTE.Utilities = {
 			
 	}
 	, eventHandler: function(onEvent, caller, name){
-		// Must check if function or string is modified now that $unlink is gone. Should be OK.
+		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
@@ -428,15 +428,15 @@ MooRTE.Utilities = {
 		var self = this
 		  , bar = this.getParent('.RTE');
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
-		//console.log(elements, name);
-		Object.each(MooRTE.Elements[name].hides || self.getSiblings('*[class*=rteAdd]'), function(el){ 
+		Array.each(MooRTE.Elements[name].hides || self.getSiblings('*[class*=rteAdd]'), function(el){
 			el.removeClass('rteSelected');
 			//bar.getFirst('.rteGroup_' + el.get('class').match(/rteAdd([^ ]+?)\b/)[1]).addClass('rteHide');
-			bar.getFirst('.rteGroup_' + el.get('class').match(/rteAdd([^ ]+?)\b/)[1]).addClass('rteHide');
+			var klass = el.get('class').match(/rteAdd([^ ]+?)\b/)[1];
+			bar.getFirst('.rteGroup_' + klass).addClass('rteHide');
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
 		this.addClass('rteSelected rteAdd'+name);
-		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);//3rdel
+		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), {className:'rteGroup_'+name}); //[this.getParent('[class*=rteGroup_]'), 'after'] //3rdel
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	}
 	, clipStickyWin: function(caller){
