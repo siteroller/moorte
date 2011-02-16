@@ -104,7 +104,7 @@ var MooRTE = new Class({
 		var rte = new Element( 'div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
 					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
 					.inject(document.body);
-		MooRTE.activeBar = rte; // not used!
+		MooRTE.activeBar = rte;
 		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom'])//,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	}
@@ -138,13 +138,15 @@ var MooRTE = new Class({
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
 	}
 	, textArea: function (el){
-		var div = new Element('div', {
-			text:el.get('value'),
-			'class':'rteTextArea '+el.get('class'), 
-			'styles':{width:el.getSize().x}
-		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).inject(el,'before');
+		var div = new Element('div', 
+			{ text: el.get('value')
+			, 'class': 'rteTextArea '+el.get('class')
+			, 'styles': {width:el.getSize().x}
+			} ).setStyle(Browser.ie?'height':'min-height',el.getSize().y)
+				.store('textarea',el).replaces(el);
+			//.inject(el,'before');
 		
-		var form = el.addClass('rteHide').getParent('form');
+		var form = el.getParent('form');//.addClass('rteHide2')
 		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		} });
@@ -579,11 +581,60 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var removed
-		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
+		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
 		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
-		if (!params.cmd || 'create,show,restore'.contains(params.cmd.toLowerCase())){
+		if ('undefined,create,show,restore'.test(params.cmd,'i')){
+			if (!bar) return new MooRTE(Object.append(params.options||{},{'elements':this}));
+			
+			var removed = bar.retrieve('removed');
+			if (!removed) return this.removeClass('rteHide');
+			
+			bar.inject(removed[0], removed[1])
+				.eliminate('removed')
+				.retrieve('fields')
+				.each(function(el){
+					if (el.hasClass('rteTextArea'))
+						el.retrieve('textarea').replaces(el);
+					else {
+						el.set('contentEditable', true);
+						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+					}
+				});
+			return this;
+		}
+		
+		if (!bar) return false;
+		switch (params.cmd.toLowerCase()){
+			case 'hide': 
+				bar.addClass('rteHide'); break;
+			case 'remove':
+				bar.dispose()
+					.store('removed', bar.getPrevious()
+						? [bar.getPrevious(),'after']
+						: [bar.getParent(),'top'])
+					.retrieve('fields')
+					.each(function(el){
+						if (el.hasClass('rteTextArea')){
+							console.log(el, el.retrieve('textarea'))
+							el.retrieve('textarea').replaces(el);// Text should be updated in textarea!!!!!!!!!!!!!!
+						}else {
+							el.set('contentEditable', false);
+							MooRTE.Utilities.removeEvents(el);
+						}
+					});
+			break;
+			case 'destroy':
+				bar.retrieve('fields').each(function(el){
+					if (el.hasClass('rteTextArea')){
+						el.retrieve('textarea').replaces(el);
+						el.destroy();
+					} else el.eliminate('bar').removeEvents().set('contentEditable',false);
+				});
+				bar.destroy();
+		}
+		
+			/*
 			if (removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1])
 					.retrieve('fields').each(function(el){
@@ -603,7 +654,7 @@ Element.implement({
 			}
 			return bar
 				? this.removeClass('rteHide') 
-				: new MooRTE(Object.append(params.options||{},{'elements':this}));
+				: new MooRTE(Object.append(params.options||{},{'elements':this}));		
 		} else {
 			if (!bar) return false;
 			switch (params.cmd.toLowerCase()){
@@ -635,6 +686,7 @@ Element.implement({
 					bar.destroy();
 			}
 		}
+		*/
 	}
 });
 Elements.implement({
