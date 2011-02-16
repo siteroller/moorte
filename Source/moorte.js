@@ -580,8 +580,9 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString})
-		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
+		// if (rte) this.store('bar', rte);
+		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
 		if ('undefined,create,show,restore'.test(params.cmd,'i')){
 			
@@ -624,12 +625,12 @@ Element.implement({
 					});
 			break;
 			case 'detach':
-				var el = this;
-				if (el.hasClass('rteTextArea')){
-					el.retrieve('textarea').set('value', el.get('html')).replaces(el);
+				if (this == bar) return this;
+				if (this.hasClass('rteTextArea')){
+					this.retrieve('textarea').set('value', this.get('html')).replaces(this);
 				} else {
-					el.set('contentEditable', false);
-					MooRTE.Utilities.removeEvents(el);
+					this.set('contentEditable', false);
+					MooRTE.Utilities.removeEvents(this);
 				}
 			break;
 			case 'destroy':
@@ -641,6 +642,7 @@ Element.implement({
 				});
 				bar.destroy();
 		}
+		return this;
 	}
 });
 Elements.implement({
