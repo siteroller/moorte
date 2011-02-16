@@ -584,10 +584,11 @@ Element.implement({
 		  , bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
 		if ('undefined,create,show,restore'.test(params.cmd,'i')){
-			if (!bar) return new MooRTE(Object.append(params.options||{},{'elements':this}));
 			
-			var removed = bar.retrieve('removed');
-			if (!removed) return this.removeClass('rteHide');
+			var removed = bar && bar.retrieve('removed');
+			if (!removed) return bar 
+				? this.removeClass('rteHide')
+				: new MooRTE(Object.append(params.options||{},{'elements':this}));
 			
 			bar.inject(removed[0], removed[1])
 				.eliminate('removed')
@@ -621,6 +622,15 @@ Element.implement({
 							MooRTE.Utilities.removeEvents(el);
 						}
 					});
+			break;
+			case 'detach':
+				var el = this;
+				if (el.hasClass('rteTextArea')){
+					el.retrieve('textarea').set('value', el.get('html')).replaces(el);
+				} else {
+					el.set('contentEditable', false);
+					MooRTE.Utilities.removeEvents(el);
+				}
 			break;
 			case 'destroy':
 				bar.retrieve('fields').each(function(el){
