@@ -64,7 +64,7 @@ var MooRTE = new Class({
 			if (l=='b' || l=='t' || !l) el.set('contentEditable', true);
 			else l == 'e'
 				? self.positionToolbar(el,rte)
-				: el.set('contentEditable',true).addEvents({
+				: MooRTE.Utilities.addEvents(el.set('contentEditable',true), {
 					'focus': function(){ self.positionToolbar(el, rte); },
 					'blur': function(){
 						this.setStyle( 'padding-top'
@@ -81,13 +81,13 @@ var MooRTE = new Class({
 			
 			if (Browser.firefox) el.innerHTML += '&nbsp;<p id="rteMozFix"><br></p>';
 			
-			el.store('bar', rte)
-				.addEvents({ keydown: MooRTE.Utilities.shortcuts
+			el.store('bar', rte);
+			MooRTE.Utilities.addEvents(el, { keydown: MooRTE.Utilities.shortcuts
 					        , keyup  : MooRTE.Utilities.updateBtns
 					        , mouseup: MooRTE.Utilities.updateBtns
 					        , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
 					        });
-			rte.addEvent('mouseup', MooRTE.Utilities.updateBtns);
+			MooRTE.Utilities.addEvents(rte, {'mouseup': MooRTE.Utilities.updateBtns});
 		});
 		rte.store('fields', els);
 		
@@ -145,9 +145,9 @@ var MooRTE = new Class({
 		}).setStyle(Browser.ie?'height':'min-height',el.getSize().y).inject(el,'before');
 		
 		var form = el.addClass('rteHide').getParent('form');
-		if (form) form.addEvent('submit',function(e){
+		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
 			el.set('value', MooRTE.Utilities.clean(div)); 
-		});
+		} });
 		return div;
 	}
 });
@@ -254,6 +254,16 @@ MooRTE.Utilities = {
 	exec: function(args){
 		args = Array.from(args);
 		document.execCommand(args[0], args[2]||null, args[1]||false);
+	}
+	, addEvents: function(el, events){
+		//console.log(events);
+		Object.append(el.retrieve('rteEvents',{}), events);
+		el.addEvents(events);
+	}
+	, removeEvents: function(el){
+		Object.each(el.retrieve('rteEvents',{}), function(fn, event){
+			el.removeEvent(event, fn);
+		});
 	}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
@@ -578,6 +588,7 @@ Element.implement({
 			if (removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1])
 					.retrieve('fields').each(function(el){
+						console.log(el);
 						el.hasClass('rteTextArea')
 							? el
 								.addClass('rteShow')
@@ -585,9 +596,9 @@ Element.implement({
 								.getNext('textarea')
 								.addClass('rteHide')
 								.removeClass('rteShow')
-							: el
+							: (el
 								.set('contentEditable', true)
-								.cloneEvents(el.retrieve('elEvents'));
+								, MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents')));
 					});
 				this.eliminate('removed');
 			}
@@ -604,6 +615,7 @@ Element.implement({
 						: [bar.getParent(),'top'];
 					this.store('removed', location);
 					bar.dispose().retrieve('fields').each(function(el){
+						console.log(el, el.hasClass('rteTextArea'));
 						el.hasClass('rteTextArea')
 							? el
 								.addClass('rteHide')
@@ -611,10 +623,7 @@ Element.implement({
 								.getNext('textarea')
 								.addClass('rteShow')
 								.removeClass('rteHide')
-							: el
-								.store('elEvents', new Element('div').cloneEvents(el))
-								.removeEvents()
-								.set('contentEditable',false);
+							: (el.set('contentEditable',false), MooRTE.Utilities.removeEvents(el));
 					});
 				break;
 				case 'destroy':
