@@ -581,8 +581,8 @@ MooRTE.Utilities = {
 Element.implement({
 	moorte: function(){
 		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
-		// if (rte) this.store('bar', rte);
-		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
+		  , bar = this.hasClass('MooRTE') ? this 
+		  		: params.rte ? (this.store('bar', rte), rte) : this.retrieve('bar') || '';
 		
 		if ('undefined,create,show,restore'.test(params.cmd,'i')){
 			
