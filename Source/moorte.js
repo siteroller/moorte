@@ -59,11 +59,11 @@ var MooRTE = new Class({
 		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
 		
 		els.each(function(el,index){
-			if (el.get('tag') == 'textarea' || el.get('tag') == 'input') els[index] = el = self.textArea(el); 
-			if (l=='e' || !rte) rte = self.insertToolbar(l);	
-			if (l=='b' || l=='t' || !l) el.set('contentEditable', true);
+			if ('textarea,input,'.contains(el.get('tag') + ',')) els[index] = el = self.textArea(el);
+			if (l=='e' || !rte) rte = self.insertToolbar(l);
+			if ('bt'.contains(l)) el.set('contentEditable', true);
 			else l == 'e'
-				? self.positionToolbar(el,rte)
+				? self.positionToolbar(el, rte)
 				: MooRTE.Utilities.addEvents(el.set('contentEditable',true), {
 					'focus': function(){ self.positionToolbar(el, rte); },
 					'blur': function(){
@@ -75,7 +75,7 @@ var MooRTE = new Class({
 											.getSize()
 											.y
 									).removeClass('rteShow');
-						rte.addClass('rteHide'); 
+						rte.addClass('rteHide');
 					}
 				});
 			
@@ -163,16 +163,16 @@ MooRTE.Range = {
 		
 		switch (type){
 			case 'text': return range.text || range.toString();
-			case 'node': return range.cloneContents 
-				? range.cloneContents() 
+			case 'node': return range.cloneContents
+				? range.cloneContents()
 				: new Element('div', {html:range.htmlText});
-			default: case 'html': 
+			default: case 'html':
 				var content = range.htmlText;
 				if (!content){
 					var html = range.cloneContents();
 					MooRTE.Range.content.empty().appendChild(html);
 					content = MooRTE.Range.content.innerHTML;
-				}; 
+				};
 				return content;
 		}
 	}
@@ -256,7 +256,6 @@ MooRTE.Utilities = {
 		document.execCommand(args[0], args[2]||null, args[1]||false);
 	}
 	, addEvents: function(el, events){
-		//console.log(events);
 		Object.append(el.retrieve('rteEvents',{}), events);
 		el.addEvents(events);
 	}
@@ -610,8 +609,8 @@ Element.implement({
 			switch (params.cmd.toLowerCase()){
 				case 'hide': bar.addClass('rteHide'); break;
 				case 'remove':
-					var location = bar.getPrevious() 
-						? [bar.getPrevious(),'after'] 
+					var location = bar.getPrevious()
+						? [bar.getPrevious(),'after']
 						: [bar.getParent(),'top'];
 					this.store('removed', location);
 					bar.dispose().retrieve('fields').each(function(el){
