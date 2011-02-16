@@ -144,9 +144,8 @@ var MooRTE = new Class({
 			, 'styles': {width:el.getSize().x}
 			} ).setStyle(Browser.ie?'height':'min-height',el.getSize().y)
 				.store('textarea',el).replaces(el);
-			//.inject(el,'before');
 		
-		var form = el.getParent('form');//.addClass('rteHide2')
+		var form = el.getParent('form');
 		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
 			el.set('value', MooRTE.Utilities.clean(div)); 
 		} });
@@ -606,7 +605,7 @@ Element.implement({
 		
 		if (!bar) return false;
 		switch (params.cmd.toLowerCase()){
-			case 'hide': 
+			case 'hide':
 				bar.addClass('rteHide'); break;
 			case 'remove':
 				bar.dispose()
@@ -616,9 +615,8 @@ Element.implement({
 					.retrieve('fields')
 					.each(function(el){
 						if (el.hasClass('rteTextArea')){
-							console.log(el, el.retrieve('textarea'))
-							el.retrieve('textarea').replaces(el);// Text should be updated in textarea!!!!!!!!!!!!!!
-						}else {
+							el.retrieve('textarea').set('value', el.get('html')).replaces(el);
+						} else {
 							el.set('contentEditable', false);
 							MooRTE.Utilities.removeEvents(el);
 						}
@@ -633,60 +631,6 @@ Element.implement({
 				});
 				bar.destroy();
 		}
-		
-			/*
-			if (removed = this.retrieve('removed')){
-				bar.inject(removed[0], removed[1])
-					.retrieve('fields').each(function(el){
-						console.log(el);
-						el.hasClass('rteTextArea')
-							? el
-								.addClass('rteShow')
-								.removeClass('rteHide')
-								.getNext('textarea')
-								.addClass('rteHide')
-								.removeClass('rteShow')
-							: (el
-								.set('contentEditable', true)
-								, MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents')));
-					});
-				this.eliminate('removed');
-			}
-			return bar
-				? this.removeClass('rteHide') 
-				: new MooRTE(Object.append(params.options||{},{'elements':this}));		
-		} else {
-			if (!bar) return false;
-			switch (params.cmd.toLowerCase()){
-				case 'hide': bar.addClass('rteHide'); break;
-				case 'remove':
-					var location = bar.getPrevious()
-						? [bar.getPrevious(),'after']
-						: [bar.getParent(),'top'];
-					this.store('removed', location);
-					bar.dispose().retrieve('fields').each(function(el){
-						console.log(el, el.hasClass('rteTextArea'));
-						el.hasClass('rteTextArea')
-							? el
-								.addClass('rteHide')
-								.removeClass('rteShow')
-								.getNext('textarea')
-								.addClass('rteShow')
-								.removeClass('rteHide')
-							: (el.set('contentEditable',false), MooRTE.Utilities.removeEvents(el));
-					});
-				break;
-				case 'destroy':
-					bar.retrieve('fields').each(function(el){
-						if (el.hasClass('rteTextArea')){
-							el.getNext('textarea').removeClass('rteHide');
-							el.destroy();
-						} else el.eliminate('bar').removeEvents().set('contentEditable',false);
-					});
-					bar.destroy();
-			}
-		}
-		*/
 	}
 });
 Elements.implement({

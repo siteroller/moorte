@@ -66,7 +66,8 @@ var MooRTE = new Class({
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
-		MooRTE.activeBar = rte; // not used!
+		// no activeBar is set, moorte() when called from an element will crash. This safely gives a default.
+		MooRTE.activeBar = rte;
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); //Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	},
