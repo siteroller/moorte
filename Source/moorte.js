@@ -79,7 +79,7 @@ var MooRTE = new Class({
 					}
 				});
 			
-			if (Browser.firefox) el.innerHTML += '&nbsp;<p class="rteMozFix"><br></p>';
+			if (Browser.firefox) el.innerHTML += '<p id="rteMozFix"><br></p>';
 			
 			el.store('bar', rte);
 			MooRTE.Utilities.addEvents(el, { keydown: MooRTE.Utilities.shortcuts
@@ -301,7 +301,7 @@ MooRTE.Utilities = {
 		update.custom.each(function(){
 			vals[2].call(vals[1], vals[0]);
 		});
-		if (Browser.firefox && MooRTE.Range.selection.anchorNode['class'] == 'rteMozFix'){
+		if (Browser.firefox && MooRTE.Range.selection.anchorNode.id == 'rteMozFix'){
 			MooRTE.Range.selection.extend(MooRTE.Range.selection.anchorNode.parentNode, 0);
 			//MooRTE.Range.selection.collapseToStart();
 		}
@@ -611,9 +611,7 @@ Element.implement({
 		}
 		
 		if (!bar) return false;
-		var clean = function(el){
-			el.getElements('.rteMozFix').destroy();
-		};
+		
 		switch (params.cmd.toLowerCase()){
 			case 'hide':
 				bar.addClass('rteHide'); break;
@@ -624,6 +622,7 @@ Element.implement({
 					.dispose()
 					.retrieve('fields')
 					.each(function(el){
+						el.getElement('#rteMozFix').destroy();
 						if (el.hasClass('rteTextArea'))
 							el.retrieve('textarea').set('value', el.get('html')).replaces(el);
 						else {
@@ -634,6 +633,7 @@ Element.implement({
 			break;
 			case 'detach':
 				if (this == bar) return this;
+				el.getElement('#rteMozFix').destroy();
 				if (this.hasClass('rteTextArea'))
 					this.retrieve('textarea').set('value', this.get('html')).replaces(this);
 				else {
@@ -643,6 +643,7 @@ Element.implement({
 			break;
 			case 'destroy':
 				bar.retrieve('fields').each(function(el){
+					el.getElement('#rteMozFix').destroy();
 					if (el.hasClass('rteTextArea')){
 						el.retrieve('textarea').set('value', el.get('html')).replaces(el).eliminate('textarea');
 						el.destroy();
