@@ -79,7 +79,7 @@ var MooRTE = new Class({
 					}
 				});
 			
-			if (Browser.firefox) el.innerHTML += '&nbsp;<p id="rteMozFix"><br></p>';
+			if (Browser.firefox) el.innerHTML += '&nbsp;<p class="rteMozFix"><br></p>';
 			
 			el.store('bar', rte);
 			MooRTE.Utilities.addEvents(el, { keydown: MooRTE.Utilities.shortcuts
@@ -301,7 +301,7 @@ MooRTE.Utilities = {
 		update.custom.each(function(){
 			vals[2].call(vals[1], vals[0]);
 		});
-		if (Browser.firefox && MooRTE.Range.selection.anchorNode.id == 'rteMozFix'){
+		if (Browser.firefox && MooRTE.Range.selection.anchorNode['class'] == 'rteMozFix'){
 			MooRTE.Range.selection.extend(MooRTE.Range.selection.anchorNode.parentNode, 0);
 			//MooRTE.Range.selection.collapseToStart();
 		}
@@ -580,16 +580,21 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
-		  , bar = this.hasClass('MooRTE') ? this 
-		  		: params.rte ? (this.store('bar', rte), rte) : this.retrieve('bar') || '';
+		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement});
+		if (params.rte) params.rte.hasClass('MooRTE')
+			? this.store('bar', params.rte)
+			: alert('err: Passed in element is not a RTE.');
+		else if (params.options){
+			new MooRTE(Object.merge(params.options, {'elements':this}));
+			return this;
+		}
+		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
-		if ('undefined,create,show,restore'.test(params.cmd,'i')){
-			
+		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
 			var removed = bar && bar.retrieve('removed');
 			if (!removed) return bar 
 				? this.removeClass('rteHide')
-				: new MooRTE(Object.append(params.options||{},{'elements':this}));
+				: (new MooRTE({'elements':this}), this);
 			
 			bar.inject(removed[0], removed[1])
 				.eliminate('removed')
@@ -606,19 +611,22 @@ Element.implement({
 		}
 		
 		if (!bar) return false;
+		var clean = function(el){
+			el.getElements('.rteMozFix').destroy();
+		};
 		switch (params.cmd.toLowerCase()){
 			case 'hide':
 				bar.addClass('rteHide'); break;
 			case 'remove':
-				bar.dispose()
-					.store('removed', bar.getPrevious()
+				bar.store('removed', bar.getPrevious()
 						? [bar.getPrevious(),'after']
 						: [bar.getParent(),'top'])
+					.dispose()
 					.retrieve('fields')
 					.each(function(el){
-						if (el.hasClass('rteTextArea')){
+						if (el.hasClass('rteTextArea'))
 							el.retrieve('textarea').set('value', el.get('html')).replaces(el);
-						} else {
+						else {
 							el.set('contentEditable', false);
 							MooRTE.Utilities.removeEvents(el);
 						}
@@ -626,9 +634,9 @@ Element.implement({
 			break;
 			case 'detach':
 				if (this == bar) return this;
-				if (this.hasClass('rteTextArea')){
+				if (this.hasClass('rteTextArea'))
 					this.retrieve('textarea').set('value', this.get('html')).replaces(this);
-				} else {
+				else {
 					this.set('contentEditable', false);
 					MooRTE.Utilities.removeEvents(this);
 				}
@@ -636,9 +644,12 @@ Element.implement({
 			case 'destroy':
 				bar.retrieve('fields').each(function(el){
 					if (el.hasClass('rteTextArea')){
-						el.retrieve('textarea').replaces(el);
+						el.retrieve('textarea').set('value', el.get('html')).replaces(el).eliminate('textarea');
 						el.destroy();
-					} else el.eliminate('bar').removeEvents().set('contentEditable',false);
+					} else {
+						el.set('contentEditable', false).eliminate('bar');
+						MooRTE.Utilities.removeEvents(el);
+					}
 				});
 				bar.destroy();
 		}
