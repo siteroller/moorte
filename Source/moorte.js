@@ -59,7 +59,7 @@ var MooRTE = new Class({
 		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
 		
 		els.each(function(el,index){
-			if ('textarea,input,'.contains(el.get('tag') + ',')) els[index] = el = self.textArea(el);
+			if ('textarea,input'.contains(el.get('tag'), ',')) els[index] = el = self.textArea(el);
 			if (l=='e' || !rte) rte = self.insertToolbar(l);
 			if ('bt'.contains(l)) el.set('contentEditable', true);
 			else l == 'e'
@@ -360,7 +360,7 @@ MooRTE.Utilities = {
 				  , val = MooRTE.Elements[btn]
 				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
 				  , input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type)
-				  , state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase()+',');  //Note1
+				  , state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase(), ',');  //Note1
 
 				var properties = Object.append({
 					href:'javascript:void(0)',
@@ -400,8 +400,8 @@ MooRTE.Utilities = {
 				
 				if (val.onUpdate || state)
 					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
-						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter,'
-							.contains(btn.toLowerCase()+',') ? 'value' : (state ? 'state' : 'custom')
+						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter'
+							.contains(btn.toLowerCase(),',') ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
@@ -596,17 +596,15 @@ Element.implement({
 				? this.removeClass('rteHide')
 				: (new MooRTE({'elements':this}), this);
 			
-			bar.inject(removed[0], removed[1])
-				.eliminate('removed')
-				.retrieve('fields')
-				.each(function(el){
-					if (el.hasClass('rteTextArea'))
-						el.retrieve('textarea').replaces(el);
-					else {
-						el.set('contentEditable', true);
-						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-					}
-				});
+			bar.retrieve('fields').each(function(el){
+				if (el.hasClass('rteTextArea'))
+					el.retrieve('textarea').replaces(el);
+				else {
+					el.set('contentEditable', true);
+					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+				}
+			});
+			bar.inject(removed[0], removed[1]).eliminate('removed');
 			return this;
 		}
 		
