@@ -142,8 +142,10 @@ var MooRTE = new Class({
 			{ text: el.get('value')
 			, 'class': 'rteTextArea '+el.get('class')
 			, 'styles': {width:el.getSize().x}
-			} ).setStyle(Browser.ie?'height':'min-height',el.getSize().y)
-				.store('textarea',el).replaces(el);
+			} 
+		).setStyle(Browser.ie?'height':'min-height',el.getSize().y)
+		 .store('src',el).replaces(el);
+		el.store('new', div);
 		
 		var form = el.getParent('form');
 		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
@@ -580,7 +582,8 @@ MooRTE.Utilities = {
 
 Element.implement({
 	moorte: function(){
-		var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement});
+		var self = this.retrieve('new') || this
+		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement});
 		if (params.rte) params.rte.hasClass('MooRTE')
 			? this.store('bar', params.rte)
 			: alert('err: Passed in element is not a RTE.');
@@ -588,26 +591,28 @@ Element.implement({
 			new MooRTE(Object.merge(params.options, {'elements':this}));
 			return this;
 		}
-		var bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
 		
+		var bar = self.hasClass('MooRTE') ? self : self.retrieve('bar') || '';
 		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
-			var removed = bar && bar.retrieve('removed');
-			if (!removed) return bar 
-				? this.removeClass('rteHide')
-				: (new MooRTE({'elements':this}), this);
-			
+			if (!bar){
+				new MooRTE({'elements':this});
+				return self; //this.retrieve('new') || this;
+			}
+			var removed = bar.retrieve('removed');
+			if (!removed) return self.removeClass('rteHide');
+
 			bar.retrieve('fields').each(function(el){
-				if (el.hasClass('rteTextArea'))
-					el.retrieve('textarea').replaces(el);
-				else {
+				if (el.hasClass('rteTextArea')){
+					var src = el.retrieve('src');
+					el.set('html', src.get('value')).replaces(src);
+				} else {
 					el.set('contentEditable', true);
 					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
 				}
 			});
 			bar.inject(removed[0], removed[1]).eliminate('removed');
-			return this;
+			return self;
 		}
-		
 		if (!bar) return false;
 		
 		switch (params.cmd.toLowerCase()){
@@ -620,10 +625,11 @@ Element.implement({
 					.dispose()
 					.retrieve('fields')
 					.each(function(el){
-						el.getElement('#rteMozFix').destroy();
-						if (el.hasClass('rteTextArea'))
-							el.retrieve('textarea').set('value', el.get('html')).replaces(el);
-						else {
+						if (el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
+						if (el.hasClass('rteTextArea')){
+							var src = el.retrieve('src');
+							src.set('value', el.get('html')).replaces(el);
+						} else {
 							el.set('contentEditable', false);
 							MooRTE.Utilities.removeEvents(el);
 						}
@@ -631,19 +637,21 @@ Element.implement({
 			break;
 			case 'detach':
 				if (this == bar) return this;
-				el.getElement('#rteMozFix').destroy();
-				if (this.hasClass('rteTextArea'))
-					this.retrieve('textarea').set('value', this.get('html')).replaces(this);
-				else {
+				if (self.getElement('#rteMozFix')) self.getElement('#rteMozFix').destroy();
+				if (self.hasClass('rteTextArea')){
+					var src = self.retrieve('src');
+					src.set('value', self.get('html')).replaces(self);
+				} else {
 					this.set('contentEditable', false);
 					MooRTE.Utilities.removeEvents(this);
 				}
 			break;
 			case 'destroy':
 				bar.retrieve('fields').each(function(el){
-					el.getElement('#rteMozFix').destroy();
+					if (el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
 					if (el.hasClass('rteTextArea')){
-						el.retrieve('textarea').set('value', el.get('html')).replaces(el).eliminate('textarea');
+						var src = el.retrieve('src');
+						src.set('value', el.get('html')).replaces(el).eliminate('new');
 						el.destroy();
 					} else {
 						el.set('contentEditable', false).eliminate('bar');
@@ -652,7 +660,7 @@ Element.implement({
 				});
 				bar.destroy();
 		}
-		return this;
+		return this.retrieve('src') || this;
 	}
 });
 Elements.implement({
