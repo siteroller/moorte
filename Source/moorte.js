@@ -452,17 +452,16 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.eventHandler('onShow', this, name);
 	}
 	, clipStickyWin: function(caller){
-		// ToDo: create the instance of the AssetLoader once. Then just call the load function.
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
-			if (window.AssetLoader) new AssetLoader({
+			if (window.AssetLoader) AssetLoader.javascript(['mootools-more.js','StickyWinModalUI.js'], {
 				onComplete: function(command){
-					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>  <b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/>\
-						(Those lucky enough to be on a Mac use Cmd instead of Ctrl.)<br/><br/>\
+					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>\
+						<b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/><br/>\
 						If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
 					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
 					MooRTE.Elements.clipPop.hide();
 				}
-			}, 'StickyWinModalUI.js');
+			});
 	}
 	, clean: function(html, options){
 	
