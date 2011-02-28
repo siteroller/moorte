@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+   <head>
+		<title>MooRTE Lite Demo</title>
+		<link   type="text/css" rel="stylesheet" href="../../Source/Assets/moorte.css">
+		<script type="text/javascript" src="../../Source/Assets/scripts/mootools.13.js"></script>
+		<script type="text/javascript" src="../../Source/moorte.js"></script>
+		<script>
+		// Important!! Use load instead of domready for accurate positioning. 
+		window.addEvent('load', function(){
+			var comments = document.id('comments');
+			
+			comments.moorte({
+				skin: 'Tango',
+				buttons: {'div.Toolbar':['bold','italic','underline','strikethrough','indent','outdent','removeformat']}
+			});
+			
+			['Remove','Destroy','Detach','Hide','Restore'].each(function(action){
+				document.id('Actions').grab(new Element('input',
+					{ type: 'submit'
+					, value: action + ' RTE'
+					, styles: { width:100 }
+					, events: { click:function(){comments.moorte(action) }
+					}
+				}));
+			});
+			
+		});
+		
+		</script>
+		<style type="text/css">
+			span{display:inline-block; width:75px;}
+			#comments,#name{ width:200px }
+			#comments{ height:150px; }
+		</style>
+	</head>
+	<body>
+		<form action="http://siteroller.net/test/submit/form.php?version=0.55&page=lite" method="post">
+			<span>Name: </span>
+			<input type="text" name="name" id="name">
+			<br><br>
+			<span>History: </span>
+			<input name="comments" id="comments">
+			<br><br>
+			<input type="submit" value="Please tell us what you think">
+		</form>
+		<p id='Actions' style='text-align:center; width:400px;'></p>
+	</body>
+</html>
