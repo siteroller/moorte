@@ -15,12 +15,12 @@
 				buttons: {'div.Toolbar':['bold','italic','underline','strikethrough','indent','outdent','removeformat']}
 			});
 			
-			['Remove','Destroy','Detach','Hide','Restore'].each(function(action){
+			['Remove','Destroy','Detach','Hide',''].each(function(action){
 				document.id('Actions').grab(new Element('input',
 					{ type: 'submit'
-					, value: action + ' RTE'
+					, value: (action || 'Restore') + ' RTE'
 					, styles: { width:100 }
-					, events: { click:function(){comments.moorte(action) }
+					, events: { click:function(){comments.moorte(action); alert("$('comments').moorte("+action+");") }
 					}
 				}));
 			});
@@ -41,9 +41,12 @@
 			<br><br>
 			<span>History: </span>
 			<input name="comments" id="comments">
-			<br><br>
-			<input type="submit" value="Please tell us what you think">
 		</form>
 		<p id='Actions' style='text-align:center; width:400px;'></p>
+		<p>
+			Element begins with the Tango skin. <br>
+			Hide/Show or Remove/Restore do not affect the RTE.<br>
+			Destroy: destroys the rte. If Restore is pressed it creates a new RTE, with the default Word'03 skin.
+		</p>
 	</body>
 </html>
