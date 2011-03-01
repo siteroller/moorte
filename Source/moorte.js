@@ -590,16 +590,31 @@ Element.implement({
 			new MooRTE(Object.merge(params.options, {'elements':this}));
 			return this;
 		}
-		
+				
 		var bar = self.hasClass('MooRTE') ? self : self.retrieve('bar') || '';
 		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
 			if (!bar){
 				new MooRTE({'elements':this});
 				return self; //this.retrieve('new') || this;
 			}
+			if (bar.hasClass('rteHide')){
+				bar.removeClass('rteHide');
+				return self;
+			}
+			
 			var removed = bar.retrieve('removed');
-			if (!removed) return self.removeClass('rteHide');
-
+			if (!removed){
+				if (this == bar) return this;
+				bar.retrieve('fields').push(self);
+				// console.log(1,this,2, self,3, bar);
+				if (self.hasClass('rteTextArea') && !self.getParent()){
+					var src = self.retrieve('src');
+					self.set('html', src.get('value')).replaces(src);
+				} else {
+					this.set('contentEditable', true);
+					MooRTE.Utilities.addEvents(this, this.retrieve('rteEvents'));
+				}
+			}
 			bar.retrieve('fields').each(function(el){
 				if (el.hasClass('rteTextArea')){
 					var src = el.retrieve('src');
@@ -636,6 +651,7 @@ Element.implement({
 			break;
 			case 'detach':
 				if (this == bar) return this;
+				bar.retrieve('fields').erase(this);
 				if (self.getElement('#rteMozFix')) self.getElement('#rteMozFix').destroy();
 				if (self.hasClass('rteTextArea')){
 					var src = self.retrieve('src');
