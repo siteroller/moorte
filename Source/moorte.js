@@ -101,7 +101,7 @@ var MooRTE = new Class({
 	}
 	, insertToolbar: function (pos){
 		var self = this;
-		var rte = new Element( 'div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
+		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
 					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
 					.inject(document.body);
 		MooRTE.activeBar = rte;
@@ -142,14 +142,14 @@ var MooRTE = new Class({
 			{ text: el.get('value')
 			, 'class': 'rteTextArea '+el.get('class')
 			, 'styles': {width:el.getSize().x}
-			} 
+			}
 		).setStyle(Browser.ie?'height':'min-height',el.getSize().y)
-		 .store('src',el).replaces(el);
+		 .store('src', el).replaces(el);
 		el.store('new', div);
-		
+
 		var form = el.getParent('form');
 		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
-			el.set('value', MooRTE.Utilities.clean(div)); 
+			el.set('value', MooRTE.Utilities.clean(div)).replaces(div); 
 		} });
 		return div;
 	}
@@ -606,15 +606,16 @@ Element.implement({
 			if (!removed){
 				if (this == bar) return this;
 				bar.retrieve('fields').push(self);
-				// console.log(1,this,2, self,3, bar);
-				if (self.hasClass('rteTextArea') && !self.getParent()){
-					var src = self.retrieve('src');
-					self.set('html', src.get('value')).replaces(src);
+				var src = self.retrieve('src');
+				if (src){
+					if (src.getParent()) self.set('html', src.get('value')).replaces(src);
 				} else {
 					this.set('contentEditable', true);
 					MooRTE.Utilities.addEvents(this, this.retrieve('rteEvents'));
 				}
+				return self;
 			}
+			
 			bar.retrieve('fields').each(function(el){
 				if (el.hasClass('rteTextArea')){
 					var src = el.retrieve('src');
@@ -628,7 +629,7 @@ Element.implement({
 			return self;
 		}
 		if (!bar) return false;
-		
+
 		switch (params.cmd.toLowerCase()){
 			case 'hide':
 				bar.addClass('rteHide'); break;

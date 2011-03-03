@@ -12,14 +12,15 @@
 			
 			comments.moorte({
 				skin: 'Tango',
+				where: 'top',
 				padFloat: false,
 				buttons: {'div.Toolbar':['bold','italic','underline','strikethrough','indent','outdent','removeformat']}
 			});
 			
-			['Remove','Destroy','Detach','Hide',''].each(function(action){
+			['Detach','Hide','Remove','Destroy',''].each(function(action,i){
 				document.id('Actions').grab(new Element('input',
 					{ type: 'submit'
-					, value: (action || 'Restore') + ' RTE'
+					, value: (action || 'Restore') + (i ? ' RTE' : ' Node') 
 					, styles: { width:100 }
 					, events: { click:function(){comments.moorte(action); alert("$('comments').moorte("+action+");") }
 					}
@@ -44,10 +45,15 @@
 			<input name="comments" id="comments">
 		</form>
 		<p id='Actions' style='text-align:center; width:400px;'></p>
-		<p>
-			Element begins with the Tango skin. <br>
-			Hide/Show or Remove/Restore do not affect the RTE.<br>
-			Destroy: destroys the rte. If Restore is pressed it creates a new RTE, with the default Word'03 skin.
-		</p>
+		<ul>
+			<li>Element begins with the Tango skin. <br>
+			<li><b>Detach</b> - Disconnects the element from the rte and turns off editing. The toolbar and other elements connected to the toolbar are unaffected. 
+			<br>Restore reattaches the element to the rte it was last connected to, unless a different RTE is passed in.</li> 
+			<li><b>Hide</b> - Adds "display:none" to the rte toolbar. Simple hide, nothing more.
+			<br> Restore RTE  removes the display:none, and everything is back to where it was.</li>
+			<li><b>Remove</b> - removes the rte toolbar from the page and makes all connected elements uneditable.<br> Restore RTE reverses the actions, and all is back to how it was.</li>
+			<li><b>Destroy</b> - destroys the rte toolbar and makes all connected elements uneditable. 
+			<br>Restore creates a brand new RTE, with the default Word'03 skin.</li>
+		</ul>
 	</body>
 </html>
