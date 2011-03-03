@@ -40,8 +40,8 @@ var MooRTE = new Class({
 	Implements: [Options]
 
 	, options: { floating: true // false broken by WK bug - "an editable element may not contain non-editable content".
-			   , where: 'before' // 'top/bottom/before/after' (Mootools standard.)
-			   , padFloat: true // before/after: add to existing margins when true. top/bottom: padding always added. If false shrinks element accordingly.
+			   , padFloat: true // if (padFloat && where == before||after) existing margins are enlarged. top/bottom: padding always added. If false shrinks element accordingly.
+			   , where: 'before' // 'top/bottom/before/after' (Mootools standard). 'top' is the same as 'before', except that it shrinks the element accordingly.
 			   , stretch: false // If element grows, should it stretch the element or add toolbars. Other options abound.
 			   , location: 'elements'
 			   , buttons: 'div.Menu:[Main,File,Insert]'
@@ -124,10 +124,10 @@ var MooRTE = new Class({
 				.height;
 
 		if (o.floating){
-			if (o.padFloat){
-				var pad = {before:'margin-top',after:'margin-after',top:'padding-top',bottom:'padding-bottom'}[o.where];
-				el.setStyle(pad, parseInt(el.getStyle(pad)) + rteHeight);
-			}
+			var pad = {before:'margin-top',after:'margin-after',top:'padding-top',bottom:'padding-bottom'}[o.where];
+			el.setStyle(pad, parseInt(el.getStyle(pad)) + rteHeight);
+			if (!o.padFloat) el.setStyle('min-height', elSize.height - rteHeight).setStyle('height', elSize.height - rteHeight);
+
 			rte
 				.setStyles({ 'left': elSize.left, 'top': (elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) })
 				.addClass('rteFloat')
