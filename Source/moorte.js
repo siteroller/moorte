@@ -262,10 +262,11 @@ MooRTE.Utilities = {
 		Object.append(el.retrieve('rteEvents',{}), events);
 		el.addEvents(events);
 	}
-	, removeEvents: function(el){
+	, removeEvents: function(el, destroy){
 		Object.each(el.retrieve('rteEvents',{}), function(fn, event){
 			el.removeEvent(event, fn);
 		});
+		if (destroy) el.eliminate('rteEvents');
 	}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
@@ -656,7 +657,7 @@ Element.implement({
 			} else {
 				el.set('contentEditable', false);
 				MooRTE.Utilities.removeEvents(el, destroy);
-				if (destroy) el.eliminate('bar').eliminate('rteEvents');
+				if (destroy) el.eliminate('bar');
 			}
 		});
 		return this.retrieve('src') || this;
