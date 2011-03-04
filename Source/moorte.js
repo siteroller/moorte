@@ -620,7 +620,6 @@ Element.implement({
 			return self;
 		}
 		if (!bar) return false;
-//##############################################
 		
 		switch (params.cmd.toLowerCase()){
 			case 'hide':
@@ -661,57 +660,6 @@ Element.implement({
 			}
 		});
 		return this.retrieve('src') || this;
-
-
-/*
-		switch (params.cmd.toLowerCase()){
-			case 'hide':
-				bar.addClass('rteHide'); break;
-			case 'remove':
-				bar.store('removed', bar.getPrevious()
-						? [bar.getPrevious(),'after']
-						: [bar.getParent(),'top'])
-					.dispose()
-					.retrieve('fields')
-					.each(function(el){
-						if (el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
-						if (el.hasClass('rteTextArea')){
-							var src = el.retrieve('src');
-							src.set('value', el.get('html')).replaces(el);
-						} else {
-							el.set('contentEditable', false);
-							MooRTE.Utilities.removeEvents(el);
-						}
-					});
-			break;
-			case 'detach':
-				if (this == bar) return this;
-				bar.retrieve('fields').erase(this);
-				if (self.getElement('#rteMozFix')) self.getElement('#rteMozFix').destroy();
-				if (self.hasClass('rteTextArea')){
-					var src = self.retrieve('src');
-					src.set('value', self.get('html')).replaces(self);
-				} else {
-					this.set('contentEditable', false);
-					MooRTE.Utilities.removeEvents(this);
-				}
-			break;
-			case 'destroy':
-				bar.retrieve('fields').each(function(el){
-					if (el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
-					if (el.hasClass('rteTextArea')){
-						var src = el.retrieve('src');
-						src.set('value', el.get('html')).replaces(el).eliminate('new');
-						el.destroy();
-					} else {
-						el.set('contentEditable', false).eliminate('bar');
-						MooRTE.Utilities.removeEvents(el);
-					}
-				});
-				bar.destroy();
-		}
-		return this.retrieve('src') || this;
-	*/
 	}
 });
 Elements.implement({
