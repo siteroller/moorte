@@ -620,7 +620,50 @@ Element.implement({
 			return self;
 		}
 		if (!bar) return false;
+//##############################################
+		
+		switch (params.cmd.toLowerCase()){
+			case 'hide':
+				bar.addClass('rteHide');
+				return this;
+			case 'detach':
+				if (this == bar) return this;
+				self = this.retrieve('new') || this;
+				bar.retrieve('fields').erase(self); 
+				els = [self];
+				break;
+			case 'remove':
+				bar.store('removed', bar.getPrevious()
+						? [bar.getPrevious(),'after']
+						: [bar.getParent(),'top']);
+				bar.dispose();
+				els = bar.retrieve('fields');
+				break;			
+			case 'destroy':
+				var destroy = true;
+				els = bar.retrieve('fields');
+				bar.destroy();
+		}
+		
+		els.each(function(el){
+			if (Browser.firefox) el.getElement('#rteMozFix').destroy();
+			var src = el.retrieve('src');
+			if (src){
+				src.set('value', el.get('html')).replaces(el);
+				if (destroy){
+					src.eliminate('new');
+					el.destroy();
+				}
+			} else {
+				el.set('contentEditable', false);
+				MooRTE.Utilities.removeEvents(el, destroy);
+				if (destroy) el.eliminate('bar').eliminate('rteEvents');
+			}
+		});
+		return this.retrieve('src') || this;
 
+
+/*
 		switch (params.cmd.toLowerCase()){
 			case 'hide':
 				bar.addClass('rteHide'); break;
@@ -668,6 +711,7 @@ Element.implement({
 				bar.destroy();
 		}
 		return this.retrieve('src') || this;
+	*/
 	}
 });
 Elements.implement({
