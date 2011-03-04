@@ -595,71 +595,29 @@ Element.implement({
 		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
 			if (!bar){
 				new MooRTE({'elements':this});
-				return self; //this.retrieve('new') || this;
+				return self;
 			}
 			if (bar.hasClass('rteHide')){
 				bar.removeClass('rteHide');
 				return self;
 			}
 			
-			var els = []
+			var els = [self]
 			  , removed = bar.retrieve('removed');
 			if (removed){
 				els = bar.retrieve('fields');
 				bar.inject(removed[0], removed[1]).eliminate('removed');
-			} else {
-				if (this == bar) return this;
-				els = [this];
-			}
+			} else if (this == bar) return this;
+			
 			els.each(function(el){
 				var src = el.retrieve('src');
-				if (src){
-					// if !src.parent, the textarea is not on the page, in which case we cannot replace it.
-					if (src.getParent()) el.set('html', src.get('value')).replaces(src);
-				} else {
+				if (!src){
 					el.set('contentEditable', true);
 					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-					if (Browser.firefox) this.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
-				}
+					if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
+				} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
 			})
 			return self;
-			/*
-			// if !removed, element must detached.
-			if (!removed){
-				// you cannot attach a bar to itself
-				if (this == bar) return this;
-				// add this element to the bar it is related to.
-				bar.retrieve('fields').push(self);
-				// Textareas must be replaced with a div. Get the textarea.
-				var src = self.retrieve('src');
-				if (src){
-					// if !src.parent, the textarea is not on the page, in which case we cannot replace it.
-					if (src.getParent()) self.set('html', src.get('value')).replaces(src);
-				} else {
-					// If its not a textarea. Set contenteditable, restore events, add moz fix.
-					this.set('contentEditable', true);
-					MooRTE.Utilities.addEvents(this, this.retrieve('rteEvents'));
-					if (Browser.firefox) this.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
-				}
-				// return the editable div
-				return self;
-			}
-			
-			// If the RTE has been removed, all of its fields have been uneditabled. restore them.
-			bar.retrieve('fields').each(function(el){
-				var src = el.retrieve('src');
-				if (src){
-					// if !src.parent, the textarea is not on the page, in which case we cannot replace it.
-					if (src.getParent()) el.set('html', src.get('value')).replaces(src);
-				} else {
-					el.set('contentEditable', true);
-					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-					if (Browser.firefox) this.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
-				}
-			});
-			*/
-			
-			
 		}
 		if (!bar) return false;
 

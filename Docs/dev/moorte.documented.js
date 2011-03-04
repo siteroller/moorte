@@ -605,7 +605,40 @@ Element.implement({
 		// The following variables are created: params - passed in arguments, sorted to be useful. cmd - What should be done: create, destroy, etc.
 		// removed - Will hold a reference to the removed element. bar - the RTE to apply. If not passed, check if element has it in memory. If undefined, create new.
 		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if(!cmd || (cmd == 'create')){
+		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
+			if (!bar){
+				new MooRTE({'elements':this});
+				return self; //this.retrieve('new') || this;
+			}
+			if (bar.hasClass('rteHide')){
+				bar.removeClass('rteHide');
+				return self;
+			}
+			// assume we will act on current element
+			var els = [self]
+			  , removed = bar.retrieve('removed');
+			if (removed){
+				// get the list of all elements that must be re-editabled
+				els = bar.retrieve('fields');
+				// inject the toolbar back onto the page.
+				bar.inject(removed[0], removed[1]).eliminate('removed');
+			// if bar, !hasClass(rteHide), and !removed, element must detached.
+			// You cannot attach a bar to itself
+			} else if (this == bar) return this;
+			
+			els.each(function(el){
+				// Textareas must be replaced with a div. Get the textarea.
+				var src = el.retrieve('src');
+				if (!src){
+					// Must not have been a textarea. Set contenteditable, restore events, add moz fix.
+					el.set('contentEditable', true);
+					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+					if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
+				// if !src.parent, the textarea is not on the page, in which case we cannot replace it.
+				} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
+			})
+			return self;
+			
 			// If removed is defined, the element exists and is in memory.
 			if(removed = this.retrieve('removed')){
 				bar.inject(removed[0], removed[1]);
