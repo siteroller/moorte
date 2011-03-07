@@ -580,13 +580,6 @@ MooRTE.Utilities = {
 	}
 };
 
-/* The following steps:
-*	1. If a RTE is passed in (or an elemnt that is connected to an RTE), we set this to be the current RTE for all future operations.
-*		Generally, this will be for 'attach' only.
-*	2. If any of the four keywords are passed in ('destroy', 'remove', 'detach', 'hide')  
-*
-*
-*/
 MooRTE.extensions = function(){
 	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
 	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
@@ -603,17 +596,15 @@ MooRTE.extensions = function(){
 				bar.retrieve('fields').include(self);
 			}
 		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
-		
+
 		if (!cmd){
-			if (!bar) new MooRTE(Object.merge(params.options || {}, {'elements':this}));
-			else if (bar.hasClass('rteHide')) bar.removeClass('rteHide');
-			return;
+			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this}));
+			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
 		} else if (!bar || self.retrieve('removed')) return;
-		
+	
 		switch (cmd){
 			case 'hide':
-				bar.addClass('rteHide');
-				return;
+				return bar.addClass('rteHide');
 			case 'detach':
 				if (self == bar) return;
 				bar.retrieve('fields').erase(self); 

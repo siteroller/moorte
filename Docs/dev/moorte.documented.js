@@ -600,6 +600,22 @@ MooRTE.Utilities = {
 	}
 }
 
+/* Overview:
+*	1. If a RTE is passed in we set it to be the current RTE for all future operations.
+*		Generally, this will be for 'attach' only.
+*	2. If any of the four keywords are passed in ('destroy', 'remove', 'detach', 'hide'):
+*		a. If the toolbar doesn't exist, or it has been removed, we exit. You cannot destroy a removed toolbar at the moment.
+*		b. If it exists, we follow the instruction. If an object is passed in, it is ignored.
+*	3. If not, check if a bar already exists. 
+*		a. If not, create a brand new spanking toolbar. 
+*		b. If yes, but has the class of hidden, show it and return.
+*	5. Otherwise, if field is removed, restore it.
+*	6. If not, it must be detached. Reattach it.
+*
+*	In all cases where an action would be applied to a RTE, one could pass in any element which is connected to the RTE.
+*	eg: $('edit1').moorte('remove') - Will remove the RTE that controls $('edit1').
+*	eg: $('edit1').moorte($('edit2')) - Will cause $('edit1') to attach itself to $('edit2')'s toolbar.
+*/
 Element.implement({
 	moorte:function(){ //arguments: command, options
 		// The following variables are created: params - passed in arguments, sorted to be useful. cmd - What should be done: create, destroy, etc.
