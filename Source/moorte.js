@@ -580,55 +580,42 @@ MooRTE.Utilities = {
 	}
 };
 
-Element.implement({
-	moorte: function(){
-		var self = this.retrieve('new') || this
-		  , params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement});
-		if (params.rte) params.rte.hasClass('MooRTE')
-			? this.store('bar', params.rte)
-			: alert('err: Passed in element is not a RTE.');
-		else if (params.options){
-			new MooRTE(Object.merge(params.options, {'elements':this}));
-			return this;
-		}
-				
-		var bar = self.hasClass('MooRTE') ? self : self.retrieve('bar') || '';
-		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
-			if (!bar){
-				new MooRTE({'elements':this});
-				return self;
+/* The following steps:
+*	1. If a RTE is passed in (or an elemnt that is connected to an RTE), we set this to be the current RTE for all future operations.
+*		Generally, this will be for 'attach' only.
+*	2. If any of the four keywords are passed in ('destroy', 'remove', 'detach', 'hide')  
+*
+*
+*/
+MooRTE.extensions = function(){
+	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
+	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
+
+	Array.from(this).some(function(self){
+
+		var bar, self = self.retrieve('new') || self;
+		if (params.rte){
+			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
+			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), false;
+			if (self.retrieve('bar') != bar){
+				self.retrieve('bar').retrieve('fields').erase(self);
+				self.store('bar', bar);
+				bar.retrieve('fields').include(self);
 			}
-			if (bar.hasClass('rteHide')){
-				bar.removeClass('rteHide');
-				return self;
-			}
-			
-			var els = [self]
-			  , removed = bar.retrieve('removed');
-			if (removed){
-				els = bar.retrieve('fields');
-				bar.inject(removed[0], removed[1]).eliminate('removed');
-			} else if (this == bar) return this;
-			
-			els.each(function(el){
-				var src = el.retrieve('src');
-				if (!src){
-					el.set('contentEditable', true);
-					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-					if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
-				} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
-			})
-			return self;
-		}
-		if (!bar) return false;
+		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
 		
-		switch (params.cmd.toLowerCase()){
+		if (!cmd){
+			if (!bar) new MooRTE(Object.merge(params.options || {}, {'elements':this}));
+			else if (bar.hasClass('rteHide')) bar.removeClass('rteHide');
+			return;
+		} else if (!bar || self.retrieve('removed')) return;
+		
+		switch (cmd){
 			case 'hide':
 				bar.addClass('rteHide');
-				return this;
+				return;
 			case 'detach':
-				if (this == bar) return this;
-				self = this.retrieve('new') || this;
+				if (self == bar) return;
 				bar.retrieve('fields').erase(self); 
 				els = [self];
 				break;
@@ -643,6 +630,24 @@ Element.implement({
 				var destroy = true;
 				els = bar.retrieve('fields');
 				bar.destroy();
+				break;
+			default:
+				var els = [self]
+				  , removed = bar.retrieve('removed');
+				if (removed){
+					els = bar.retrieve('fields');
+					bar.inject(removed[0], removed[1]).eliminate('removed');
+				} else if (self == bar) return;
+				
+				els.each(function(el){
+					var src = el.retrieve('src');
+					if (!src){
+						el.set('contentEditable', true);
+						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+						if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
+					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
+				})
+				return;
 		}
 		
 		els.each(function(el){
@@ -660,15 +665,12 @@ Element.implement({
 				if (destroy) el.eliminate('bar');
 			}
 		});
-		return this.retrieve('src') || this;
-	}
-});
-Elements.implement({
-	moorte:function(){
-		var opts = Array.link(arguments, { 'options': Object.type }).options;
-		return new MooRTE(Object.append(opts||{}, {'elements':this}));
-	}
-});
+	}.bind(this));
+	return this.retrieve('src') || this; 
+}
+
+Element.implement({moorte:MooRTE.extensions});
+Elements.implement({moorte:MooRTE.extensions});
 
 
 MooRTE.Elements = {
