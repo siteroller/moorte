@@ -581,15 +581,24 @@ MooRTE.Utilities = {
 };
 
 MooRTE.extensions = function(){
+	
+	/* ToDo:
+	* bug: if de/attach then remove/create does not create.
+	* bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
+	* bug: if error[number], should pass back false or errorcode
+	* bug: detach & remove throw unhandled error when clicked twice
+	* feature: MooRTE should be able to check if passed in an element that has a RTE already.
+	*/
+	
 	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
 	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
 
-	Array.from(this).some(function(self){
+	Array.from(this).every(function(self){
 
 		var bar, self = self.retrieve('new') || self;
 		if (params.rte){
 			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
-			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), false;
+			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), 600;
 			if (self.retrieve('bar') != bar){
 				self.retrieve('bar').retrieve('fields').erase(self);
 				self.store('bar', bar);
@@ -598,7 +607,7 @@ MooRTE.extensions = function(){
 		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
 
 		if (!cmd){
-			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this}));
+			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
 			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
 		} else if (!bar || self.retrieve('removed')) return;
 	
@@ -618,9 +627,8 @@ MooRTE.extensions = function(){
 				els = bar.retrieve('fields');
 				break;			
 			case 'destroy':
-				var destroy = true;
 				els = bar.retrieve('fields');
-				bar.destroy();
+				bar = bar.destroy();
 				break;
 			default:
 				var els = [self]
@@ -638,7 +646,7 @@ MooRTE.extensions = function(){
 						if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
 					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
 				})
-				return;
+				return true;
 		}
 		
 		els.each(function(el){
@@ -646,18 +654,20 @@ MooRTE.extensions = function(){
 			var src = el.retrieve('src');
 			if (src){
 				src.set('value', el.get('html')).replaces(el);
-				if (destroy){
+				if (!bar){
 					src.eliminate('new');
 					el.destroy();
 				}
 			} else {
 				el.set('contentEditable', false);
 				MooRTE.Utilities.removeEvents(el, destroy);
-				if (destroy) el.eliminate('bar');
+				if (!bar) el.eliminate('bar');
 			}
 		});
+		return true;
 	}.bind(this));
-	return this.retrieve('src') || this; 
+	
+	return this.retrieve(cmd ? 'src' : 'new') || this; 
 }
 
 Element.implement({moorte:MooRTE.extensions});
