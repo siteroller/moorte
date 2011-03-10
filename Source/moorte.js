@@ -609,13 +609,13 @@ MooRTE.extensions = function(){
 		if (!cmd){
 			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
 			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
-		} else if (!bar || self.retrieve('removed')) return;
+		} else if (!bar || self.retrieve('removed') || !self.getParent()) return true;
 	
 		switch (cmd){
 			case 'hide':
 				return bar.addClass('rteHide');
 			case 'detach':
-				if (self == bar) return;
+				if (self == bar) return true;
 				bar.retrieve('fields').erase(self); 
 				els = [self];
 				break;
@@ -650,7 +650,7 @@ MooRTE.extensions = function(){
 		}
 		
 		els.each(function(el){
-			if (Browser.firefox) el.getElement('#rteMozFix').destroy();
+			if (Browser.firefox && el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
 			var src = el.retrieve('src');
 			if (src){
 				src.set('value', el.get('html')).replaces(el);
