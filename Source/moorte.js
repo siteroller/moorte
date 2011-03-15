@@ -586,7 +586,7 @@ MooRTE.extensions = function(){
 	* bug: if de/attach then remove/create does not create.
 	* bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
 	* bug: if error[number], should pass back false or errorcode
-	* bug: detach & remove throw unhandled error when clicked twice
+	* bug: remove throws unhandled error when clicked twice
 	* feature: MooRTE should be able to check if passed in an element that has a RTE already.
 	*/
 	
