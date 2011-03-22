@@ -583,7 +583,6 @@ MooRTE.Utilities = {
 MooRTE.extensions = function(){
 	
 	/* ToDo:
-	* bug: if de/attach then remove/create does not create.
 	* bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
 	* bug: if error[number], should pass back false or errorcode
 	* bug: remove throws unhandled error when clicked twice
@@ -595,7 +594,10 @@ MooRTE.extensions = function(){
 
 	Array.from(this).every(function(self){
 
-		var bar, self = self.retrieve('new') || self;
+		var bar
+		  , els = []
+		  , self = self.retrieve('new') || self;
+
 		if (params.rte){
 			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
 			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), 600;
@@ -610,7 +612,7 @@ MooRTE.extensions = function(){
 			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
 			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
 		} else if (!bar || self.retrieve('removed') || !self.getParent()) return true;
-	
+		
 		switch (cmd){
 			case 'hide':
 				return bar.addClass('rteHide');
@@ -631,7 +633,7 @@ MooRTE.extensions = function(){
 				bar = bar.destroy();
 				break;
 			default:
-				var els = [self]
+				els = [self]
 				  , removed = bar.retrieve('removed');
 				if (removed){
 					els = bar.retrieve('fields');
@@ -639,16 +641,17 @@ MooRTE.extensions = function(){
 				} else if (self == bar) return;
 				
 				els.each(function(el){
+					bar.retrieve('fields').include(el);
 					var src = el.retrieve('src');
 					if (!src){
 						el.set('contentEditable', true);
 						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-						if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
+						if (Browser.firefox && !el.getElement('#rteMozFix')) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
 					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
 				})
 				return true;
 		}
-		
+				
 		els.each(function(el){
 			if (Browser.firefox && el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
 			var src = el.retrieve('src');
