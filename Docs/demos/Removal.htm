@@ -42,7 +42,7 @@
 			<input type="text" name="name" id="name">
 			<br><br>
 			<span>History: </span>
-			<input name="comments" id="comments">
+			<input name="comments" id="comments" value='The geek shall inherit the earth.'>
 		</form>
 		<p id='Actions' style='text-align:center; width:400px;'></p>
 		<ul>
@@ -55,5 +55,12 @@
 			<li><b>Destroy</b> - destroys the rte toolbar and makes all connected elements uneditable. 
 			<br>Restore creates a brand new RTE, with the default Word'03 skin.</li>
 		</ul>
+		<br>
+		<p> <u>Geeks Only:</u><br>
+		In concept, "detach" is a function of element. It detaches the element from the RTE, without affecting the RTE at all.<br>
+		Detach therefore can NOT be called directly on a RTE.<br><br>
+		Restore, Remove and Hide are methods of the RTE: They affect the RTE and every element associated with it.<br>
+		For practicality, restore/remove/hide can be called on any element which has an associated RTE, the RTE is assumed.</p>
+		
 	</body>
 </html>
