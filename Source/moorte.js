@@ -583,13 +583,14 @@ MooRTE.Utilities = {
 MooRTE.extensions = function(){
 	
 	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
-	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
-
-	Array.from(this).every(function(self){
+	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : ''
+	  , editables = Array.from(this);
+	
+	editables.every(function(self, i){
 
 		var bar
 		  , els
-		  , self = self.retrieve('new') || self;
+		  , self = editables[i] = self.retrieve('new') || self;
 
 		if (params.rte){
 			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
@@ -602,8 +603,11 @@ MooRTE.extensions = function(){
 		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
 
 		if (!cmd){
-			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
-			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
+			if (!bar){ 
+				new MooRTE(Object.merge(params.options || {}, {'elements':this}));
+				editables[i] = self.retrieve('new') || self;
+				return false;
+			} else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
 		} else if (!bar || self.retrieve('removed') || !self.getParent()) return true;
 		
 		switch (cmd){
@@ -645,6 +649,7 @@ MooRTE.extensions = function(){
 				return true;
 		}
 				
+		editables[i] = self.retrieve('src') || self;
 		els.each(function(el){
 			if (Browser.firefox && el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
 			var src = el.retrieve('src');
@@ -663,7 +668,7 @@ MooRTE.extensions = function(){
 		return true;
 	}.bind(this));
 	
-	return this.retrieve(cmd ? 'src' : 'new') || this; 
+	return editables;
 }
 
 Element.implement({moorte:MooRTE.extensions});

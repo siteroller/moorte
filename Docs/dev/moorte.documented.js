@@ -618,9 +618,8 @@ MooRTE.Utilities = {
 */
 
 /* 	ToDo:
-* 	bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
 * 	feature: if error[number], should pass back false or errorcode
-* 	feature: MooRTE should check if passed in element has a RTE already.
+* 	feature [may exist]: MooRTE should check if passed in element has a RTE already.
 */
 MooRTE.extensions = function(){	//arguments: command, options
 
