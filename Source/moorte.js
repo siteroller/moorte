@@ -582,20 +582,13 @@ MooRTE.Utilities = {
 
 MooRTE.extensions = function(){
 	
-	/* ToDo:
-	* bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
-	* bug: if error[number], should pass back false or errorcode
-	* bug: remove throws unhandled error when clicked twice
-	* feature: MooRTE should be able to check if passed in an element that has a RTE already.
-	*/
-	
 	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
 	  , cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
 
 	Array.from(this).every(function(self){
 
 		var bar
-		  , els = []
+		  , els
 		  , self = self.retrieve('new') || self;
 
 		if (params.rte){

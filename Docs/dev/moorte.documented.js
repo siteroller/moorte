@@ -616,77 +616,128 @@ MooRTE.Utilities = {
 *	eg: $('edit1').moorte('remove') - Will remove the RTE that controls $('edit1').
 *	eg: $('edit1').moorte($('edit2')) - Will cause $('edit1') to attach itself to $('edit2')'s toolbar.
 */
-Element.implement({
-	moorte:function(){ //arguments: command, options
-		// The following variables are created: params - passed in arguments, sorted to be useful. cmd - What should be done: create, destroy, etc.
-		// removed - Will hold a reference to the removed element. bar - the RTE to apply. If not passed, check if element has it in memory. If undefined, create new.
-		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if ('undefined,create,show,restore,attach'.test(params.cmd,'i')){
-			if (!bar){
-				new MooRTE({'elements':this});
-				return self; //this.retrieve('new') || this;
+
+/* 	ToDo:
+* 	bug: if passed in array, all elements should be 'new'/'src' (replace passed in with src)
+* 	feature: if error[number], should pass back false or errorcode
+* 	feature: MooRTE should check if passed in element has a RTE already.
+*/
+MooRTE.extensions = function(){	//arguments: command, options
+
+		// params - passed in arguments, sorted to be useful.
+	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
+		// cmd - What should be done: create, destroy, etc.
+	, cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
+
+	// This should all work if the toolbar extends multiple elements and has been removed and restored.  Untested.	
+	Array.from(this).every(function(self){
+
+		var bar	// The RTE controlling this element. Can only be one.
+		  , els // The elements that are affected by the bar. can be many.
+		  , self = self.retrieve('new') || self; // The current element. If textarea/input, the div created to replace the textarea. 
+
+		if (params.rte){  
+			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
+			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), 600;
+			if (self.retrieve('bar') != bar){
+				self.retrieve('bar').retrieve('fields').erase(self);
+				self.store('bar', bar);
+				bar.retrieve('fields').include(self);
 			}
-			if (bar.hasClass('rteHide')){
-				bar.removeClass('rteHide');
-				return self;
-			}
-			// assume we will act on current element
-			var els = [self]
-			  , removed = bar.retrieve('removed');
-			if (removed){
-				// get the list of all elements that must be re-editabled
+		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
+
+		if (!cmd){
+			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
+				// If bar exists, it must be on the page, but invisible. Otherwise, create a new instance of the RTE.
+			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
+		} else if (!bar || self.retrieve('removed') || !self.getParent()) return true;
+		
+		switch (cmd){
+			case 'hide':
+				return bar.addClass('rteHide');
+			case 'detach':
+				if (self == bar) return true;
+				bar.retrieve('fields').erase(self); 
+				els = [self];
+				break;
+			case 'remove':
+				   /* The editor is structured that the RTE will either injected into 'this' (the default), or at the page bottom (if floating:false or position:fixed).
+					* We therefore could assume that whenever there is no previous element, it should be injected in the top of this: 
+					* 	 if(prev = bar.getPrevious())place = [prev,'after'];	And in the other half: if(rem = this.retrieve('removed')) rem.place ? bar.inject(rem.place, rem.where) : bar.inject(this, 'top');
+					* If we want to cover cases where the user moved it somehow to the top of a different element, we could still do something like:
+					*	 var place = bar.getPrevious() ? [bar.getPrevious(),'after'] : (bar.getParent != this ?  [bar.getParent(),'top'] : []); 
+					* Considering that in most cases we will be storing on the element a reference to itself (by default the editor is the first child of 'this'), the current code is wasteful but safe.
+					* The only potential downside is a memory leak due to the extra reference to element (which can prevent the element from being cleared from memory).  Seems inconsequential to me.
+					* 
+					* Store the previous element if exists, or the parent if no previous.  This will allow it to be returned later to the place from whence it came.
+					*/
+				bar.store('removed', bar.getPrevious()
+						? [bar.getPrevious(),'after']
+						: [bar.getParent(),'top']);
+				   /* Remove the RTE from the DOM. Do not destroy it, or it cannot be later restored. Done in Moo 1.3 using dispose. 
+					* Originally done as follows: new Element('span').replaces(bar).destroy(); break;
+					*/
+				bar.dispose();
 				els = bar.retrieve('fields');
-				// inject the toolbar back onto the page.
-				bar.inject(removed[0], removed[1]).eliminate('removed');
-			// if bar, !hasClass(rteHide), and !removed, element must detached.
-			// You cannot attach a bar to itself
-			} else if (this == bar) return this;
-			
-			els.each(function(el){
-				// Textareas must be replaced with a div. Get the textarea.
-				var src = el.retrieve('src');
-				if (!src){
-					// Must not have been a textarea. Set contenteditable, restore events, add moz fix.
-					el.set('contentEditable', true);
-					MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-					if (Browser.firefox) el.grab(new Element('div', {id:'retMozFix',styles:{display:'none'}}));
-				// if !src.parent, the textarea is not on the page, in which case we cannot replace it.
-				} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
-			})
-			return self;
-			
-			// If removed is defined, the element exists and is in memory.
-			if(removed = this.retrieve('removed')){
-				bar.inject(removed[0], removed[1]);
-				this.eliminate('removed');
-			}
-			// If bar exists, it must be on the page, but invisible. Otherwise, create a new instance of the RTE.
-			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
-			// This should also work if the toolbar extends multiple elelemnts and has been removed and restored.  Untested.
-		} else {
-			if(!bar) return false;
-			else switch(cmd.toLowerCase()){
-				case 'hide': bar.addClass('rteHide'); break;
-				case 'remove':
-					// The editor is structured that the RTE will either injected into 'this' (the default), or at the page bottom (if floating:false or position:fixed).
-					// We therefore could assume that whenever there is no previous element, it should be injected in the top of this: 
-					// 		if(prev = bar.getPrevious())place = [prev,'after'];	And in the other half: if(rem = this.retrieve('removed')) rem.place ? bar.inject(rem.place, rem.where) : bar.inject(this, 'top');
-					// If we want to cover cases where the user moved it somehow to the top of a different element, we could still do something like:
-					//		var place = bar.getPrevious() ? [bar.getPrevious(),'after'] : (bar.getParent != this ?  [bar.getParent(),'top'] : []); 
-					// Considering that in most cases we will be storing on the element a reference to itself (by default the editor is the first child of 'this'), the current code is wasteful but safe.
-					// The only potential downside is a memory leak due to the extra reference to element (which can prevent the element from being cleared from memory).  Seems inconsequential to me.
-					
-					// Store the previous element if exists, or the parent if no previous.  This will allow it to be returned later to the place from whence it came.
-					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
-					// Remove the RTE from 'this' by replacing it with a span that is then destroyed.  If we just destroyed the element, it would not be able to be restored. 
-					new Element('span').replaces(bar).destroy(); break;
-				case 'destroy': 
-					bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); 
-					bar.destroy(); break; 
-			}
+				break;			
+			case 'destroy':
+				els = bar.retrieve('fields');
+				bar = bar.destroy();
+				break;
+			default:
+					// assume we will act on current element
+				els = [self]
+				  , removed = bar.retrieve('removed');
+					// If removed is defined, the element exists and is in memory.
+				if (removed){
+						// get the list of all elements that must be re-editabled
+					els = bar.retrieve('fields');
+						// inject the toolbar back onto the page.
+					bar.inject(removed[0], removed[1]).eliminate('removed');
+						// if bar, !hasClass(rteHide), and !removed, element must detached.
+						// You cannot attach a bar to itself
+				} else if (self == bar) return;
+				
+				els.each(function(el){
+						
+					bar.retrieve('fields').include(el);
+					var src = el.retrieve('src');
+					if (!src){
+						el.set('contentEditable', true);
+						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+						if (Browser.firefox && !el.getElement('#rteMozFix')) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
+					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
+				})
+				return true;
 		}
-	}
-});
+				
+		els.each(function(el){
+			if (Browser.firefox && el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
+				// Textareas must be replaced with a div. Get the textarea.
+			var src = el.retrieve('src');
+			if (src){
+				// We used to check if src.getParent(), as if !src.parent, the textarea is not on the page, in which case we cannot replace it.
+				// I dont recall when or why this became unnecessary.
+				src.set('value', el.get('html')).replaces(el);
+				if (!bar){
+					src.eliminate('new');
+					el.destroy();
+				}
+			} else {
+				// Must not have been a textarea. Set contenteditable, restore events, add moz fix.
+				el.set('contentEditable', false);
+				MooRTE.Utilities.removeEvents(el, destroy);
+				if (!bar) el.eliminate('bar');
+			}
+		});
+		return true;
+	}.bind(this));
+	
+	return this.retrieve(cmd ? 'src' : 'new') || this; 
+}
+
+Element.implement({moorte:MooRTE.extensions});
+Elements.implement({moorte:MooRTE.extensions});
 
 MooRTE.Elements = new Hash({
 
