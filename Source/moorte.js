@@ -412,7 +412,8 @@ MooRTE.Utilities = {
 			}
 
 			var sub = btnVals || val && val.contains;
-			if (sub) MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
+			if (!options.inherit) options = {};
+			if (sub) MooRTE.Utilities.addElements(sub, e, options);
 			e.removeClass('rteHide');
 		})
 			

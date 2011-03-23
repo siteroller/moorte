@@ -285,21 +285,29 @@ MooRTE.Utilities = {
 			, btn = btn.split('.')[0];
 			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			
-			// What should happen when attempting to add an element and a similar element already exists?
-			// For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
-			// Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
+		  /* What should happen when attempting to add an element and a similar element already exists?
+			* For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
+			* Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
 			
-			// Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
-			// In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
-			// Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
-			// Fortunately, another bug in the code prevented other problems from arising ;)
+			* Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
+			* In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
+			* Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
+			* Fortunately, another bug in the code prevented other problems from arising ;)
+			*
+			* Since the aforementioned commit it by default will create a new element even if a similar one already exists.
+			* One can force moorte to use an existing element by setting the option - useExistingEls to true. 
+			* Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
+			* eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
+			* Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
+			*/
 			
-			// Since the aforementioned commit it by default will create a new element even if a similar one already exists.
-			// One can force moorte to use an existing element by setting the option - useExistingEls to true. 
-			// Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
-			// eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
-			// Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
-			
+			/* ToDo: Chrome + Mootools bug. Demo here: http://jsfiddle.net/JFyCQ/ 
+			* When an a contains a div, which in turn contains an a, Slick cannot find the div with getFirst/Last.
+			* Probably related to the way the browser (Chrome, here) builds the elements & assumes an <a> cannot contain an <a>.
+			* Oddly, the source here shows no signs of build problems, unlike the jsfiddle page.
+			* This would affect an attempt to place an element inside a flyout, which uses said structure.
+			* Could be fixed by using some other elements, with fixes for other bugs.
+			*/
 			var e = parent.getElement('.rte'+btn);
 			if (!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
