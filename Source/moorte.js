@@ -437,6 +437,12 @@ MooRTE.Utilities = {
 					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	}
+	
+   /* 	ToDo:
+	* 	When group is clicked, it should show existing instead of creating new.
+	*	When group button is clicked, it should make editor the default and work.
+	*	Fix messed up logic and functions.
+	*/
 	, group: function(elements, name){
 		var self = this
 		  , bar = this.getParent('.RTE');
@@ -458,7 +464,7 @@ MooRTE.Utilities = {
 				onComplete: function(command){
 					var body = "For your protection, "+(Browser.webkit?"Webkit":"Firefox")+" does not allow access to the clipboard.<br/>\
 						<b>Please use Ctrl+C to copy, Ctrl+X to cut, and Ctrl+V to paste.</b><br/><br/>\
-						If this functionality is important, consider switching to a browser such as IE,<br/> which will allow us to easily access [and modify] your system."; 
+						If this functionality is important consider switching to Internet Explorer,<br/> which allows us to access [and modify] your system."; 
 					MooRTE.Elements.clipPop = new StickyWin.Modal({content: StickyWin.ui('Security Restriction', body, {buttons:[{ text:'close'}]})});	
 					MooRTE.Elements.clipPop.hide();
 				}
@@ -792,7 +798,7 @@ MooRTE.Elements = {
 					   , onLoad: function(){
 							if (window.Asset) new Asset.javascript('StickyWinModalUI.js', {
 								self: this
-								, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
+								//, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
 								, onComplete: function(){
 									var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
 												<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
