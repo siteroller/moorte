@@ -66,7 +66,8 @@ var MooRTE = new Class({
 		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false }).adopt(
 			 new Element('div', {'class':'RTE '+self.options.skin })
 		).inject(document.body);
-		MooRTE.activeBar = rte; // not used!
+		// no activeBar is set, moorte() when called from an element will crash. This safely gives a default.
+		MooRTE.activeBar = rte;
 		MooRTE.Utilities.addElements(this.options.buttons, rte.getFirst(), 'bottom', 'rteGroup_Auto'); //Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 	},
@@ -202,36 +203,105 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	addElements: function(buttons, place, relative, name){
-		if(!place) place = MooRTE.activeBar.getFirst();
-		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'), self = this, btns = []; 
-		if($type(buttons) == 'string'){
-			buttons = buttons.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'"); 					// surround strings with single quotes & convert double to single quoutes. 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");		// add curly braces to string:string - makes {string:string} 
-			buttons = buttons.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");					// add curly braces to string:object.  Eventually fix to allow recursion.
-			while (buttons != (buttons = buttons.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));	// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
-			buttons = JSON.decode('['+buttons+']');
+	// elements[mixed:string/object/array] - the elements to add.
+	// place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
+	// options [object] - default is { useExistingEls:false - when told to add an element similar to an existing one, do not use existing element.
+	//		, className:'' - any extra classes to add to the element. }
+	addElements: function(buttons, place, options){
+		// Not sure why this is the best place for this check:
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
+		if (!place) place = MooRTE.activeBar.getFirst();
+		else if (Type.isArray(place)){
+			// In all but IE6, this could be written as [place,relative] = place;
+			var relative = place[1]; 
+			place = place[0];
 		}
-	
+		// If no options are passed in, create an empty object, which is the equivalent to setting defaults to false/''. 
+		if (!options) options = {};
+		var parent = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
 		
-		//the following should be a loop.  When was the loop removed and why?!
-		if(btns[0]){ buttons = btns; btns = [];}
-		$splat(buttons).each(function(item){
-			switch($type(item)){
-				case 'string': btns.push(item); break;
-				case 'array' : item.each(function(val){btns.push(val)}); var loop = (item.length==1); break;	//item.each(buttons.push);
-				case 'object': Hash.each(item, function(val,key){ btns.push(Hash.set({},key,val)) }); break;			
-			}
-		});
-
-		btns.each(function(btn){
-			var btnVals,btnClass;
-			if ($type(btn)=='object'){btnVals = Hash.getValues(btn)[0]; btn = Hash.getKeys(btn)[0];}
-			btnClass = btn.split('.');																		//[btn,btnClass] = btn.split('.'); - Code sunk by IE6
-			btn=btnClass.shift();
-			var e = parent.getElement('[class~='+name+']'||'.rte'+btn);
+		// elements can be an object/array or a string. eg {'div.Flyout':['indent','outdent']} or "{'div.Flyout':['indent','outdent']}"
+		// MooRTE allows an invalid JSON string with implied Object and Array braces. eg: "'div.Flyout':[indent,outdent]"
+		// The following turns it into valid JSON and converts it into an object or array.
+		if (typeOf(elements) == 'string'){
+			// surround strings with single quotes & convert double to single quoutes. 
+			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
+			// add curly braces to string:string - makes {string:string} 
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
+			// add curly braces to string:object.  Eventually fix to allow recursion.
+			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
+			// add curly braces to string:array.  Allows for recursive objects - {a:[{b:[c]}, [d], e]}.
+			while (elements != (elements = elements.replace(/((?:[,[]|^)\s*)('[^']+'\s*:\s*\[(?:(?=([^\],\[]+))\3|\]}|[,[](?!\s*'[^']+'\s*:\s*\[([^\]]|\]})+\]))*\](?!}))/gm, "$1{$2}")));
+			// convert JSON to JS object. 
+			elements = JSON.decode('['+elements+']');
+		}
 			
-			if(!e || name == 'rteGroup_Auto'){
+		// The following was a loop till 2009-04-28 12:11:22, commit fc4da3. 
+		// The loop was then removed, probably by mistake, till 2009-12-09 13:18:15.
+		// As 'elements' may contained nested objects, we must convert it to an array.
+		// We use a new array 'els' instead of 'map', as map would not be able to handle multiple pushes, using each.
+		var els = []
+		  , elsLoop = 0; 
+		do {
+			if (els.length) elements = els, els = [];
+			Array.from(elements).each(function(item){
+				switch(typeOf(item)){
+					case 'string':
+						els.push(item); break;
+					case 'object':
+						Object.each(item, function(val,key){ 
+							els.push(Object.set(key,val)) 
+						}); break;
+					case 'array':
+						item.each(function(val){els.push(val)}); 
+						elsLoop = item.length;	
+				}
+			});
+			// While testing, we add in the loopstop variable
+			// if (++loopStop > 50) return alert('crashed in addElements array handling'); 
+		} while (elsLoop);
+
+		els.each(function(btn){
+			if (Type.isObject(btn)){
+				var btnVals = Object.values(btn)[0];
+				btn = Object.keys(btn)[0];
+			}
+			
+			// The class is made up of any classes that are appended to the name of the element, 
+			// eg: div.Flyout.Group1 would get the MooRTE.Elements.div with the classes Flyout and Group1
+			// Additionally, we allow classes to be passed in using the options.className option. (multiple classes are seperated with a space.)
+			// The major difference, is that div.Flyout gets prepended with "rte", and className does not.
+			// ToDo: the className option will probably dropped before the next RC.
+			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
+			// Check if the element exists in the location it would be entered into.
+			// eg. if (place == $('myEl')) it will only look for elements already in $('myEl').
+			// This check is (by design) loose - it doesn't check that $('myEl') is the last item, even though the new element is scheduled to be placed as the last item.
+			// we could do an exact check using place['get'+(..'First')].matches(btnClass)
+			// but dont since I think it would interfere with those cases one actually does want to reuse an existing element. because when 
+			  , e = place['get' + ({before:'Previous', after:'Next', top:'First'}[relative] || 'Last')](btnClass)
+			//alternatively written:
+			//, loc = {before:'Previous', after:'Next'}[relative] || 'First', e = place['get' + loc](btnClass);	
+			//, e = place['get'+ (relative == 'before' ? 'Previous' : relative == 'after' ? 'Next' : 'First')](btnClass);
+			, btn = btn.split('.')[0];
+			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
+			
+			// What should happen when attempting to add an element and a similar element already exists?
+			// For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
+			// Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
+			
+			// Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
+			// In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
+			// Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
+			// Fortunately, another bug in the code prevented other problems from arising ;)
+			
+			// Since the aforementioned commit it by default will create a new element even if a similar one already exists.
+			// One can force moorte to use an existing element by setting the option - useExistingEls to true. 
+			// Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
+			// eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
+			// Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
+			
+			var e = parent.getElement('.rte'+btn);
+			if (!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
 				var state = 'bold,italic,underline,strikethrough,subscript,superscript,insertorderedlist,insertunorderedlist,unlink,'.contains(btn.toLowerCase()+',')
 				
@@ -242,8 +312,12 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							var bar = MooRTE.activeBar = this.getParent('.MooRTE')
-							  , source = bar.retrieve('source')
+							// bar is the RTE - the parent element that contains the class 'MooRTE';
+							// There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
+							// var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							// So that bar will map to its own local variable, checked each time the button is pressed.
+							MooRTE.activeBar = bar;
+							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
 							
 							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
@@ -294,19 +368,60 @@ MooRTE.Utilities = {
 			
 	},
 	
-	eventHandler: function(onEvent, caller, name){
-		var event;
-		if(!(event = $unlink(MooRTE.Elements[name][onEvent]))) return;
-		switch($type(event)){
-			case 'function': event.bind(caller)(name,onEvent); break;
-			case 'string': MooRTE.Utilities.eventHandler(event, caller, name); break;
-			case 'array': event.push(name,onEvent); MooRTE.Utilities[event.shift()].run(event, caller); break;
+	, eventHandler: function(onEvent, caller, name){
+		// UNTESTED: Function completely rewritten for v1.3
+		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		var event = MooRTE.Elements[name][onEvent];
+		switch(typeOf(event)){
+			case 'function':
+				event.call(caller, name, onEvent); break;
+			case 'array': // Deprecated, for backwards compatibility only.
+				event = Array.clone(event);
+				event.push(name, onEvent);
+				MooRTE.Utilities[event.shift()].apply(caller, event); break;
+			case 'object':
+				Object.every(event, function(val,key){
+					// key - the function name, eg. "group". val - the arguments, eg "{Toolbar:['start','Html/Text']}"
+					// name - the key in the Elements array, eg "View", onEvent - the event, eg."onClick"
+					val = Type.isArray(val) ? Array.clone(val) : Type.isObject(val) ? Object.clone(val) : val;
+					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
+				}); break;
+			case 'string':
+				onEvent == 'source' && onEvent.substr(0,2) != 'on'
+					? MooRTE.Range.wrapText(event, caller)
+					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
-	},
-	
+	/*
+	*	function:
+	*		a. Inserts an element with a series of sub elements
+	*		b. Optionally links elements so that when one shows the others are hidden.
+	*	arguments:
+	*		elements[mixed] - The elements to add, as string/JSON/Array/Object.
+	*		name[string] - the MooRTE.Elements that created 'this'. eg: "Main", referring to MooRTE.Elements.Main 
+	*	this: refers to the element that was pressed to trigger the 'group' method, & which contains the group method in its onClick/onLoad property.
+	*	returns: false
+	*
+	*	Adds a class to the button triggering the group .rteAdd_+name
+	*	Calls the onShow eventhandler. By default, this is empty, but it can be configured by any plugin.
+	*	Calls addElements. Adds all elements and gives the topmost a class of .rteGroup_+name. 
+	*		eg. {group:'div.Flyout:[btn]'} will create <div class="rteGroup_div rteFlyout"><a class="rtebtn"></a></div> 
+	*		ToDo: Elements is added to whichever parent of 'this' is part of a group. Not sure what my logic was.
+	*	
+	*	This function will also hide other groups if either of the two conditions are met:
+	*		a. MooRTE.Elements[name] has an attribute 'hides'.
+	*			eg. MooRTE.Elements.Main has a hides:'div'. When Main is clicked it will show the group attached to it, and hide the els specified in hides.
+	* 		b. 'this' has siblings that also have created groups.
+	*			The crazy logic here is that if you have two items which trigger the showing of groups, they are probably tabs.
+	*			otherwise, you would have just included the submenu using 'contains'.
+	*			This logic isn't logical, and should be fixed before v0.6
+	*	ToDo: concept, perhaps eventHandler should allow an array/object of functions to be run, and hides will be a seperate function when hides is specified alongside group
+	*		Also, eventHandler should allow multiple arguments, no?!
+	*
+	*
+	*/
 	group: function(elements, name){
 		var self = this, parent = this.getParent('.RTE');
-		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){ 
+		(MooRTE.Elements[name].hides||self.getSiblings('*[class*=rteAdd]')).each(function(el){
 			el.removeClass('rteSelected');
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
 			MooRTE.Utilities.eventHandler('onHide', self, name);
@@ -315,8 +430,6 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
 	},
-	
-	
 	assetLoader:function(args){
 		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
@@ -487,44 +600,143 @@ MooRTE.Utilities = {
 	}
 }
 
-Element.implement({
-	moorte:function(){ //arguments: command, options
-		// The following variables are created: params - passed in arguments, sorted to be useful. cmd - What should be done: create, destroy, etc.
-		// removed - Will hold a reference to the removed element. bar - the RTE to apply. If not passed, check if element has it in memory. If undefined, create new.
-		var params = Array.link(arguments, {'options': Object.type, 'cmd': String.type}), cmd = params.cmd, removed, bar = this.hasClass('MooRTE') ? this : this.retrieve('bar') || '';
-		if(!cmd || (cmd == 'create')){
-			// If removed is defined, the element exists and is in memory.
-			if(removed = this.retrieve('removed')){
-				bar.inject(removed[0], removed[1]);
-				this.eliminate('removed');
+/* Overview:
+*	1. If a RTE is passed in we set it to be the current RTE for all future operations.
+*		Generally, this will be for 'attach' only.
+*	2. If any of the four keywords are passed in ('destroy', 'remove', 'detach', 'hide'):
+*		a. If the toolbar doesn't exist, or it has been removed, we exit. You cannot destroy a removed toolbar at the moment.
+*		b. If it exists, we follow the instruction. If an object is passed in, it is ignored.
+*	3. If not, check if a bar already exists. 
+*		a. If not, create a brand new spanking toolbar. 
+*		b. If yes, but has the class of hidden, show it and return.
+*	5. Otherwise, if field is removed, restore it.
+*	6. If not, it must be detached. Reattach it.
+*
+*	In all cases where an action would be applied to a RTE, one could pass in any element which is connected to the RTE.
+*	eg: $('edit1').moorte('remove') - Will remove the RTE that controls $('edit1').
+*	eg: $('edit1').moorte($('edit2')) - Will cause $('edit1') to attach itself to $('edit2')'s toolbar.
+*/
+
+/* 	ToDo:
+* 	feature: if error[number], should pass back false or errorcode
+* 	feature [may exist]: MooRTE should check if passed in element has a RTE already.
+*/
+MooRTE.extensions = function(){	//arguments: command, options
+
+		// params - passed in arguments, sorted to be useful.
+	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
+		// cmd - What should be done: create, destroy, etc.
+	, cmd = 'detach,hide,remove,destroy'.test(params.cmd,'i') ? params.cmd.toLowerCase() : '';
+
+	// This should all work if the toolbar extends multiple elements and has been removed and restored.  Untested.	
+	Array.from(this).every(function(self){
+
+		var bar	// The RTE controlling this element. Can only be one.
+		  , els // The elements that are affected by the bar. can be many.
+		  , self = self.retrieve('new') || self; // The current element. If textarea/input, the div created to replace the textarea. 
+
+		if (params.rte){  
+			bar = params.rte.hasClass('MooRTE') ? params.rte : params.rte.retrieve('bar');
+			if (!bar) return alert('Err 600: The passed in element is not connected to an RTE.'), 600;
+			if (self.retrieve('bar') != bar){
+				self.retrieve('bar').retrieve('fields').erase(self);
+				self.store('bar', bar);
+				bar.retrieve('fields').include(self);
 			}
-			// If bar exists, it must be on the page, but invisible. Otherwise, create a new instance of the RTE.
-			return bar ? this.removeClass('rteHide') : new MooRTE($extend(params.options||{},{'elements':this}));
-			// This should also work if the toolbar extends multiple elelemnts and has been removed and restored.  Untested.
-		} else {
-			if(!bar) return false;
-			else switch(cmd.toLowerCase()){
-				case 'hide': bar.addClass('rteHide'); break;
-				case 'remove':
-					// The editor is structured that the RTE will either injected into 'this' (the default), or at the page bottom (if floating:false or position:fixed).
-					// We therefore could assume that whenever there is no previous element, it should be injected in the top of this: 
-					// 		if(prev = bar.getPrevious())place = [prev,'after'];	And in the other half: if(rem = this.retrieve('removed')) rem.place ? bar.inject(rem.place, rem.where) : bar.inject(this, 'top');
-					// If we want to cover cases where the user moved it somehow to the top of a different element, we could still do something like:
-					//		var place = bar.getPrevious() ? [bar.getPrevious(),'after'] : (bar.getParent != this ?  [bar.getParent(),'top'] : []); 
-					// Considering that in most cases we will be storing on the element a reference to itself (by default the editor is the first child of 'this'), the current code is wasteful but safe.
-					// The only potential downside is a memory leak due to the extra reference to element (which can prevent the element from being cleared from memory).  Seems inconsequential to me.
-					
-					// Store the previous element if exists, or the parent if no previous.  This will allow it to be returned later to the place from whence it came.
-					this.store('removed', bar.getPrevious() ? [bar.getPrevious(),'after'] : [bar.getParent(),'top']);
-					// Remove the RTE from 'this' by replacing it with a span that is then destroyed.  If we just destroyed the element, it would not be able to be restored. 
-					new Element('span').replaces(bar).destroy(); break;
-				case 'destroy': 
-					bar.retrieve('fields').each(function(el){el.removeEvents().store('bar','').contentEditable = false;}); 
-					bar.destroy(); break; 
-			}
+		} else bar = self.hasClass('MooRTE') ? self : self.retrieve('bar');
+
+		if (!cmd){
+			if (!bar) return new MooRTE(Object.merge(params.options || {}, {'elements':this})), false;
+				// If bar exists, it must be on the page, but invisible. Otherwise, create a new instance of the RTE.
+			else if (bar.hasClass('rteHide')) return bar.removeClass('rteHide');
+		} else if (!bar || self.retrieve('removed') || !self.getParent()) return true;
+		
+		switch (cmd){
+			case 'hide':
+				return bar.addClass('rteHide');
+			case 'detach':
+				if (self == bar) return true;
+				bar.retrieve('fields').erase(self); 
+				els = [self];
+				break;
+			case 'remove':
+				   /* The editor is structured that the RTE will either injected into 'this' (the default), or at the page bottom (if floating:false or position:fixed).
+					* We therefore could assume that whenever there is no previous element, it should be injected in the top of this: 
+					* 	 if(prev = bar.getPrevious())place = [prev,'after'];	And in the other half: if(rem = this.retrieve('removed')) rem.place ? bar.inject(rem.place, rem.where) : bar.inject(this, 'top');
+					* If we want to cover cases where the user moved it somehow to the top of a different element, we could still do something like:
+					*	 var place = bar.getPrevious() ? [bar.getPrevious(),'after'] : (bar.getParent != this ?  [bar.getParent(),'top'] : []); 
+					* Considering that in most cases we will be storing on the element a reference to itself (by default the editor is the first child of 'this'), the current code is wasteful but safe.
+					* The only potential downside is a memory leak due to the extra reference to element (which can prevent the element from being cleared from memory).  Seems inconsequential to me.
+					* 
+					* Store the previous element if exists, or the parent if no previous.  This will allow it to be returned later to the place from whence it came.
+					*/
+				bar.store('removed', bar.getPrevious()
+						? [bar.getPrevious(),'after']
+						: [bar.getParent(),'top']);
+				   /* Remove the RTE from the DOM. Do not destroy it, or it cannot be later restored. Done in Moo 1.3 using dispose. 
+					* Originally done as follows: new Element('span').replaces(bar).destroy(); break;
+					*/
+				bar.dispose();
+				els = bar.retrieve('fields');
+				break;			
+			case 'destroy':
+				els = bar.retrieve('fields');
+				bar = bar.destroy();
+				break;
+			default:
+					// assume we will act on current element
+				els = [self]
+				  , removed = bar.retrieve('removed');
+					// If removed is defined, the element exists and is in memory.
+				if (removed){
+						// get the list of all elements that must be re-editabled
+					els = bar.retrieve('fields');
+						// inject the toolbar back onto the page.
+					bar.inject(removed[0], removed[1]).eliminate('removed');
+						// if bar, !hasClass(rteHide), and !removed, element must detached.
+						// You cannot attach a bar to itself
+				} else if (self == bar) return;
+				
+				els.each(function(el){
+						
+					bar.retrieve('fields').include(el);
+					var src = el.retrieve('src');
+					if (!src){
+						el.set('contentEditable', true);
+						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
+						if (Browser.firefox && !el.getElement('#rteMozFix')) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
+					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
+				})
+				return true;
 		}
-	}
-});
+				
+		els.each(function(el){
+			if (Browser.firefox && el.getElement('#rteMozFix')) el.getElement('#rteMozFix').destroy();
+				// Textareas must be replaced with a div. Get the textarea.
+			var src = el.retrieve('src');
+			if (src){
+				// We used to check if src.getParent(), as if !src.parent, the textarea is not on the page, in which case we cannot replace it.
+				// I dont recall when or why this became unnecessary.
+				src.set('value', el.get('html')).replaces(el);
+				if (!bar){
+					src.eliminate('new');
+					el.destroy();
+				}
+			} else {
+				// Must not have been a textarea. Set contenteditable, restore events, add moz fix.
+				el.set('contentEditable', false);
+				MooRTE.Utilities.removeEvents(el, destroy);
+				if (!bar) el.eliminate('bar');
+			}
+		});
+		return true;
+	}.bind(this));
+	
+	return this.retrieve(cmd ? 'src' : 'new') || this; 
+}
+
+Element.implement({moorte:MooRTE.extensions});
+Elements.implement({moorte:MooRTE.extensions});
 
 MooRTE.Elements = new Hash({
 

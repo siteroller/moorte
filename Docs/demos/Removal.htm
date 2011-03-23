@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+   <head>
+		<title>MooRTE Lite Demo</title>
+		<link   type="text/css" rel="stylesheet" href="../../Source/Assets/moorte.css">
+		<script type="text/javascript" src="../../Source/Assets/scripts/mootools.13.js"></script>
+		<script type="text/javascript" src="../../Source/moorte.js"></script>
+		<script>
+		// Important!! Use load instead of domready for accurate positioning. 
+		window.addEvent('load', function(){
+			var comments = document.id('comments');
+			
+			comments.moorte({
+				skin: 'Tango',
+				where: 'top',
+				padFloat: false,
+				buttons: {'div.Toolbar':['bold','italic','underline','strikethrough','indent','outdent','removeformat']}
+			});
+			
+			['Detach','Hide','Remove','Destroy',''].each(function(action,i){
+				document.id('Actions').grab(new Element('input',
+					{ type: 'submit'
+					, value: (action || 'Restore') + (i ? ' RTE' : ' Node') 
+					, styles: { width:100 }
+					, events: { click:function(){comments.moorte(action); alert("$('comments').moorte("+action+");") }
+					}
+				}));
+			});
+			
+		});
+		
+		</script>
+		<style type="text/css">
+			span{display:inline-block; width:75px;}
+			#comments,#name{ width:200px }
+			#comments{ height:150px; }
+		</style>
+	</head>
+	<body>
+		<form action="http://siteroller.net/test/submit/form.php?version=0.55&page=lite" method="post">
+			<span>Name: </span>
+			<input type="text" name="name" id="name">
+			<br><br>
+			<span>History: </span>
+			<input name="comments" id="comments" value='The geek shall inherit the earth.'>
+		</form>
+		<p id='Actions' style='text-align:center; width:400px;'></p>
+		<ul>
+			<li>Element begins with the Tango skin. <br>
+			<li><b>Detach</b> - Disconnects the element from the rte and turns off editing. The toolbar and other elements connected to the toolbar are unaffected. 
+			<br>Restore reattaches the element to the rte it was last connected to, unless a different RTE is passed in.</li> 
+			<li><b>Hide</b> - Adds "display:none" to the rte toolbar. Simple hide, nothing more.
+			<br> Restore RTE  removes the display:none, and everything is back to where it was.</li>
+			<li><b>Remove</b> - removes the rte toolbar from the page and makes all connected elements uneditable.<br> Restore RTE reverses the actions, and all is back to how it was.</li>
+			<li><b>Destroy</b> - destroys the rte toolbar and makes all connected elements uneditable. 
+			<br>Restore creates a brand new RTE, with the default Word'03 skin.</li>
+		</ul>
+		<br>
+		<p> <u>Geeks Only:</u><br>
+		In concept, "detach" is a function of element. It detaches the element from the RTE, without affecting the RTE at all.<br>
+		Detach therefore can NOT be called directly on a RTE.<br><br>
+		Restore, Remove and Hide are methods of the RTE: They affect the RTE and every element associated with it.<br>
+		For practicality, restore/remove/hide can be called on any element which has an associated RTE, the RTE is assumed.</p>
+		
+	</body>
+</html>
