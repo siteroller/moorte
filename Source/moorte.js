@@ -376,13 +376,13 @@ MooRTE.Utilities = {
 							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
 							
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];
-							// Works around https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
-							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) MooRTE.activeField.focus();
+							// Workaround, see docs.
 							var holder = MooRTE.Range.parent();
 							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
-							if (!MooRTE.activeField.contains(holder)) MooRTE.activeField.focus();
-			
+							
+							if (!(fields.contains(MooRTE.activeField) && MooRTE.activeField.contains(holder)))
+								(MooRTE.activeField = fields[0]).focus();
+
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
 							!val.onClick && !source && (!val.element || val.element == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)

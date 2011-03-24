@@ -320,37 +320,56 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							// bar is the RTE - the parent element that contains the class 'MooRTE';
-							// There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
-							// var bar = MooRTE.activeBar = this.getParent('.MooRTE')
-							// So that bar will map to its own local variable, checked each time the button is pressed.
+						   /* 	bar is the RTE - the toolbar parent [contains the class 'MooRTE'];
+							* 	
+							*	There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
+							* 	var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							* 	So that bar will map to its own local variable, checked each time the button is pressed.
+							*/
 							MooRTE.activeBar = bar;
 							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
-							
-							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
-							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							
-							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
-							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
-							// "holder" is a reference to the node that includes all selected text. 
-							// Will be a text node or an element, depending on what is actually selected.
+							  
+						   /* 	We must check that selected text is under the control of the button being clicked. 
+							*	Otherwise, the whole page would become editable, including non-editable text and non-active fields.
+							*
+							*	First step is to find the element that contains the selection.
+							*	Should be:
+							*	if (!MooRTE.activeField.contains(MooRTE.Range.parent())) fields[0].focus();....
+							* 	Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							*	"holder" is a reference to the node that includes all selected text. 
+							*	Will be a text node or an element, depending on what is actually selected.
+							*/
 							var holder = MooRTE.Range.parent();
-							// If using webkit, we need an element, as text nodes are not officially "contained": bug #1113
-							// (nodeType == 3) means we have a text node. "parentElement" is a Webkit-specific property.
-							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
-							// If the "active field" does not contain all of the selected text, return.
-							// Otherwise one would be able to select & modify non-editable text, or text in a non-active field.
-							if (!MooRTE.activeField.contains(holder)) return;
+							// 	If using webkit, we need an element, as text nodes are not officially "contained": bug #1113
+							// 	(nodeType == 3) means we have a text node. "parentElement" is a Webkit-specific property.
+							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
 							
-							// If element has no onClick event, no [source ??], and is an 'a' element [or undefined/default] -   
-							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							// If it has a source, run that. If it has an onClick event, run that.
-							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
-							// If the button is passed an event, stop the event from propogating. 
-							// If button is meant to accept input, the event must continue or the cursor will not appear. 
+							/*	Second step is just to check if holder is within one of the fields:
+							*	if (!fields.some(function(field){ return field.contains(holder) }))	fields[0].focus();
+							*
+							*	However that would require a DOM checking for every single field, every time a button is clicked.
+							*	Instead, we assume that activeField would be set if the field was editable.
+							*/
+							if (!(fields.contains(MooRTE.activeField) && MooRTE.activeField.contains(holder))){ 
+								fields[0].focus();
+								MooRTE.activeField = fields[0];
+							}								
+						   /*	It is theroetically possible to have a selection without ever calling focus, or to have had activeField reset by JS.
+						    *	If we wanted to check for that, but not run the loop of checking each field for holder, we could combine them, by:
+						    *	Add the following to the end of the 'if' above:
+						    *	&& !fields.some(function(field){ if (field.contains(holder)) return MooRTE.activeField = field; }
+							*/
+							
+						   /*	If the button is passed an event, stop the event from propogating. 
+							* 	If button is meant to accept input, the event must continue or the cursor will not appear. 
+							*/
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
+							// If element has no onClick event, no [source ??], and is an 'a' element [or undefined/default] -   
+							val.onClick && !source && (!val.element || val.element == 'a')
+								? MooRTE.Utilities.exec(val.args || btn)
+								// If it has a source, run that. If it has an onClick event, run that.
+								: MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 						}
 					}
 				}, val);
