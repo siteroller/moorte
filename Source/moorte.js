@@ -410,8 +410,7 @@ MooRTE.Utilities = {
 			}
 
 			var sub = btnVals || val && val.contains;
-			if (!options.inherit) options = {};
-			if (sub) MooRTE.Utilities.addElements(sub, e, options);
+			if (sub && !options.noSub) MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
 			e.removeClass('rteHide');
 		})
 			
@@ -436,12 +435,6 @@ MooRTE.Utilities = {
 					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	}
-	
-   /* 	ToDo:
-	* 	When group is clicked, it should show existing instead of creating new.
-	*	When group button is clicked, it should make editor the default and work.
-	*	Fix messed up logic and functions.
-	*/
 	, group: function(elements, name){
 		var self = this
 		  , bar = this.getParent('.RTE');
