@@ -375,16 +375,14 @@ MooRTE.Utilities = {
 							MooRTE.activeBar = bar;
 							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
-							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
-							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
 							
+							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];
 							// Works around https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
-							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
+							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) MooRTE.activeField.focus();
 							var holder = MooRTE.Range.parent();
-							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
-							if (!MooRTE.activeField.contains(holder)) return;
-							
+							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
+							if (!MooRTE.activeField.contains(holder)) MooRTE.activeField.focus();
+			
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
 							!val.onClick && !source && (!val.element || val.element == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)
