@@ -410,7 +410,7 @@ MooRTE.Utilities = {
 			}
 
 			var sub = btnVals || val && val.contains;
-			if (sub && !(val && options.ifExists == 'stop'))
+			if (sub && !(options.ifExists == 'stop' && !val))
 				MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
 			e.removeClass('rteHide');
 		})
@@ -449,10 +449,7 @@ MooRTE.Utilities = {
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
 		this.addClass('rteSelected rteGroupBtn_'+name);
-		var group = this.getParent().getSiblings('.rteGroup_'+name)[0];
-		group 
-			? group.removeClass('rteHide')
-			: MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), {className:'rteGroup_'+name});
+		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), {className:'rteGroup_'+name, ifExists:'stop'});
 		MooRTE.Utilities.eventHandler('onShow', this, name);
 	}
 	, clipStickyWin: function(caller){
