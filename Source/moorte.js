@@ -358,7 +358,7 @@ MooRTE.Utilities = {
 			  , btn = btn.split('.')[0];
 			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 		
-			if (!e || !options.useExistingEls){
+			if (!e || !options.ifExists){
 				var bgPos = 0
 				  , val = MooRTE.Elements[btn]
 				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
@@ -410,7 +410,8 @@ MooRTE.Utilities = {
 			}
 
 			var sub = btnVals || val && val.contains;
-			if (sub && !options.noSub) MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
+			if (sub && !(val && options.ifExists == 'stop'))
+				MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
 			e.removeClass('rteHide');
 		})
 			

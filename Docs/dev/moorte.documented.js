@@ -203,10 +203,17 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	// elements[mixed:string/object/array] - the elements to add.
-	// place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
-	// options [object] - default is { useExistingEls:false - when told to add an element similar to an existing one, do not use existing element.
-	//		, className:'' - any extra classes to add to the element. }
+  /* elements[mixed:string/object/array] - the elements to add.
+	* place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
+	* options [object] - default is {} 
+	*		{ className: [''] - any extra classes to add to the element.
+	*		, inherits: [false/true] - if options should be passed to sub elements.
+	*		, ifExists: [false/true/'stop'] - when adding an element similar to an existing one, should it use the existing.	
+	*			false - Ignore existing. Create new element. 
+	*			true - Use existing element.
+	*			'stop': Do not create new or use existing.
+	*		}
+	*/
 	addElements: function(buttons, place, options){
 		// Not sure why this is the best place for this check:
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
@@ -299,6 +306,7 @@ MooRTE.Utilities = {
 			* Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
 			* eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
 			* Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
+			* After #dd363d, the original behavior was reinstated as the ifExists:'stop' option. 
 			*/
 			
 			/* ToDo: Chrome + Mootools bug. Demo here: http://jsfiddle.net/JFyCQ/ 
