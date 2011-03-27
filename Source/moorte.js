@@ -345,7 +345,9 @@ MooRTE.Utilities = {
 			});
 		} while (elsLoop);
 		
-		var bar = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE'); 
+		var collection = []
+		, bar = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE');
+		
 		els.each(function(btn){
 			if (Type.isObject(btn)){
 				var btnVals = Object.values(btn)[0];
@@ -413,8 +415,10 @@ MooRTE.Utilities = {
 			if (sub && !(options.ifExists == 'stop' && !val))
 				MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
 			e.removeClass('rteHide');
-		})
-			
+			collection.push(e);
+		});
+		
+		return collection[1] ? collection : collection[0];	
 	}
 	, eventHandler: function(onEvent, caller, name){
 		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
