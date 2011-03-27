@@ -405,7 +405,13 @@ MooRTE.Utilities = {
 	
 	, eventHandler: function(onEvent, caller, name){
 		// UNTESTED: Function completely rewritten for v1.3
-		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		// Must check if function or string is modified now that unlink is gone. Should be OK.
+		
+		/* ToDo:
+		*	If array, assume multiple method references.
+		*	If object, and value is an array, pass in as multpile arguments.
+		*/
+		
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
@@ -461,11 +467,62 @@ MooRTE.Utilities = {
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
-		this.addClass('rteSelected rteAdd'+name);
+		
+		// Should be able to add the two classes together, but duplicates each time method runs. 
+		// It appears to be the underscore that borks it. Mootools bug. Needs verification and Lighthouse listing.
+		// this.addClass('rteSelected rteGroupBtn_'+name);
+		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
-	},
-	assetLoader:function(args){
+	}
+  /* tabs method, replaces group method:
+	*	arguments:
+	*		(req) elements[object] - The items from MooRTE.Elements to add. Passed to addElements, conventions are same.
+	*		(req) name[string] - The name of this Group/GroupBtn combination.  Added
+	*		(req) tabGroup[string]
+	*		(opt) place[object reference]
+	*	this: element being clicked.
+	*	returns: null
+	*	overview: 
+	*		Tabs consist of a number of related Group/GroupBtn pairs.
+	*		When a GroupBtn is pressed, its corresponding Group shows, and all related Groups are hidden.
+	*		The first time a Group/GroupBtn is passed in, it is created and added to the MooRTE.tabs array
+	*	Notes:
+	*		'hides', which can be set on any element in Elements, and which group would hide when element pressed, has been deprecated.
+	*			No backwards support for this, and nothing stands ion its place.
+	*
+	*/
+	, tabs: function(elements, name, tabGroup, place){
+	  /*	Temporarily hard set 'tabGroups' and 'place'. Should be passed in args or set as default.
+		*	ToDo: Allow Utilities.eventHolder to accept multiple arguments as an array when passed an object.
+		*		Till then, unable to pass tabGroup and place arguments.
+		*	ToDo: Change the preset arguments to be first in list when calling methods.
+		*		This will allow the number of arguments to be not set in advance.  May be less intuitive, should try to find Mootools precedence.
+		*		Till then, tabGroup and place is assumed to be the passed in items, and crashes.
+		*	ToDo: Change the order of arguments to tabGroup, name, elements.  Mebbe??
+		*	Till then, the tabGroup and place are hard coded, not passed, and everything works ;)
+		*	
+		*/
+		tabGroup = 'tabs1';
+		place = null;
+			
+		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
+		
+		Object.each(MooRTE.Tabs[tabGroup], function(els, title){
+			els[0].removeClass('rteSelected');
+			els[1].addClass('rteHide');
+			MooRTE.Utilities.eventHandler('onHide', this, name);
+		}, this);
+		
+		this.addClass('rteSelected rteGroupBtn_'+name);
+		var group = MooRTE.Utilities.addElements(elements, place, {className:'rteGroup_'+name, ifExists:'stop'});
+		MooRTE.Utilities.eventHandler('onShow', this, name);
+		
+		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
+		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [this, group]//Object.set(name, );
+	}
+
+	, assetLoader:function(args){
 		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
 		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
@@ -945,3 +1002,9 @@ MooRTE.Elements = new Hash({
 							}
 						}
 });
+
+/*	ToDo: Should support be added to have methods that run only on firstClick?
+*		One way this can be done is creating another Elements object on each bar, that is only populated when directly told to.
+*		When a button is added or method is called and the item is in the element-specific-Elements-array, and will use that instead of the main Elements Object.
+*		Then firstClick can be added when desired, as well as allowing a button to have specific uses, such as one editor on a page being Markup.
+*/		

@@ -453,7 +453,7 @@ MooRTE.Utilities = {
 			MooRTE.Utilities.eventHandler('onHide', this, name);
 		}, this);
 		
-		this.addClass('rteSelected');
+		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		var group = MooRTE.Utilities.addElements(elements, place, {className:'rteGroup_'+name, ifExists:'stop'});
 		MooRTE.Utilities.eventHandler('onShow', this, name);
 		
