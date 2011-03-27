@@ -441,6 +441,10 @@ MooRTE.Utilities = {
 		}
 	}
 	, tabs: function(elements, name, tabGroup, place){
+		// ToDo: temporarily hard set. Should be passed in args or set as default.
+		tabGroup = 'tabs1';
+		place = null;
+		
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
 		
 		Object.each(MooRTE.Tabs[tabGroup], function(els, title){
@@ -683,11 +687,13 @@ MooRTE.Elements = {
 
    // Groups are Samples - They can be created manually, or dynamically by the download builder.
 	// Groups (Menus)
-     Main			:{text:'Main',   'class':'rteText', onClick:'onLoad', onLoad:{group: {Toolbar:['start','bold','italic','underline','strikethrough','Justify','Lists','Indents','subscript','superscript']}} }
-   , File			:{text:'File',   'class':'rteText', onClick:{group: {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']} } }
-   , Font			:{text:'Font',   'class':'rteText', onClick:['group',{Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}] }
-   , Insert			:{text:'Insert', 'class':'rteText', onClick:['group',{Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}] }//'Upload Photo'
-   , View			:{text:'Views',  'class':'rteText', onClick:['group',{Toolbar:['start','Html/Text']}] }
+     Main			:{ text:'Main', 'class':'rteText', onClick:'onLoad', onLoad:{
+							   tabs: 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'} 
+						 }
+   , File			:{text:'File',   'class':'rteText', onClick:{tabs: {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']} } }
+   , Font			:{text:'Font',   'class':'rteText', onClick:{tabs: {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}} }
+   , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}} }//'Upload Photo'
+   , View			:{text:'Views',  'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
 
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
