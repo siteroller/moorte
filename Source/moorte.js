@@ -252,7 +252,7 @@ MooRTE.Range = {
 		if (Browser.firefox) MooRTE.Range.selection = window.getSelection();
 		if (!Browser.ie) MooRTE.Range.content = new Element('div');
 }());
-
+MooRTE.Tabs = {};
 MooRTE.Utilities = {
 	exec: function(args){
 		args = Array.from(args);
@@ -440,21 +440,21 @@ MooRTE.Utilities = {
 					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	}
-	, group: function(elements, name){
-		var self = this
-		  , bar = this.getParent('.RTE');
-		
+	, tabs: function(elements, name, tabGroup, place){
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
-		Array.each(MooRTE.Elements[name].hides || self.getSiblings('*[class*=rteGroupBtn_]'), function(el){
-			el.removeClass('rteSelected');
-			//bar.getFirst('.rteGroup_' + el.get('class').match(/rteGroupBtn_([^ ]+?)\b/)[1]).addClass('rteHide');
-			var klass = el.get('class').match(/rteGroupBtn_([^ ]+?)\b/)[1];
-			bar.getFirst('.rteGroup_' + klass).addClass('rteHide');
-			MooRTE.Utilities.eventHandler('onHide', self, name);
-		});
-		this.addClass('rteSelected rteGroupBtn_'+name);
-		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), {className:'rteGroup_'+name, ifExists:'stop'});
+		
+		Object.each(MooRTE.Tabs[tabGroup], function(els, title){
+			els[0].removeClass('rteSelected');
+			els[1].addClass('rteHide');
+			MooRTE.Utilities.eventHandler('onHide', this, name);
+		}, this);
+		
+		this.addClass('rteSelected');
+		var group = MooRTE.Utilities.addElements(elements, place, {className:'rteGroup_'+name, ifExists:'stop'});
 		MooRTE.Utilities.eventHandler('onShow', this, name);
+		
+		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
+		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [this, group]//Object.set(name, );
 	}
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
