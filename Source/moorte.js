@@ -258,16 +258,6 @@ MooRTE.Utilities = {
 		args = Array.from(args);
 		document.execCommand(args[0], args[2]||null, args[1]||false);
 	}
-	, addEvents: function(el, events){
-		Object.append(el.retrieve('rteEvents',{}), events);
-		el.addEvents(events);
-	}
-	, removeEvents: function(el, destroy){
-		Object.each(el.retrieve('rteEvents',{}), function(fn, event){
-			el.removeEvent(event, fn);
-		});
-		if (destroy) el.eliminate('rteEvents');
-	}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
 			if (!Browser.ie) return;
@@ -307,6 +297,36 @@ MooRTE.Utilities = {
 		if (Browser.firefox && MooRTE.Range.selection.anchorNode.id == 'rteMozFix'){
 			MooRTE.Range.selection.extend(MooRTE.Range.selection.anchorNode.parentNode, 0);
 			//MooRTE.Range.selection.collapseToStart();
+		}
+	}
+	, addEvents: function(el, events){
+		Object.append(el.retrieve('rteEvents',{}), events);
+		el.addEvents(events);
+	}
+	, removeEvents: function(el, destroy){
+		Object.each(el.retrieve('rteEvents',{}), function(fn, event){
+			el.removeEvent(event, fn);
+		});
+		if (destroy) el.eliminate('rteEvents');
+	}
+	, eventHandler: function(onEvent, caller, name){
+		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
+		var event = MooRTE.Elements[name][onEvent];
+		switch(typeOf(event)){
+			case 'function':
+				event.call(caller, name, onEvent); break;
+			case 'array': // Deprecated.
+				event = Array.clone(event);
+				event.push(name, onEvent);
+				MooRTE.Utilities[event.shift()].apply(caller, event); break;
+			case 'object':
+				Object.every(Object.clone(event), function(val,key){
+					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
+				}); break;
+			case 'string':
+				onEvent == 'source' && onEvent.substr(0,2) != 'on'
+					? MooRTE.Range.wrapText(event, caller)
+					: MooRTE.Utilities.eventHandler(event, caller, name);
 		}
 	}
 	, addElements: function(elements, place, options){
@@ -420,26 +440,6 @@ MooRTE.Utilities = {
 		
 		return collection[1] ? collection : collection[0];	
 	}
-	, eventHandler: function(onEvent, caller, name){
-		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
-		var event = MooRTE.Elements[name][onEvent];
-		switch(typeOf(event)){
-			case 'function':
-				event.call(caller, name, onEvent); break;
-			case 'array': // Deprecated.
-				event = Array.clone(event);
-				event.push(name, onEvent);
-				MooRTE.Utilities[event.shift()].apply(caller, event); break;
-			case 'object':
-				Object.every(Object.clone(event), function(val,key){
-					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
-				}); break;
-			case 'string':
-				onEvent == 'source' && onEvent.substr(0,2) != 'on'
-					? MooRTE.Range.wrapText(event, caller)
-					: MooRTE.Utilities.eventHandler(event, caller, name);
-		}
-	}
 	, tabs: function(elements, name, tabGroup, place){
 		// ToDo: temporarily hard set. Should be passed in args or set as default.
 		tabGroup = 'tabs1';
@@ -471,6 +471,22 @@ MooRTE.Utilities = {
 					MooRTE.Elements.clipPop.hide();
 				}
 			});
+	}
+	, fontsize: function(dir, size){
+		if (size == undefined)
+			size = window.document.queryCommandValue('fontsize') 
+				|| MooRTE.Range.parent().getStyle('font-size');
+		
+		if (size == +size) size = +size + dir;
+		else {
+			// MooRTE.Utilities.convertunit(size[0],size[1],'px'); Convert em's, xx-small, etc.
+			size = size.split(/([^\d]+)/)[0];
+			[0,10,13,16,18,24,32,48].every(function(s,i){	
+				if ((s - size) < 0) return true;
+				size = !(s - size) || dir < 0 ? i + dir : i;
+			});
+		}
+		MooRTE.Utilities.exec('fontsize', size);		
 	}
 	, clean: function(html, options){
 	
@@ -569,22 +585,6 @@ MooRTE.Utilities = {
 		} while (cleaned != html); // && ++loopStop <3
 		
 		return html.trim();
-	}
-	, fontsize: function(dir, size){
-		if (size == undefined)
-			size = window.document.queryCommandValue('fontsize') 
-				|| MooRTE.Range.parent().getStyle('font-size');
-		
-		if (size == +size) size = +size + dir;
-		else {
-			// MooRTE.Utilities.convertunit(size[0],size[1],'px'); Convert em's, xx-small, etc.
-			size = size.split(/([^\d]+)/)[0];
-			[0,10,13,16,18,24,32,48].every(function(s,i){	
-				if ((s - size) < 0) return true;
-				size = !(s - size) || dir < 0 ? i + dir : i;
-			});
-		}
-		MooRTE.Utilities.exec('fontsize', size);		
 	}
 };
 
