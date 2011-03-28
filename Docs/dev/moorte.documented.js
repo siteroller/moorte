@@ -494,8 +494,6 @@ MooRTE.Utilities = {
 	*/
 	, tabs: function(elements, name, tabGroup, place){
 	  /*	Temporarily hard set 'tabGroups' and 'place'. Should be passed in args or set as default.
-		*	ToDo: Allow Utilities.eventHolder to accept multiple arguments as an array when passed an object.
-		*		Till then, unable to pass tabGroup and place arguments.
 		*	ToDo: Change the preset arguments to be first in list when calling methods.
 		*		This will allow the number of arguments to be not set in advance.  May be less intuitive, should try to find Mootools precedence.
 		*		Till then, tabGroup and place is assumed to be the passed in items, and crashes.

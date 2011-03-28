@@ -321,7 +321,8 @@ MooRTE.Utilities = {
 				MooRTE.Utilities[event.shift()].apply(caller, event); break;
 			case 'object':
 				Object.every(Object.clone(event), function(val,key){
-					MooRTE.Utilities[key].apply(caller, [val,name,onEvent]);
+					var vals = Array.from(val).append([name,onEvent]);
+					MooRTE.Utilities[key].apply(caller, vals);
 				}); break;
 			case 'string':
 				onEvent == 'source' && onEvent.substr(0,2) != 'on'
@@ -440,10 +441,9 @@ MooRTE.Utilities = {
 		
 		return collection[1] ? collection : collection[0];	
 	}
-	, tabs: function(elements, name, tabGroup, place){
+	, tabs: function(elements, tabGroup, place, name){
 		// ToDo: temporarily hard set. Should be passed in args or set as default.
-		tabGroup = 'tabs1';
-		place = null;
+		if (!tabGroup) tabGroup = 'tabs1';
 		
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
 		
@@ -688,9 +688,9 @@ MooRTE.Elements = {
    // Groups are Samples - They can be created manually, or dynamically by the download builder.
 	// Groups (Menus)
      Main			:{ text:'Main', 'class':'rteText', onClick:'onLoad', onLoad:{
-							   tabs: 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'} 
+							   tabs: ['Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]', 'tabs1', null]} 
 						 }
-   , File			:{text:'File',   'class':'rteText', onClick:{tabs: {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']} } }
+   , File			:{text:'File',   'class':'rteText', onClick:{tabs: [{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']},'tabs1', null] } }
    , Font			:{text:'Font',   'class':'rteText', onClick:{tabs: {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}} }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}} }//'Upload Photo'
    , View			:{text:'Views',  'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
