@@ -683,19 +683,22 @@ MooRTE.extensions = function(){
 Element.implement({moorte:MooRTE.extensions});
 Elements.implement({moorte:MooRTE.extensions});
 
-
+MooRTE.Groups = 
+	// Sample Groups. Stored for cleanliness; could be integrated directly into MooRTE.Elements.
+	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
+   	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
+   	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
+ 	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
+	}
+	
 MooRTE.Elements = {
-
-   // Groups are Samples - They can be created manually, or dynamically by the download builder.
-	// Groups (Menus)
-     Main			:{ text:'Main', 'class':'rteText', onClick:'onLoad', onLoad:{
-							   tabs: ['Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]', 'tabs1', null]} 
-						 }
-   , File			:{text:'File',   'class':'rteText', onClick:{tabs: [{Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']},'tabs1', null] } }
-   , Font			:{text:'Font',   'class':'rteText', onClick:{tabs: {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}} }
-   , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}} }//'Upload Photo'
-   , View			:{text:'Views',  'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
-
+	// TabGroup Triggers. Samples, these can be created dynamically or manually.
+     Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,onClick:'onLoad'}
+   , File			:{text:'File'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
+   , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
+   , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
+   , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
+     
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
