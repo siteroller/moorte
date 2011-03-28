@@ -315,10 +315,11 @@ MooRTE.Utilities = {
 		switch(typeOf(event)){
 			case 'function':
 				event.call(caller, name, onEvent); break;
-			case 'array': // Deprecated.
-				event = Array.clone(event);
-				event.push(name, onEvent);
-				MooRTE.Utilities[event.shift()].apply(caller, event); break;
+			case 'array': 
+				// Multiple events. Untested & likely to be deprecated.
+				event = Array.clone(event).each(function(e){
+					MooRTE.eventHandler(e, caller, name);
+				}); break;
 			case 'object':
 				Object.every(Object.clone(event), function(val,key){
 					var vals = Array.from(val).append([name,onEvent]);

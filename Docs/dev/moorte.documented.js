@@ -416,7 +416,11 @@ MooRTE.Utilities = {
 		switch(typeOf(event)){
 			case 'function':
 				event.call(caller, name, onEvent); break;
-			case 'array': // Deprecated, for backwards compatibility only.
+			case 'array': 
+				// Deprecated, for backwards compatibility only.
+				// Formerly same as object, but where first item in array was name of method.
+				// Now allows for a number of events to be combined.
+				// Untested, experimental, likely to be deprecated entirely.
 				event = Array.clone(event);
 				event.push(name, onEvent);
 				MooRTE.Utilities[event.shift()].apply(caller, event); break;
