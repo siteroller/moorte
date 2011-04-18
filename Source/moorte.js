@@ -628,6 +628,9 @@ MooRTE.extensions = function(){
 				els = [self];
 				break;
 			case 'remove':
+				// Don't store 'removed' if already stored. Alternatively could check if element is in DOM by if (!bar.getParent()). 
+				// ToDo: Added as a hotfix, but why is this check neccessary?
+				if (bar.retrieve('removed')) return true;
 				bar.store('removed', bar.getPrevious()
 						? [bar.getPrevious(),'after']
 						: [bar.getParent(),'top']);
