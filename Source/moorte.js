@@ -669,7 +669,7 @@ MooRTE.extensions = function(){
 				}
 			} else {
 				el.set('contentEditable', false);
-				MooRTE.Utilities.removeEvents(el, destroy);
+				MooRTE.Utilities.removeEvents(el, 'destroy');
 				if (!bar) el.eliminate('bar');
 			}
 		});
