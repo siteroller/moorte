@@ -254,8 +254,8 @@ MooRTE.Range = {
 }());
 MooRTE.Tabs = {};
 MooRTE.Utilities = {
-	exec: function(){ // args
-		args = Array.from(arguments).flatten();
+	exec: function(){
+		var args = Array.from(arguments).flatten();
 		document.execCommand(args[0], args[2]||null, args[1]||false);
 	}
 	, shortcuts: function(e){
@@ -831,33 +831,28 @@ MooRTE.Elements = {
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , 'Upload Photo':{ img: 15
-					   , onLoad: function(){
-							MooRTE.Utilities.assetLoader({ //new Loader({
-								scripts: ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.js'], 
-								styles:  ['/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.css'], 
-								onComplete:function(){
-									var uploader = new Swiff.Uploader({
-										verbose: true 
-										, target: this
-										, queued: false
-										, multiple: false
-										, instantStart: true
-										, fieldName:'photoupload' 
-										, typeFilter: { 'Images (*.jpg, *.jpeg, *.gif, *.png)': '*.jpg; *.jpeg; *.gif; *.png'}
-										, path: '/siteroller/classes/fancyupload/fancyupload/source/Swiff.Uploader.swf'
-										, url: '/siteroller/classes/moorte/source/plugins/fancyUpload/uploadHandler.php'
-										, onButtonDown :function(){ MooRTE.Range.set() }
-										, onButtonEnter :function(){ MooRTE.Range.create() }
-										, onFileProgress: function(val){  } //self.set('text',val);
-										, onFileComplete: function(args){ MooRTE.Range.set().exec('insertimage',JSON.decode(args.response.text).file) }
-									});
-									this.addEvent('mouseenter',function(){ uploader.target = this; uploader.reposition(); })
-								}
+   , mooupload     :{ img: 15
+					, onLoad: function(){
+						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
+							onComplete:function(){
+								var uploader = new MooUpload(this,
+									{ action: MooRTE.Path + 'mooupload/Demo/upload.php'	// Path to upload script
+									, flash: { movie: MooRTE.Path + 'mooupload/Source/Moo.Uploader.swf' }
+  									, autostart: true
+  									, onButtonDown :function(){ MooRTE.Range.set() }
+									, onButtonEnter :function(){ MooRTE.Range.create() }
+									, onFileUpload: function(args, data){
+										var path = MooRTE.Path + 'mooupload/Demo/tmp/' + data.upload_name;
+										MooRTE.Range.set();
+										MooRTE.Utilities.exec('insertimage',path)
+									  }
+										
+									})
+							  }.bind(this)
 							})
-						}							
+					  }
 					}
-   , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ element:'span' }
    , viewSource		:{ img:35, onClick:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
