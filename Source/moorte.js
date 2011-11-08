@@ -839,6 +839,7 @@ MooRTE.Elements = {
 									{ action: MooRTE.Path + 'mooupload/Demo/upload.php'	// Path to upload script
 									, flash: { movie: MooRTE.Path + 'mooupload/Source/Moo.Uploader.swf' }
   									, autostart: true
+  									, accept: 'image/*'
   									, onButtonDown :function(){ MooRTE.Range.set() }
 									, onButtonEnter :function(){ MooRTE.Range.create() }
 									, onFileUpload: function(args, data){
