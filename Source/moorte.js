@@ -79,7 +79,7 @@ var MooRTE = new Class({
 					}
 				});
 			
-			if (Browser.firefox) el.innerHTML += "<p id='rteMozFix' style='display:none'><br></p>";
+			//if (Browser.firefox) el.innerHTML += "<p id='rteMozFix' style='display:none'><br></p>";
 			
 			el.store('bar', rte);
 			MooRTE.Utilities.addEvents(el, { keydown: MooRTE.Utilities.shortcuts
@@ -655,7 +655,8 @@ MooRTE.extensions = function(){
 					if (!src){
 						el.set('contentEditable', true);
 						MooRTE.Utilities.addEvents(el, el.retrieve('rteEvents'));
-						if (Browser.firefox && !el.getElement('#rteMozFix')) el.grab(new Element('div', {id:'retMozFix', styles:{display:'none'}}));
+						// if (Browser.firefox && !el.getElement('#rteMozFix')) 
+						//	el.grab(new Element('div', {id:'rteMozFix', styles:{display:'none'}}));
 					} else if (src.getParent()) el.set('html', src.get('value')).replaces(src);
 				})
 				return true;
