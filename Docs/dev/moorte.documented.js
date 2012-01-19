@@ -203,10 +203,17 @@ MooRTE.Utilities = {
 		})
 	},
 	
-	// elements[mixed:string/object/array] - the elements to add.
-	// place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
-	// options [object] - default is { useExistingEls:false - when told to add an element similar to an existing one, do not use existing element.
-	//		, className:'' - any extra classes to add to the element. }
+  /* elements[mixed:string/object/array] - the elements to add.
+	* place [mixed:element/array] - where to add the new elements. If array [element,location] the second arg is 'before','after', etc.
+	* options [object] - default is {} 
+	*		{ className: [''] - any extra classes to add to the element.
+	*		, inherits: [false/true] - if options should be passed to sub elements.
+	*		, ifExists: [false/true/'stop'] - when adding an element similar to an existing one, should it use the existing.	
+	*			false - Ignore existing. Create new element. 
+	*			true - Use existing element.
+	*			'stop': Do not create new or use existing.
+	*		}
+	*/
 	addElements: function(buttons, place, options){
 		// Not sure why this is the best place for this check:
 		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source']);
@@ -285,21 +292,30 @@ MooRTE.Utilities = {
 			, btn = btn.split('.')[0];
 			// [btn,btnClass] = btn.split('.'); - Code sunk by IE6
 			
-			// What should happen when attempting to add an element and a similar element already exists?
-			// For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
-			// Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
+		  /* What should happen when attempting to add an element and a similar element already exists?
+			* For example, div:[indent] and div:[justify] begin with a reference to the element called div. 
+			* Should indent and justify both be added to the same element, should it create a new copy of the div element, or should it assume that since div already exists, all of the children must also exist?
 			
-			// Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
-			// In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
-			// Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
-			// Fortunately, another bug in the code prevented other problems from arising ;)
+			* Prior to about #3721b8d2 we assumed the last option. If the element existed, it made sure the element was visible and then exited.
+			* In order to handle the case where we needed a duplicate to be created (such as the div.menu) a 'name' argument was allowed that added the named class to the element.
+			* Another check was added that if the named class was one that we needed to duplicate, it should duplicate.
+			* Fortunately, another bug in the code prevented other problems from arising ;)
+			*
+			* Since the aforementioned commit it by default will create a new element even if a similar one already exists.
+			* One can force moorte to use an existing element by setting the option - useExistingEls to true. 
+			* Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
+			* eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
+			* Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
+			* After #dd363d, the original behavior was reinstated as the ifExists:'stop' option. 
+			*/
 			
-			// Since the aforementioned commit it by default will create a new element even if a similar one already exists.
-			// One can force moorte to use an existing element by setting the option - useExistingEls to true. 
-			// Even if so, elements are only considered the same if they have the same classes (including any classes in options.className).
-			// eg. div refers to MooRTE.Elements['div']. div.Flyout.AnotherClass refers to the same element with two added classes, and will not match div.Flyout.class2
-			// Also, the existing el must be in the correct location (loosely): see a few lines up where the check is done.
-			
+			/* ToDo: Chrome + Mootools bug. Demo here: http://jsfiddle.net/JFyCQ/ 
+			* When an a contains a div, which in turn contains an a, Slick cannot find the div with getFirst/Last.
+			* Probably related to the way the browser (Chrome, here) builds the elements & assumes an <a> cannot contain an <a>.
+			* Oddly, the source here shows no signs of build problems, unlike the jsfiddle page.
+			* This would affect an attempt to place an element inside a flyout, which uses said structure.
+			* Could be fixed by using some other elements, with fixes for other bugs.
+			*/
 			var e = parent.getElement('.rte'+btn);
 			if (!e){
 				var bgPos = 0, val = MooRTE.Elements[btn], input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type), textarea = (val.element && val.element.toLowerCase() == 'textarea');
@@ -312,37 +328,56 @@ MooRTE.Utilities = {
 					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
 					events:{
 						mousedown: function(e){
-							// bar is the RTE - the parent element that contains the class 'MooRTE';
-							// There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
-							// var bar = MooRTE.activeBar = this.getParent('.MooRTE')
-							// So that bar will map to its own local variable, checked each time the button is pressed.
+						   /* 	bar is the RTE - the toolbar parent [contains the class 'MooRTE'];
+							* 	
+							*	There is no way to move a button from one RTE to another. To facilitate such an option, one would use:
+							* 	var bar = MooRTE.activeBar = this.getParent('.MooRTE')
+							* 	So that bar will map to its own local variable, checked each time the button is pressed.
+							*/
 							MooRTE.activeBar = bar;
 							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
-							
-							// If the active field is not one of those controlled by the active tooolbar, update the activeField to one that is.
-							// Should probably go through all fields connected to this toolbar looking for the one which contains the selected text.
-							if (!fields.contains(MooRTE.activeField)) MooRTE.activeField = fields[0];//.focus()
-							
-							// Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
-							// Should be: if (!MooRTE.activeField.contains(MooRTE.Range.parent())) return;
-							// "holder" is a reference to the node that includes all selected text. 
-							// Will be a text node or an element, depending on what is actually selected.
+							  
+						   /* 	We must check that selected text is under the control of the button being clicked. 
+							*	Otherwise, the whole page would become editable, including non-editable text and non-active fields.
+							*
+							*	First step is to find the element that contains the selection.
+							*	Should be:
+							*	if (!MooRTE.activeField.contains(MooRTE.Range.parent())) fields[0].focus();....
+							* 	Workaround for https://mootools.lighthouseapp.com/projects/2706/tickets/1113-contains-not-including-textnodes
+							*	"holder" is a reference to the node that includes all selected text. 
+							*	Will be a text node or an element, depending on what is actually selected.
+							*/
 							var holder = MooRTE.Range.parent();
-							// If using webkit, we need an element, as text nodes are not officially "contained": bug #1113
-							// (nodeType == 3) means we have a text node. "parentElement" is a Webkit-specific property.
-							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement; 
-							// If the "active field" does not contain all of the selected text, return.
-							// Otherwise one would be able to select & modify non-editable text, or text in a non-active field.
-							if (!MooRTE.activeField.contains(holder)) return;
+							// 	If using webkit, we need an element, as text nodes are not officially "contained": bug #1113
+							// 	(nodeType == 3) means we have a text node. "parentElement" is a Webkit-specific property.
+							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
 							
-							// If element has no onClick event, no [source ??], and is an 'a' element [or undefined/default] -   
-							if (!val.onClick && !source && (!val.element || val.element == 'a')) MooRTE.Utilities.exec(val.args||btn);
-							// If it has a source, run that. If it has an onClick event, run that.
-							else MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
-							// If the button is passed an event, stop the event from propogating. 
-							// If button is meant to accept input, the event must continue or the cursor will not appear. 
+							/*	Second step is just to check if holder is within one of the fields:
+							*	if (!fields.some(function(field){ return field.contains(holder) }))	fields[0].focus();
+							*
+							*	However that would require a DOM checking for every single field, every time a button is clicked.
+							*	Instead, we assume that activeField would be set if the field was editable.
+							*/
+							if (!(fields.contains(MooRTE.activeField) && MooRTE.activeField.contains(holder))){ 
+								fields[0].focus();
+								MooRTE.activeField = fields[0];
+							}								
+						   /*	It is theroetically possible to have a selection without ever calling focus, or to have had activeField reset by JS.
+						    *	If we wanted to check for that, but not run the loop of checking each field for holder, we could combine them, by:
+						    *	Add the following to the end of the 'if' above:
+						    *	&& !fields.some(function(field){ if (field.contains(holder)) return MooRTE.activeField = field; }
+							*/
+							
+						   /*	If the button is passed an event, stop the event from propogating. 
+							* 	If button is meant to accept input, the event must continue or the cursor will not appear. 
+							*/
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
+							// If element has no onClick event, no [source ??], and is an 'a' element [or undefined/default] -   
+							val.onClick && !source && (!val.element || val.element == 'a')
+								? MooRTE.Utilities.exec(val.args || btn)
+								// If it has a source, run that. If it has an onClick event, run that.
+								: MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 						}
 					}
 				}, val);
@@ -370,12 +405,22 @@ MooRTE.Utilities = {
 	
 	, eventHandler: function(onEvent, caller, name){
 		// UNTESTED: Function completely rewritten for v1.3
-		// Must check if function or string is modified now that ulink is gone. Should be OK.
+		// Must check if function or string is modified now that unlink is gone. Should be OK.
+		
+		/* ToDo:
+		*	If array, assume multiple method references.
+		*	If object, and value is an array, pass in as multpile arguments.
+		*/
+		
 		var event = MooRTE.Elements[name][onEvent];
 		switch(typeOf(event)){
 			case 'function':
 				event.call(caller, name, onEvent); break;
-			case 'array': // Deprecated, for backwards compatibility only.
+			case 'array': 
+				// Deprecated, for backwards compatibility only.
+				// Formerly same as object, but where first item in array was name of method.
+				// Now allows for a number of events to be combined.
+				// Untested, experimental, likely to be deprecated entirely.
 				event = Array.clone(event);
 				event.push(name, onEvent);
 				MooRTE.Utilities[event.shift()].apply(caller, event); break;
@@ -426,11 +471,55 @@ MooRTE.Utilities = {
 			parent.getFirst('.rteGroup_'+(el.get('class').match(/rteAdd([^ ]+?)\b/)[1])).addClass('rteHide');	//In the siteroller php selector engine, one can get a class that begins with a string by combining characters - caller.getSiblings('[class~^=rteAdd]').  Unfortunately, Moo does not support this!
 			MooRTE.Utilities.eventHandler('onHide', self, name);
 		});
-		this.addClass('rteSelected rteAdd'+name);
+		
+		// Should be able to add the two classes together, but duplicates each time method runs. 
+		// It appears to be the underscore that borks it. Mootools bug. Needs verification and Lighthouse listing.
+		// this.addClass('rteSelected rteGroupBtn_'+name);
+		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		MooRTE.Utilities.addElements(elements, this.getParent('[class*=rteGroup_]'), 'after', 'rteGroup_'+name);
 		MooRTE.Utilities.eventHandler('onShow', this, name);	
-	},
-	assetLoader:function(args){
+	}
+  /* tabs method, replaces group method:
+	*	arguments:
+	*		(req) elements[object] - The items from MooRTE.Elements to add. Passed to addElements, conventions are same.
+	*		(req) name[string] - The name of this Group/GroupBtn combination.  Added
+	*		(req) tabGroup[string]
+	*		(opt) place[object reference]
+	*	this: element being clicked.
+	*	returns: null
+	*	overview: 
+	*		Tabs consist of a number of related Group/GroupBtn pairs.
+	*		When a GroupBtn is pressed, its corresponding Group shows, and all related Groups are hidden.
+	*		The first time a Group/GroupBtn is passed in, it is created and added to the MooRTE.tabs array
+	*	Notes:
+	*		'hides', which can be set on any element in Elements, and which group would hide when element pressed, has been deprecated.
+	*			No backwards support for this, and nothing stands ion its place.
+	*
+	*/
+	, tabs: function(elements, name, tabGroup, place){
+	  /*	ToDo: Change the preset arguments to be first in list when calling methods.
+		*		This will allow the number of arguments to be not set in advance.  May be less intuitive, should try to find Mootools precedence.
+		*		Till then, tabGroup and place is assumed to be the passed in items, and crashes.
+		*/
+		tabGroup = 'tabs1';
+			
+		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
+		
+		Object.each(MooRTE.Tabs[tabGroup], function(els, title){
+			els[0].removeClass('rteSelected');
+			els[1].addClass('rteHide');
+			MooRTE.Utilities.eventHandler('onHide', this, name);
+		}, this);
+		
+		this.addClass('rteSelected rteGroupBtn_'+name);
+		var group = MooRTE.Utilities.addElements(elements, place, {className:'rteGroup_'+name, ifExists:'stop'});
+		MooRTE.Utilities.eventHandler('onShow', this, name);
+		
+		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
+		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [this, group]//Object.set(name, );
+	}
+
+	, assetLoader:function(args){
 		
 		if(MooRTE.Utilities.assetLoader.busy) return MooRTE.Utilities.assetLoader.delay(750,this,args);
 		var head = $$('head')[0], path = MooRTE.path.slice(0,-1), path = path.slice(0, path.lastIndexOf('/')+1), path = MooRTE.pluginpath||path, me = args.me;// + (args.folder || '')
@@ -910,3 +999,9 @@ MooRTE.Elements = new Hash({
 							}
 						}
 });
+
+/*	ToDo: Should support be added to have methods that run only on firstClick?
+*		One way this can be done is creating another Elements object on each bar, that is only populated when directly told to.
+*		When a button is added or method is called and the item is in the element-specific-Elements-array, and will use that instead of the main Elements Object.
+*		Then firstClick can be added when desired, as well as allowing a button to have specific uses, such as one editor on a page being Markup.
+*/		
