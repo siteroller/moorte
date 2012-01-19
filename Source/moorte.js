@@ -832,15 +832,19 @@ MooRTE.Elements = {
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload     :{ img: 15
+   , mooupload     :{ img: 49
+   					, id: 'imgUploader'
+   					, title:'Upload Images'
 					, onLoad: function(){
-						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
+						new Asset.javascript(MooRTE.Path + 'mooupload/Source/MooUpload.js', {
 							onComplete:function(){
 								var uploader = new MooUpload(this,
-									{ action: MooRTE.Path + 'mooupload/Demo/upload.php'	// Path to upload script
+									{ action: MooRTE.Path + 'filemanager/upload.php'//'mooupload/Demo/upload.php'	// Path to upload script
 									, flash: { movie: MooRTE.Path + 'mooupload/Source/Moo.Uploader.swf' }
   									, autostart: true
   									, accept: 'image/*'
+  									, verbose: true
+  									, texts:{ selectfile:'&nbsp;' }
   									, onButtonDown :function(){ MooRTE.Range.set() }
 									, onButtonEnter :function(){ MooRTE.Range.create() }
 									, onFileUpload: function(args, data){
