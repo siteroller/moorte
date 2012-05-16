@@ -455,7 +455,7 @@ MooRTE.Utilities = {
 		}, this);
 		
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
-		var group = MooRTE.Utilities.addElements(elements, place, {className:'rteGroup_'+name, ifExists:'stop'});
+		var group = MooRTE.Utilities.addElements(elements, $(place), {className:'rteGroup_'+name, ifExists:'stop'});
 		MooRTE.Utilities.eventHandler('onShow', this, name);
 		
 		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
@@ -694,22 +694,29 @@ MooRTE.Groups =
    	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
  	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
 	}
+
+MooRTE.Ribbons = 	// Default Word10 Ribbons. Could be integrated into MooRTE.Elements, but neater seperate.
+	{ Home : 'div.Ribbon:{div.Group0:[bold,italic,underline,strikethrough,subscript,superscript,FontCaption]\
+				,div.Group1:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull,ParaCaption]}'
+   	}
+
 	
-MooRTE.Elements = {
+MooRTE.Elements =
 	// TabGroup Triggers. Samples, these can be created dynamically or manually.
-     Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,onClick:'onLoad'}
-   , File			:{text:'File'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
+   { Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,onClick:'onLoad'}
+   , File			:{text:'File'  , 'class':'rteText rteFile', onClick:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
    , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
-     
+   // TabGroup Triggers. (Word10)
+   , Home			:{text:'Home'  , 'class':'rteText rteSelected', onClick:{tabs: [MooRTE.Ribbons.Home, 'tabs1', 'rteRibbons']} }  
+   
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
-   , div				:{ element:'div' }
    , bold		 	:{ img:1, shortcut:'b', source:'<b>' }
    , italic		 	:{ img:2, shortcut:'i', source:'<i>' }
    , underline	 	:{ img:3, shortcut:'u', source:'<u>' }
@@ -952,8 +959,14 @@ MooRTE.Elements = {
 						}
 					}
 					
-   // Deprecated
-   , 'Toolbar'      :{element:'div'} //div.Toolbar would create the same div (with a class of rteToolbar).  But since it is the default, I dont wish to confuse people...
+	// Generic
+	, div			:{ element:'div', title:'' }
+	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
+
+	// Word10
+	, Ribbons    	:{ element:'div', title:'', 'id':'rteRibbons', contains:MooRTE.Ribbons.Home }
+	, FontCaption	:{ element:'div', 'class':'rteCaption', text:'Font'}
+	, ParaCaption	:{ element:'div', 'class':'rteCaption', text:'Paragraph'}
 };
 
 
