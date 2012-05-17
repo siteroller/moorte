@@ -83,9 +83,10 @@ div.MooRTE div.Sheva 		.rteSelected{ background-color:#bbb }
 /* End Tango */
 
 /* Begin Word10 skin */
-div.MooRTE div.Word10	{ left:0; bottom:0; width:100%;
-							/*background-color:#B9D2F8;background-image:-moz-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);
-							background-image:-ms-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);  background-image:linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); */}
+	/* Replaced the blue to white BG with a transparent BG: div.MooRTE div.Word10	{ 
+	 * background-color:#B9D2F8;background-image:-moz-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);
+	 * background-image:-ms-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);  background-image:linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); }*/
+div.MooRTE div.Word10	{ left:0; bottom:0; width:100%; }
 div.MooRTE div.Word10	span { height:20px; margin:1px; display:inline-block; }
 div.MooRTE div.Word10	input{ height:20px; width:100px; }
 div.MooRTE div.Word10	a    { display:inline-block;}
@@ -108,14 +109,16 @@ div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFile):after { border:1p
 div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFile):before{ left:-6px; border-bottom-right-radius:6px; border-width:0 1px 1px 0; box-shadow: 2px 2px 0 #FFF; }
 div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFile):after { right:-6px; border-bottom-left-radius:6px; border-width:0 0 1px 1px; box-shadow:-2px 2px 0 #FFF; XOR:#D1D1D1;}
 
-div.MooRTE div.Word10	div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
+div.MooRTE div.Word10	>div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
 							background-image:linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-webkit-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
 							background-image:-moz-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-ms-linear-gradient(bottom,#E5E9ED 0,#FFF 50px); }
+div.MooRTE>div.Word10	>div.rteRibbons>div.rteRibbon>div{ padding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; -moz-border-right-colors: #fff #1d1d1 #fff; }
 div.MooRTE div.Word10	>div.rteTop>a,
 div.MooRTE div.Word10	div.rteRibbon a{ height:21px; width:22px; margin:4px 1px; text-decoration:none; vertical-align:top; background-image:url(images/Word03.gif); border-radius:3px; 
 							-moz-box-sizing: border-box; -webkit-moz-box-sizing: border-box; box-sizing: border-box;}
 div.MooRTE div.Word10	>div.rteTop>a:hover,
 div.MooRTE div.Word10	div.rteRibbon a:hover{ border:1px solid black; background-color:#FFB874 }
+div.MooRTE>div.Word10	>div.rteRibbons>div.rteRibbon div.rteCaption{ height:25px; text-align:center; color:rgb(155,155,155); font:14px/25px Times New Roman;}
 div.MooRTE div.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
 div.MooRTE div.Word10	a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; }
 div.MooRTE div.Word10	a.rteText:hover{ }
