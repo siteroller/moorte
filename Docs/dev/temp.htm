@@ -1,0 +1,67 @@
+, Home_As_Object : 
+		{ 'div.Ribbon':
+			{ 'div.Group0': ['bold','italic','underline','strikethrough','subscript','superscript']
+			, 'div.Group1': ['Justify','Lists','Indents']
+			}
+		}
+
+
+Top Section: 24px; Tabs: 25px high (23px +1px border); 
+Ribbon: 85px + 1px border; 
+Within ribbon:6px padding, buttons, title; 
+Below Ribbon: grey 3px section (+ 1px bottom border);
+Buttons should be 20px x 21px large, + 1px border on all sides, + top/bottom margin of 4px.
+left/right margin of 1px overlapping. Indent lines have a 5px margin on right/left
+There is a top margin of ten pixels, and bottom margin of 25px: each including the 4px margin on each box.
+The gradient begins 50px from the bottom: from white to rgb(229,233,237);
+
+The undo and similar should go in top section, I presume.
+Is 115px too much for a webpage header?
+toolbars should be renamed ribbons
+
+Ehancements:
+div (rtediv) and all othergeneric, oft repeated elements should go into their own Object.
+All items in default object may perhaps be limutted to one use per instance of MooRTE?
+All events except click should be moved in events object on each button.
+MooRTE.btnVals should be renamed MooRTE.reserved, should be listed as its own object, and should be defined once - overlapping reserved words should not be allowed.
+How are the buttons in the tabs told that only one can be pressed? Can that be changed to radio:'tabs1'
+
+<style>
+	div.MooRTE>div.Word10>div.rteRibbons>div.rteRibbon>div.rteRibbonGroup2 a{
+		margin:4px 1px;
+		}
+	div.MooRTE>div.Word10>div.rteRibbons>div.rteRibbon>div.rteRibbonGroup2 a:hover{
+		background-image: url('../../Source/Assets/images/Word03.gif'), -moz-linear-gradient(top, rgb(253,237,186), rgb(255,214,125), rgb(255,240,144));
+		border: 1px solid rgb(195,150,79);
+		border-radius:3px;
+		}
+	div.MooRTE>div.Word10>div.rteRibbons>div.rteRibbon>div.rteRibbonGroup2 a.seperator{
+		margin:4px 5px;
+		}
+	div.bottomText{
+		height:20px;  
+		}
+	div.MooRTE div.Word10 div.rteToolbar a:hover{
+		background-image: url('images/Word03.gif'), -moz-linear-gradient(top,rgb(253,237,186), rgb(255,214,125), rgb(255,240,144));
+		border: 1px solid rgb(195,150,79);
+		}
+	div.MooRTE>div.Word10>div.rteTabs{
+		text-align:center; margin:200px 0 20px; padding:0; line-height:24px; font-size:12px; font-family:Verdana; height:26px;
+		}
+	div.MooRTE>div.Word10>div.rteTabs>a.rteSelected{
+		border: 1px solid #AAA; display:inline-block; position:relative; z-index:0; text-shadow: 0 1px #FFF;
+		box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #FFF;  margin:0 -5px; padding:0 20px;
+		border-top-left-radius: 6px; border-top-right-radius: 6px;
+
+		background: #D1D1D1; background-image:-o-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+	    background-image:-ms-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%); 
+	    background-image:-moz-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+	    background-image:-webkit-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+	    background-image:linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+    	xheight:22px; xbackground-color:white; xborder:1px solid #8B9096;
+		}
+	div.MooRTE>div.Word10>div.rteRibbons{
+		background-color:white; border:1px solid #8B9096; border-top:0; 									OR:#878C92;
+		background-image:-moz-linear-gradient(bottom, #E5E9ED 0, #FFF 50px);
+		}
+</style>
