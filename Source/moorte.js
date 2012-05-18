@@ -443,24 +443,34 @@ MooRTE.Utilities = {
 		return collection[1] ? collection : collection[0];	
 	}
 	, tabs: function(elements, tabGroup, place, name){
-		// ToDo: temporarily hard set. Should be passed in args or set as default.
-		if (!tabGroup) tabGroup = 'tabs1';
-		
+
 		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
+
+		var entry = MooRTE.Tabs[tabGroup];
 		
-		Object.each(MooRTE.Tabs[tabGroup], function(els, title){
-			els[0].removeClass('rteSelected');
-			els[1].addClass('rteHide');
+		if (!entry) MooRTE.Tabs[tabGroup] = {};
+		else Object.each(entry, function(els, title){
+			console.log(els[0])
+			if (els[0]) els[0].removeClass('rteSelected');
+			if (els[1]) els[1].addClass('rteHide');
 			MooRTE.Utilities.eventHandler('onHide', this, name);
-		}, this);
-		
+			}, this);
+
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
+		if (entry = MooRTE.Tabs[tabGroup][name]){
+			if (!entry[0]) entry[0] = this;
+			return entry[1].removeClass('rteHide');
+			}
+
 		var group = MooRTE.Utilities.addElements(elements, $(place), {className:'rteGroup_'+name, ifExists:'stop'});
+		MooRTE.Tabs[tabGroup][name] = [this, group];
 		MooRTE.Utilities.eventHandler('onShow', this, name);
-		
-		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
-		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [this, group]//Object.set(name, );
 	}
+	, addtab: function(tabGroup, content, name){
+		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
+		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [];
+		MooRTE.Tabs[tabGroup][name][+content] = this;
+		}
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) AssetLoader.javascript(['mootools-more.js','StickyWinModalUI.js'], {
@@ -687,19 +697,17 @@ MooRTE.extensions = function(){
 Element.implement({moorte:MooRTE.extensions});
 Elements.implement({moorte:MooRTE.extensions});
 
-MooRTE.Groups = 
-	// Sample Groups. Stored for cleanliness; could be integrated directly into MooRTE.Elements.
+MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
 	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
    	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
    	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
  	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
 	}
-
+	
 MooRTE.Ribbons = 	// Default Word10 Ribbons. Could be integrated into MooRTE.Elements, but neater seperate.
-	{ Home : 'div.Ribbon:{div.Group0:[bold,italic,underline,strikethrough,subscript,superscript,FontCaption]\
-				,div.Group1:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull,ParaCaption]}'
-   	}
-
+	{ Home : 'div.Group0:[bold,italic,underline,strikethrough,subscript,superscript,FontCaption]\
+			 ,div.Group1:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull,ParaCaption]'
+	}
 	
 MooRTE.Elements =
 	// TabGroup Triggers. Samples, these can be created dynamically or manually.
@@ -708,8 +716,11 @@ MooRTE.Elements =
    , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
-   // TabGroup Triggers. (Word10)
-   , Home			:{text:'Home'  , 'class':'rteText rteSelected', onClick:{tabs: [MooRTE.Ribbons.Home, 'tabs1', 'rteRibbons']} }  
+	// TabGroup Triggers. (Word10)
+	, Home			:{ text:'Home', 'class':'rteText rteSelected', id:'rteHomeTab'
+   						, onClick:{tabs: [MooRTE.Ribbons.Home, 'tabs1', 'rteRibbons']}
+   						, onLoad:{addtab:['tabs1', false, 'Home']}
+   						}
    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -964,9 +975,11 @@ MooRTE.Elements =
 	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 
 	// Word10
-	, Ribbons    	:{ element:'div', title:'', 'id':'rteRibbons', contains:MooRTE.Ribbons.Home }
-	, FontCaption	:{ element:'div', 'class':'rteCaption', text:'Font'}
-	, ParaCaption	:{ element:'div', 'class':'rteCaption', text:'Paragraph'}
+	, Ribbons    	:{ element:'div', title:'', 'id':'rteRibbons', contains:'RibbonHome' }
+	, RibbonHome	:{ element:'div', class:'rteRibbon rteRibbonHome', contains:MooRTE.Ribbons.Home
+						, onLoad:{addtab:['tabs1', true, 'Home']} }
+	, FontCaption	:{ element:'div', 'class':'rteCaption', text:'Font' }
+	, ParaCaption	:{ element:'div', 'class':'rteCaption', text:'Paragraph' }
 };
 
 
