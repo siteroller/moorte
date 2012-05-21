@@ -121,7 +121,9 @@ div.MooRTE div.Word10	>div.rteRibbons>div a:hover{ border:1px solid black; backg
 div.MooRTE div.Word10	>div.rteRibbons>div>div:after{ height:25px; text-align:center; color:rgb(155,155,155); font:14px/25px Times New Roman; display:block; }
 div.MooRTE div.Word10	>div.rteRibbons>div>div.rteFontGroup:after{content:'Font'}
 div.MooRTE div.Word10	>div.rteRibbons>div>div.rteParaGroup:after{content:'Paragraph'}
+div.MooRTE div.Word10	>div.rteRibbons>div>div.rteFileGroup:after{content:'File'}
 div.MooRTE div.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
+div.MooRTE div.Word10	>div.rteTabs>a,
 div.MooRTE div.Word10	a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; }
 div.MooRTE div.Word10	a.rteText:hover{ }
 div.MooRTE div.Word10	div.rteFlyout{position:absolute; border:0; top:20px; left:-1px; xwidth:22px; background-color:#ddd}

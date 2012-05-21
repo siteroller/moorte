@@ -340,7 +340,7 @@ MooRTE.Utilities = {
 		}
 		if (!options) options = {};
 
-		if (typeOf(elements) == 'string'){
+		if (Type.isString(elements)){
 			elements = elements.replace(/'([^']*)'|"([^"]*)"|([^{}:,\][\s]+)/gm, "'$1$2$3'");
 			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*'[^']+'\s*(?=[\],}]))/gm, "$1{$2}");
 			elements = elements.replace(/((?:[,[:]|^)\s*)('[^']+'\s*:\s*{[^{}]+})/gm, "$1{$2}");
@@ -425,8 +425,8 @@ MooRTE.Utilities = {
 				
 				if (val.onUpdate || state)
 					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
-						'fontname,fontsize,backcolor,forecolor,hilitecolor,justifyleft,justifyright,justifycenter'
-							.contains(btn.toLowerCase(),',') ? 'value' : (state ? 'state' : 'custom')
+						/font(name|size)|justify(left|right|center)|(back|fore|hilite)color/i
+							.test(btn) ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
 				MooRTE.Utilities.eventHandler('onLoad', e, btn);
@@ -728,7 +728,7 @@ MooRTE.Elements =
 			 					,div.ParaGroup:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull]'
 							}
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon	:{ element:'div', contains:'div.Group2:[superscript]' }
+	, FileRibbon	:{ element:'div', contains:'div.FileGroup:[superscript]' }
 						    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -858,7 +858,7 @@ MooRTE.Elements =
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload     :{ img: 15
+   , mooupload    :{ img: 15
 					, onLoad: function(){
 						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
 							onComplete:function(){
@@ -880,9 +880,9 @@ MooRTE.Elements =
 							})
 					  }
 					}
-   , blockquote		:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ element:'span' }
-   , viewSource		:{ img:35, onClick:'source', source:function(btn){
+   , viewSource	:{ img:35, onClick:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 						if(this.hasClass('rteSelected')){
 							bar.eliminate('source');
@@ -979,12 +979,8 @@ MooRTE.Elements =
 					}
 					
 	// Generic
-	, div			:{ element:'div', title:'' }
+	, div				:{ element:'div', title:'' }
 	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
-
-	// Move to css
-	, FontCaption	:{ element:'div', 'class':'rteCaption', text:'Font' }
-	, ParaCaption	:{ element:'div', 'class':'rteCaption', text:'Paragraph' }
 };
 
 
