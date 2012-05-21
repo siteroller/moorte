@@ -158,7 +158,7 @@ var MooRTE = new Class({
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
-		if (!sel) return null;
+		if (!sel || sel.getRangeAt && !sel.rangeCount) return null; console.log(1);
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
 	, get: function(type, range){
@@ -743,6 +743,8 @@ MooRTE.Elements =
    , justifyleft	:{ img:6
 						 , title:'Justify Left'
 						 , onUpdate:function(cmd,val){
+						 		console.log(val);
+						 		if (!val || val == 'false') return;
 								var t = MooRTE
 											.activeField
 											.retrieve('bar')
@@ -751,7 +753,7 @@ MooRTE.Elements =
 								t.getParent()
 									.getParent()
 									.setStyle('background-position', pos);
-							}
+								}
 						 }
    , justifyfull	:{ img:7, title:'Justify Full'  }
    , justifycenter:{ img:8, title:'Justify Center'}
