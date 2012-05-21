@@ -982,10 +982,7 @@ MooRTE.Elements =
 	, div			:{ element:'div', title:'' }
 	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 
-	// Word10
-	, Ribbons    	:{ element:'div', title:'', 'id':'rteRibbons', contains:'RibbonHome' }
-	, RibbonHome	:{ element:'div', class:'rteRibbon rteRibbonHome', contains:MooRTE.Ribbons.Home
-						, onLoad:{addtab:['tabs1', true, 'Home']} }
+	// Move to css
 	, FontCaption	:{ element:'div', 'class':'rteCaption', text:'Font' }
 	, ParaCaption	:{ element:'div', 'class':'rteCaption', text:'Paragraph' }
 };
