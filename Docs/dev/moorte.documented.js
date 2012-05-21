@@ -495,6 +495,21 @@ MooRTE.Utilities = {
 	*		'hides', which can be set on any element in Elements, and which group would hide when element pressed, has been deprecated.
 	*			No backwards support for this, and nothing stands ion its place.
 	*
+	
+	* Revised tabs method on May 20, '12. Not backwards cmpatible.
+	*  arguments:
+	*		(req) tabGroup[string] - Name of group of tabs
+	*		(opt) elements[mixed] - Content elements to be shown when tab is selected.
+	*		(opt) options[object]:
+	*			place [mixed] - element or MooRTE.Elements[<key>] of element within MooRTE object into which content should be added.
+	*				place must exist before being called!
+	*			'onExpand','onHide','onShow','onUpdate'[functions] - events
+	*			ToDo: selfClose[bool, false] - true if clicking the tab a second time should deselect itself. 
+	*	this: element being clicked.
+	*	returns: null
+	*	overview:
+	*		Each TabGroup can consist of several tabs; when one is clicked, it gets .rteSelected.
+	*		Each tab can (optionally) have a related content element, which is hid/shown as the tab is de/selected.		
 	*/
 	, tabs: function(elements, name, tabGroup, place){
 	  /*	ToDo: Change the preset arguments to be first in list when calling methods.
@@ -518,6 +533,20 @@ MooRTE.Utilities = {
 		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
 		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [this, group]//Object.set(name, );
 	}
+	/* addTabs - arguments:
+		(req) tabGroup[string] - name of group of tabs.
+				tabName[string] - If content (not a tab), the key, in MooRTE.Elements, of the element that will be the tab of said content.
+					If tab, this argument is ignored (ie. optional). Will overwrite existing content.
+		this: Element that calls the function
+		returns: null
+		overview:
+			Allows one to add a tab or content-of-a-tab to the Tabs array wthout immediately displaying it.
+	*/
+	, addTab: function(tabGroup, tabName){
+		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
+		if (!MooRTE.Tabs[tabGroup][tabName]) MooRTE.Tabs[tabGroup][tabName] = [];
+		MooRTE.Tabs[tabGroup][tabName][+(tabName == Array.from(arguments).splice(-2,1))] = this;
+		}
 
 	, assetLoader:function(args){
 		

@@ -442,18 +442,20 @@ MooRTE.Utilities = {
 		
 		return collection[1] ? collection : collection[0];	
 	}
-	, tabs: function(elements, tabGroup, place, name){
-
-		MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
-
-		var entry = MooRTE.Tabs[tabGroup];
+	, tabs: function(tabGroup){ //[, elements][, options], name, event 
 		
+		//MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
+
+		var args = Array.from(arguments)
+		  , name = args.splice(-2).shift()
+		  , options = args[2] || {}
+		  , entry = MooRTE.Tabs[tabGroup];
+
 		if (!entry) MooRTE.Tabs[tabGroup] = {};
 		else Object.each(entry, function(els, title){
-			console.log(els[0])
 			if (els[0]) els[0].removeClass('rteSelected');
 			if (els[1]) els[1].addClass('rteHide');
-			MooRTE.Utilities.eventHandler('onHide', this, name);
+			if (options.onHide) MooRTE.Utilities.eventHandler(options.onHide, this, name);
 			}, this);
 
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
@@ -462,14 +464,18 @@ MooRTE.Utilities = {
 			return entry[1].removeClass('rteHide');
 			}
 
-		var group = MooRTE.Utilities.addElements(elements, $(place), {className:'rteGroup_'+name, ifExists:'stop'});
+		if (!args[1]) return; // No group;
+		if (Type.isString(options.place)) 
+			options.place = this.getParent('.MooRTE').getElement('.rte'+options.place);
+
+		var group = MooRTE.Utilities.addElements(args[1], options.place, {className:'rteGroup_'+name});
 		MooRTE.Tabs[tabGroup][name] = [this, group];
-		MooRTE.Utilities.eventHandler('onShow', this, name);
-	}
-	, addtab: function(tabGroup, content, name){
+		MooRTE.Utilities.eventHandler(options.onShow, this, name);
+		}
+	, addTab: function(tabGroup, tabName){
 		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
-		if (!MooRTE.Tabs[tabGroup][name]) MooRTE.Tabs[tabGroup][name] = [];
-		MooRTE.Tabs[tabGroup][name][+content] = this;
+		if (!MooRTE.Tabs[tabGroup][tabName]) MooRTE.Tabs[tabGroup][tabName] = [];
+		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
@@ -702,11 +708,7 @@ MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE
    	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
    	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
  	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
-	}
-	
-MooRTE.Ribbons = 	// Default Word10 Ribbons. Could be integrated into MooRTE.Elements, but neater seperate.
-	{ Home : 'div.Group0:[bold,italic,underline,strikethrough,subscript,superscript,FontCaption]\
-			 ,div.Group1:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull,ParaCaption]'
+	, RibbonOpts	:{ place:'Ribbons'}
 	}
 	
 MooRTE.Elements =
@@ -716,12 +718,18 @@ MooRTE.Elements =
    , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
-	// TabGroup Triggers. (Word10)
-	, Home			:{ text:'Home', 'class':'rteText rteSelected', id:'rteHomeTab'
-   						, onClick:{tabs: [MooRTE.Ribbons.Home, 'tabs1', 'rteRibbons']}
-   						, onLoad:{addtab:['tabs1', false, 'Home']}
+	// Word 10 Groups.
+	, Ribbons    	:{ element:'div', title:'', contains:'HomeRibbon' }
+	, HomeTab		:{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
+   						, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    						}
-   
+   , HomeRibbon	:{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}//superscript,
+   						, contains: 'div.FontGroup:[bold,italic,underline,strikethrough,subscript]\
+			 					,div.ParaGroup:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull]'
+							}
+	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+	, FileRibbon	:{ element:'div', contains:'div.Group2:[superscript]' }
+						    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
