@@ -116,8 +116,14 @@ div.MooRTE>div.Word10	>div.rteRibbons>div>div{ padding-top:1px; display:table-ce
 div.MooRTE div.Word10	>div.rteTop>a,
 div.MooRTE div.Word10	>div.rteRibbons>div a{ height:21px; width:22px; margin:4px 1px; text-decoration:none; vertical-align:top; background-image:url(images/Word03.gif); border-radius:3px; 
 									-moz-box-sizing: border-box; -webkit-moz-box-sizing: border-box; box-sizing: border-box;}
-div.MooRTE div.Word10	>div.rteTop>a:hover,
-div.MooRTE div.Word10	>div.rteRibbons>div a:hover{ border:1px solid black; background-color:#FFB874 }
+div.MooRTE div.Word10	>div.rteTop>a:hover, 
+div.MooRTE div.Word10	>div.rteTop>a.rteSelected:hover,
+div.MooRTE div.Word10	>div.rteRibbons>div a.rteSelected:hover,
+div.MooRTE div.Word10	>div.rteRibbons>div a:hover{ border:1px solid black;background-color:#FFB874; 
+									/*background-image:-moz-linear-gradient(top,#ffe387,#fff292); background-image:-ms-linear-gradient(top,#ffe387,#fff292);
+									background-image:-webkit-linear-gradient(top,#ffe387,#fff292); background-image:linear-gradient(top,#ffe387,#fff292) */}
+div.MooRTE div.Word10	>div.rteTop>a.rteSelected,
+div.MooRTE div.Word10	>div.rteRibbons>div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
 div.MooRTE div.Word10	>div.rteRibbons>div>div:after{ height:25px; text-align:center; color:rgb(155,155,155); font:14px/25px Times New Roman; display:block; }
 div.MooRTE div.Word10	>div.rteRibbons>div>div.rteFontGroup:after{content:'Font'}
 div.MooRTE div.Word10	>div.rteRibbons>div>div.rteParaGroup:after{content:'Paragraph'}

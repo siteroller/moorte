@@ -387,7 +387,7 @@ MooRTE.Utilities = {
 				  , val = MooRTE.Elements[btn]
 				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
 				  , input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type)
-				  , state = 'bold,italic,underline,strikethrough,subscript,superscript,unlink,insertorderedlist,insertunorderedlist'.contains(btn.toLowerCase(), ',');  //Note1
+				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
 
 				var properties = Object.append({
 					href:'javascript:void(0)',
@@ -425,7 +425,7 @@ MooRTE.Utilities = {
 				
 				if (val.onUpdate || state)
 					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
-						/font(name|size)|justify(left|right|center)|(back|fore|hilite)color/i
+						/font(name|size)|(back|fore|hilite)color/i
 							.test(btn) ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
@@ -700,6 +700,17 @@ MooRTE.extensions = function(){
 	return editables;
 }
 
+if (false) Object.extend(MooRTE.Utilities, 
+	{	update: function(group){
+	 		Object.each(MooRTE.tabs[group], function(els){
+	 			els[0].removeClass('rteSelected');
+	 			});
+	 		pos = styles.getStyle('background-position');
+			head.setStyle('background-position', pos);
+			}
+	});
+
+
 Element.implement({moorte:MooRTE.extensions});
 Elements.implement({moorte:MooRTE.extensions});
 
@@ -740,21 +751,7 @@ MooRTE.Elements =
    , italic		 	:{ img:2, shortcut:'i', source:'<i>' }
    , underline	 	:{ img:3, shortcut:'u', source:'<u>' }
    , strikethrough:{ img:4 }
-   , justifyleft	:{ img:6
-						 , title:'Justify Left'
-						 , onUpdate:function(cmd,val){
-						 		console.log(val);
-						 		if (!val || val == 'false') return;
-								var t = MooRTE
-											.activeField
-											.retrieve('bar')
-											.getElement('.rtejustify' + (val == 'justify' ? 'full' : val))
-								  , pos = t.addClass('rteSelected').getStyle('background-position');
-								t.getParent()
-									.getParent()
-									.setStyle('background-position', pos);
-								}
-						 }
+   , justifyleft	:{ img:6, title:'Justify Left'  }
    , justifyfull	:{ img:7, title:'Justify Full'  }
    , justifycenter:{ img:8, title:'Justify Center'}
    , justifyright	:{ img:9, title:'Justify Right' }
