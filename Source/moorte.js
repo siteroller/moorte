@@ -354,7 +354,7 @@ MooRTE.Utilities = {
 			if (els.length) elements = els, els = [];
 			Array.from(elements).each(function(item){
 				switch(typeOf(item)){
-					case 'string':
+					case 'string': case 'element':
 						els.push(item); break;
 					case 'object':
 						Object.each(item, function(val,key){
@@ -375,14 +375,15 @@ MooRTE.Utilities = {
 				var btnVals = Object.values(btn)[0];
 				btn = Object.keys(btn)[0];
 			}
-
-			var btnClass = '.rte' + btn.replace('.','.rte') + (options.className ? '.'+options.className.replace(' ','.') : '')
-			  , loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
-			  , e = place['get' + loc](btnClass)
-			  , btn = btn.split('.')[0];
 			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
 		
-			if (!e || !options.ifExists){
+			if (Type.isElement(btn))       var newEl = btn;
+			else if(!MooRTE.Elements[btn]) var newEl = new Element(btn);
+			else var loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
+				    , e = place['get' + loc]('.rte' + btn);
+				 
+			if (newEl) var e = newEl.inject(place, relative);
+			else if (!e || !options.ifExists){
 				var bgPos = 0
 				  , val = MooRTE.Elements[btn]
 				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
@@ -420,7 +421,7 @@ MooRTE.Utilities = {
 						delete properties[key];
 					});
 
-				e = new Element((input && !val.element ? 'input' : val.element || 'a') + btnClass, properties)
+				e = new Element((input && !val.element ? 'input' : val.element || 'a') + '.rte' + btn, properties)
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
@@ -978,7 +979,6 @@ MooRTE.Elements =
 					}
 					
 	// Generic
-	, div				:{ element:'div', title:'' }
 	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
 
