@@ -731,16 +731,16 @@ MooRTE.Elements =
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
 	// Word 10 Groups.
-	, Ribbons    	:{ element:'div', title:'', contains:'HomeRibbon' }
 	, HomeTab		:{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
    						, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    						}
-   , HomeRibbon	:{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}//superscript,
-   						, contains: 'div.FontGroup:[bold,italic,underline,strikethrough,subscript]\
-			 					,div.ParaGroup:[Lists,Indents,justifyleft,justifycenter,justifyright,justifyfull]'
-							}
+   , HomeRibbon	:{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+   							'div.rteFontGroup:[div:[bold,italic,underline,strikethrough,subscript]]\
+			 					,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
+			 					,div.rteStylGroup:[div:[div.defaultStyle:[div]]]'
+							}//superscript,
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon	:{ element:'div', contains:'div.FileGroup:[superscript]' }
+	, FileRibbon	:{ element:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 						    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
