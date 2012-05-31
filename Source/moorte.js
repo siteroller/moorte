@@ -735,10 +735,10 @@ MooRTE.Elements =
    						, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    						}
    , HomeRibbon	:{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   							'div.rteFontGroup:[div:[bold,italic,underline,strikethrough,subscript]]\
+   							'div.rteFontGroup:[div:[bold,italic,underline,strikethrough,subscript,superscript]]\
 			 					,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
-			 					,div.rteStylGroup:[div:[div.defaultStyle:[div]]]'
-							}//superscript,
+			 					,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div  ]]'
+							}
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon	:{ element:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 						    
