@@ -128,8 +128,9 @@ var MooRTE = new Class({
 			el.setStyle(pad, parseInt(el.getStyle(pad)) + rteHeight);
 			if (!o.padFloat) el.setStyle('min-height', elSize.height - rteHeight).setStyle('height', elSize.height - rteHeight);
 
+			//in o.floating adds a margin above the textarea. Had been 'top': elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom
 			rte
-				.setStyles({ 'left': elSize.left, 'top': (elSize.top - rteHeight > 0 ? elSize.top : elSize.bottom) })
+				.setStyles({ 'left': elSize.left, 'top': elSize.top })
 				.addClass('rteFloat')
 				.getFirst()
 				.addClass('rteFloat');
@@ -158,7 +159,7 @@ var MooRTE = new Class({
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
-		if (!sel || sel.getRangeAt && !sel.rangeCount) return null; console.log(1);
+		if (!sel || sel.getRangeAt && !sel.rangeCount) return null; //console.log(1);
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
 	}
 	, get: function(type, range){
