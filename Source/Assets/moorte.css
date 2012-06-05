@@ -112,8 +112,8 @@ div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):after { right:
 div.MooRTE div.Word10	>div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
 									background-image:linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-webkit-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
 									background-image:-moz-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-ms-linear-gradient(bottom,#E5E9ED 0,#FFF 50px); }
-div.MooRTE>div.Word10	>div.rteRibbons>div{ xheight:76px; xoverflow:hidden; padding:5px 0; }
-div.MooRTE>div.Word10	>div.rteRibbons>div>div{ margin:5px 0; overflow:hidden; padding:1px;  xpadding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; vertical-align:top; -moz-border-right-colors: #fff #1d1d1 #fff; }
+div.MooRTE>div.Word10	>div.rteRibbons>div{ padding:5px 0; }
+div.MooRTE>div.Word10	>div.rteRibbons>div>div{ margin:5px 0; padding:1px;  xpadding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; vertical-align:top; -moz-border-right-colors: #fff #1d1d1 #fff; }
 div.MooRTE>div.Word10	>div.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
 div.MooRTE div.Word10	>div.rteTop>a,
 div.MooRTE div.Word10	>div.rteRibbons>div a{ height:21px; width:22px; margin:4px 1px; text-decoration:none; vertical-align:top; background-image:url(images/Word03.gif); border-radius:3px; 
@@ -134,19 +134,23 @@ div.MooRTE div.Word10	>div.rteRibbons div.rteStylGroup:after{content:'Styles'}
 div.MooRTE div.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
 div.MooRTE div.Word10	>div.rteTabs>a,
 div.MooRTE div.Word10	a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; }
-div.MooRTE div.Word10	a.rteText:hover{ }
-div.MooRTE div.Word10	div.rteFlyout{position:absolute; border:0; top:20px; left:-1px; xwidth:22px; background-color:#ddd}
-div.MooRTE div.Word10	a.Flyout{ position:relative; overflow:hidden;}
-div.MooRTE div.Word10	a.Flyout:hover{overflow:visible;}
 div.MooRTE div.Word10	.displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+div.MooRTE div.Word10	.rtefontsize,
+div.MooRTE div.Word10	.rtefontdropdown{width:96px; height:19px; margin:4px 0 0 1px; overflow:hidden; border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block;}
+div.MooRTE div.Word10	.rtefontsize {width:41px; margin-left:0;}
 
-div.MooRTE>div.Word10	div.rteRibbons div.rteStylGroup>div{ xpadding:1px; border:1px solid #c6cacd; overflow-x:hidden; overflow-y:auto; cursor:pointer; height:52px;}
+
+div.MooRTE>div.Word10	div.rteRibbons div.rteStylGroup>div{ border:1px solid #c6cacd; overflow-x:hidden; overflow-y:auto; cursor:pointer; height:52px;}
 div.MooRTE>div.Word10	.rteStylGroup>div>div{ border:1px solid #fff; float:left; margin:1px; }
 div.MooRTE>div.Word10	.rteStylGroup>div>div.rteSelected,
 div.MooRTE>div.Word10	.rteStylGroup>div>div:hover{ border-color: #c2a35c; border-radius:4px; linear-gradient("top", #fff 7px, #ffce65 75%, #fff)  }
 div.MooRTE>div.Word10	.rteStylGroup>div>div>div{ margin:3px; background-color:#fff; padding:3px; width:58px; overflow:hidden; }
 div.MooRTE>div.Word10	.rteStylGroup>div>div>div:before{ line-height:24px; content:'Aa Bb Cc Dd Ee Ff Gg'; white-space:nowrap;}
 div.MooRTE>div.Word10	.rteStylGroup>div>div>div:after{ text-align:center; display:block; color:#555; font:12px/12px Tahoma;}
+div.MooRTE>div.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3px;}
+div.MooRTE>div.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px;}
+div.MooRTE>div.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; border-right:#e2e4e7 solid 1px; height:100%; width:25px;}
+div.MooRTE>div.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
 
 xdiv.MooRTE>div.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }
 
@@ -195,12 +199,17 @@ div.MooRTE>div.Word10	.f_emphasis		>div:after{ content: }
 div.MooRTE>div.Word10	.f_emphasisSubtle>div:after{ content: }
 div.MooRTE>div.Word10	.f_emphasisIntense>div:after{content: }
 div.MooRTE>div.Word10	.f_strong		>div:after{ content: }
-div.MooRTE>div.Word10	.f_quote			>div:after{ content: }
-div.MooRTE>div.Word10	.f_quoteIntense>div:after{ content: } 	
+div.MooRTE>div.Word10	.f_quote		>div:after{ content: }
+div.MooRTE>div.Word10	.f_quoteIntense	>div:after{ content: } 	
 div.MooRTE>div.Word10	.f_bookTitle 	>div:after{ content: }
 div.MooRTE>div.Word10	.f_listParagraph>div:after{content: }
 div.MooRTE>div.Word10	.f_indent		>div:after{ content: }	
 div.MooRTE>div.Word10	.f_title 		>div:after{ content: }	
+
+div.MooRTE>div.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
+div.MooRTE>div.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
+div.MooRTE>div.Word10	.f_comic:after { content:'Comic (Body)';   font-family:Comic Sans; }
+
 /* End Word10 */
 
 /* Begin Plugins */

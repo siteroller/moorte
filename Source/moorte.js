@@ -732,14 +732,14 @@ MooRTE.Elements =
    , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
 	// Word 10 Groups.
-	, HomeTab		:{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
-   						, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
-   						}
-   , HomeRibbon	:{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   							'div.rteFontGroup:[div:[bold,italic,underline,strikethrough,subscript,superscript]]\
-			 					,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
-			 					,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div  ]]'
-							}
+	, HomeTab:		{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
+   					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
+   					}
+   , HomeRibbon:	{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+   						'div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase,bold,italic,underline,strikethrough,subscript,superscript]]\
+			 				,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
+			 				,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div]]'
+						}
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon	:{ element:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 						    
@@ -960,11 +960,35 @@ MooRTE.Elements =
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
-   , fontsize		:{}
-   , insertimage	:{}
-   , forecolor		:{}			
-   , formatblock	:{}
-   , backcolor		:{ 	img:43,
+   , fontsize		:{ element:'div'
+   					 , onLoad: function(){
+   					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this)
+   					 	}
+   					 , onClick: function(){ console.log(this.get('value'))}
+					 }
+	, fontdropdown:{ element:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
+
+	, changecase:	{ img: 23, onClick: 
+							{tabs:
+								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase]'
+								, {place:'Flyouts', events:{show:
+										function(flyout){
+											var pos = this.getCoordinates(this.getParent('.MooRTE'));
+											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+											}
+									}} 
+								]}
+						}
+	, sentencecase:{ element:'div', text:'Sentence case' } 
+	, lowercase:	{ element:'div', text:'lowercase'}
+	, uppercase:	{ element:'div', text:'UPPERCASE'}
+	, wordcase:		{ element:'div', text:'Word Case'}
+	, togglecase:	{ element:'div', text:'tOGGLE cASE'}
+
+ 	, insertimage:	{}
+ 	, forecolor:	{}			
+ 	, formatblock:	{}
+ 	, backcolor		:{ img:43,
 						onLoad:function(){
 							MooRTE.Utilities.assetLoader({
 								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
