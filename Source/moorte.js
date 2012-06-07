@@ -387,7 +387,7 @@ MooRTE.Utilities = {
 			else if (!e || !options.ifExists){
 				var bgPos = 0
 				  , val = MooRTE.Elements[btn]
-				  , textarea = (val.element && val.element.toLowerCase() == 'textarea')
+				  , textarea = (val.tag && val.tag.toLowerCase() == 'textarea')
 				  , input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type)
 				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
 
@@ -395,7 +395,8 @@ MooRTE.Utilities = {
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles: val.img ? (isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}):{},
+					styles: val.img ? (isNaN(val.img) 
+						? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}) : {},
 					events: {
 						mousedown: function(e){
 							MooRTE.activeBar = bar;
@@ -410,19 +411,19 @@ MooRTE.Utilities = {
 								(MooRTE.activeField = fields[0]).focus();
 
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-							!val.onClick && !source && (!val.element || val.element == 'a')
+							!val.onClick && !source && (!val.tag || val.tag == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)
 								: MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
 						}
 					}
 				}, val);
 				
-				MooRTE.btnVals[val.element ? 'include' : 'erase']('href')
+				MooRTE.btnVals[val.tag ? 'include' : 'erase']('href')
 					.each(function(key){
 						delete properties[key];
 					});
 
-				e = new Element((input && !val.element ? 'input' : val.element || 'a') + '.rte' + btn, properties)
+				e = new Element((input && !val.tag ? 'input' : val.tag || 'a') + '.rte' + btn, properties)
 					.inject(place, relative);
 				
 				if (val.onUpdate || state)
@@ -735,13 +736,13 @@ MooRTE.Elements =
 	, HomeTab:		{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
-   , HomeRibbon:	{ element:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+   , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase,bold,italic,underline,strikethrough,subscript,superscript]]\
 			 				,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
 			 				,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div]]'
 						}
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon	:{ element:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
+	, FileRibbon	:{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 						    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -808,7 +809,7 @@ MooRTE.Elements =
 							}
 						 }
    , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML'] }
-   , DisplayHTML	:{ element: 'textarea'
+   , DisplayHTML	:{ tag: 'textarea'
 						 , unselectable:'off'
 						 , 'class': 'displayHtml'
 						 , init:function(){ 
@@ -818,7 +819,7 @@ MooRTE.Elements =
 								this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 							}
 						 }
-   , colorpicker	:{ 'element':'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
+   , colorpicker	:{ tag:'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
 							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
 							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
@@ -882,7 +883,7 @@ MooRTE.Elements =
 					  }
 					}
    , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
-   , start			:{ element:'span' }
+   , start			:{ tag:'span' }
    , viewSource	:{ img:35, onClick:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 						if(this.hasClass('rteSelected')){
@@ -898,7 +899,7 @@ MooRTE.Elements =
 							} else MooRTE.Utilities.group.apply(this, ['source', btn]);
 						}
 					}}
-   , source			:{ element:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
+   , source			:{ tag:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
@@ -960,13 +961,13 @@ MooRTE.Elements =
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
-   , fontsize		:{ element:'div'
+   , fontsize		:{ tag:'div'
    					 , onLoad: function(){
    					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this)
    					 	}
    					 , onClick: function(){ console.log(this.get('value'))}
 					 }
-	, fontdropdown:{ element:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
+	, fontdropdown:{ tag:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
 
 	, changecase:	{ img: 23, onClick: 
 							{tabs:
@@ -979,11 +980,11 @@ MooRTE.Elements =
 									}} 
 								]}
 						}
-	, sentencecase:{ element:'div', text:'Sentence case' } 
-	, lowercase:	{ element:'div', text:'lowercase'}
-	, uppercase:	{ element:'div', text:'UPPERCASE'}
-	, wordcase:		{ element:'div', text:'Word Case'}
-	, togglecase:	{ element:'div', text:'tOGGLE cASE'}
+	, sentencecase:{ tag:'div', text:'Sentence case' } 
+	, lowercase:	{ tag:'div', text:'lowercase'}
+	, uppercase:	{ tag:'div', text:'UPPERCASE'}
+	, wordcase:		{ tag:'div', text:'Word Case'}
+	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
  	, insertimage:	{}
  	, forecolor:	{}			
@@ -1004,7 +1005,7 @@ MooRTE.Elements =
 					}
 					
 	// Generic
-	, Toolbar    	:{ element:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
+	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
 
 
