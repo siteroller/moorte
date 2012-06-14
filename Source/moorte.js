@@ -395,8 +395,10 @@ MooRTE.Utilities = {
 					href:'javascript:void(0)',
 					unselectable:(input || textarea ? 'off' : 'on'),
 					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-					styles: val.img ? (isNaN(val.img) 
-						? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}) : {},
+				//	styles: val.img ? (isNaN(val.img) 
+				//		? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}) : {},
+					styles: val.img && isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {},
+					
 					events: {
 						mousedown: function(e){
 							MooRTE.activeBar = bar;
