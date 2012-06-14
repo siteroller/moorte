@@ -457,9 +457,10 @@ MooRTE.Utilities = {
 
 		if (!entry) MooRTE.Tabs[tabGroup] = {};
 		else Object.each(entry, function(els, title){
+			// ToDo: if (this = this) return [as otherwise hide event will be called].
 			if (els[0]) els[0].removeClass('rteSelected');
 			if (els[1]) els[1].addClass('rteHide');
-			if (options.onHide) MooRTE.Utilities.eventHandler(options.onHide, this, name);
+			if ((options.events||{}).hide) options.events.hide.call(this, name);
 			}, this);
 
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
@@ -474,7 +475,8 @@ MooRTE.Utilities = {
 
 		var group = MooRTE.Utilities.addElements(args[1], options.place, {className:'rteGroup_'+name});
 		MooRTE.Tabs[tabGroup][name] = [this, group];
-		MooRTE.Utilities.eventHandler(options.onShow, this, name);
+		//console.log(options.events);
+		if ((options.events||{}).show) options.events.show.call(this, {content:group});
 		}
 	, addTab: function(tabGroup, tabName){
 		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
