@@ -22,17 +22,17 @@
 			});
 		</script>
 		<style type="text/css">
-			span{display:inline-block; width:75px;}
-			#comments,#name{ width:500px }
+			span.form{display:inline-block; width:75px;}
+			#comments,#name{ width:600px }
 			#comments{ height:300px; }
 		</style>
 	</head>
 	<body>
 		<form action="http://siteroller.net/test/submit/form.php?version=0.55&page=full" method="post">
-			<span>Name: </span>
+			<span class='form'>Name: </span>
 			<input type="text" name="name" id="name">
 			<br><br>
-			<span>History: </span>
+			<span class='form'>History: </span>
 			<input name="comments" id="comments">
 			<br><br>
 			<input type="submit" value="Please tell us what you think">

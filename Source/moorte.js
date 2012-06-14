@@ -737,8 +737,10 @@ MooRTE.Elements =
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase,bold,italic,underline,strikethrough,subscript,superscript]]\
-			 				,div.rteParaGroup:[div:[Lists,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
+   						'div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase\
+   							,span.divide,removeformat,span.divide,bold,italic,span.flyout:underline,strikethrough\
+   							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontcolor]]\
+			 				,div.rteParaGroup:[div:[ULists:insertunorderedlist,OLists:insertorderedlist,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
 			 				,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div]]'
 						}
 	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
@@ -746,7 +748,29 @@ MooRTE.Elements =
 						    
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
-   , Lists			:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
+   , Lists_old		:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
+   , OLists: 		{'class':'flyout', tag:'span', onClick: //function(){alert(3)}
+							{tabs:
+								['flyouts', 'div.listFlyouts:[insertorderedlist,insertunorderedlist]'
+								, {place:'Flyouts', events:{show:
+										function(flyout){
+											var pos = this.getCoordinates(this.getParent('.MooRTE'));
+											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+											}
+									}} 
+								]}
+						}
+   , ULists:		{'class':'flyout', tag:'span', onClick: 
+							{tabs:
+								['flyouts', 'div.listFlyouts:[insertorderedlist,insertunorderedlist]'
+								, {place:'Flyouts', events:{show:
+										function(flyout){
+											var pos = this.getCoordinates(this.getParent('.MooRTE'));
+											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+											}
+									}} 
+								]}
+						}
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
@@ -969,9 +993,9 @@ MooRTE.Elements =
 					 }
 	, fontdropdown:{ tag:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
 
-	, changecase:	{ img: 23, onClick: 
+	, changecase:	{ img: 23, 'class':'flyout', onClick: 
 							{tabs:
-								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase]'
+								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
 										function(flyout){
 											var pos = this.getCoordinates(this.getParent('.MooRTE'));
@@ -1003,7 +1027,9 @@ MooRTE.Elements =
 							var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
 						}
 					}
-					
+	, style: {}				
+	, hilight:		{}
+	, fontcolor:	{}				
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
