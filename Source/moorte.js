@@ -423,9 +423,10 @@ MooRTE.Utilities = {
 						delete properties[key];
 					});
 
-				e = new Element((input && !val.tag ? 'input' : val.tag || 'a') + '.rte' + btn, properties)
+				e = new Element((input && !val.tag ? 'input' : val.tag || 'a'), properties)
+					.addClass('rte' + btn)
 					.inject(place, relative);
-				
+			
 				if (val.onUpdate || state)
 					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						/font(name|size)|(back|fore|hilite)color/i
