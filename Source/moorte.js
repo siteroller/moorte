@@ -312,7 +312,9 @@ MooRTE.Utilities = {
 	}
 	, eventHandler: function(onEvent, caller, name){
 		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
-		var event = MooRTE.Elements[name][onEvent];
+		var event = Type.isFunction(onEvent) ? onEvent : MooRTE.Elements[name][onEvent]
+		  , provided = {element:name, event:onEvent};
+
 		switch(typeOf(event)){
 			case 'function':
 				event.call(caller, name, onEvent); break;
