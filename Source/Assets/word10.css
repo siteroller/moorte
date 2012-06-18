@@ -14,208 +14,217 @@ div.MooRTE div.Word03, .bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  bor
 .spinWait {position:absolute; border:0}
 /* End General*/
 
-/* Replaced the blue to white BG with a transparent BG: div.MooRTE div.Word10	{ 
+/* Replaced the blue to white BG with a transparent BG: div.RTE.Word10	{ 
  * background-color:#B9D2F8;background-image:-moz-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);
  * background-image:-ms-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);  background-image:linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); }*/
-div.MooRTE div.Word10	{ left:0; bottom:0; width:100%; }
-div.MooRTE div.Word10	span { height:20px; margin:1px; display:inline-block; width:auto;}
-div.MooRTE div.Word10	input{ height:20px; width:100px; }
-div.MooRTE div.Word10	a    { display:inline-block;}
-div.MooRTE div.Word10	>div.rteTop{ background-color:#fefefe; background-color:rgba(254,254,254,0.8); }
-div.MooRTE div.Word10	>div.rteTop>a{ margin:2px; }
+div.RTE.Word10	{ left:0; bottom:0; width:100%; }
+div.RTE.Word10	span { height:20px; margin:1px; display:inline-block; width:auto;}
+div.RTE.Word10	input{ height:20px; width:100px; }
+div.RTE.Word10	a    { display:inline-block;}
+div.RTE.Word10	>div.rteTop{ background-color:#fefefe; background-color:rgba(254,254,254,0.8); }
+div.RTE.Word10	>div.rteTop>a{ margin:2px; }
 
-div.MooRTE>div.Word10	>div.rteTabs { overflow:hidden; position:relative; background-image:linear-gradient(top, rgba(255,255,255,0.8), #FFF);
-									background-image:-ms-linear-gradient(top, rgba(255,255,255,0.8), #FFF); background-image:-moz-linear-gradient(top, rgba(255,255,255,0.8), #FFF);
-									background-image:-webkit-linear-gradient(top, rgba(255,255,255,0.8), #FFF);}
-div.MooRTE div.Word10	>div.rteTabs:before { position:absolute; content:' '; width:100%; bottom:0; left:0; border-bottom:1px solid #AAA; z-index:1; }
-div.MooRTE div.Word10	>div.rteTabs>a{padding:0 12px; margin:0 2px; vertical-align:top; font: 12px/24px 'MS Sans Serif', Geneva, sans-serif; color:black;}
-div.MooRTE div.Word10	>div.rteTabs>a:hover,
-div.MooRTE div.Word10	>div.rteTabs>a.rteSelected,
-div.MooRTE div.Word10	>div.rteTabs>a.rteFileTab{ border:1px solid #aaa; border-bottom:0; border-radius:4px 4px 0 0; padding:0 11px;}
-div.MooRTE div.Word10	>div.rteTabs>a.rteFileTab{ box-shadow:none; color:white; background-image:linear-gradient(top,#418add,#2862ad 40%,#3e87d8); background-image:-moz-linear-gradient(top,#418add,#2862ad 40%,#3e87d8);
-									background-image:-ms-linear-gradient(top,#418add,#2862ad 40%,#3e87d8); background-image:-webkit-linear-gradient(top,#418add,#2862ad 40%,#3e87d8); }
-div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab){ position:relative; background:#FFF; z-index:2; box-shadow:0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #FFF; }
-div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):before, 
-div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):after { border:1px solid #AAA; position:absolute; bottom:-1px; width:5px; height:5px; content:' '; }
-div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):before{ left:-6px; border-bottom-right-radius:6px; border-width:0 1px 1px 0; box-shadow: 2px 2px 0 #FFF; }
-div.MooRTE>div.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):after { right:-6px; border-bottom-left-radius:6px; border-width:0 0 1px 1px; box-shadow:-2px 2px 0 #FFF; XOR:#D1D1D1;}
 
-div.MooRTE div.Word10	>div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
+div.RTE.Word10	>div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
 									background-image:linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-webkit-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
 									background-image:-moz-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-ms-linear-gradient(bottom,#E5E9ED 0,#FFF 50px); }
-div.MooRTE>div.Word10	>div.rteRibbons>div{ padding:5px 0; }
-div.MooRTE>div.Word10	>div.rteRibbons>div>div{ margin:5px 0; padding:1px;  xpadding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; vertical-align:top; -moz-border-right-colors: #fff #1d1d1 #fff; }
-div.MooRTE>div.Word10	>div.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
-div.MooRTE div.Word10	>div.rteTop>a,
-div.MooRTE div.Word10	>div.rteRibbons>div a{ margin:4px 1px; text-decoration:none; vertical-align:top;  border-radius:3px; height:21px; width:22px;
+div.RTE.Word10	>div.rteRibbons>div{ padding:5px 0; }
+div.RTE.Word10	>div.rteRibbons>div>div{ margin:5px 0; padding:1px;  xpadding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; vertical-align:top; -moz-border-right-colors: #fff #1d1d1 #fff; }
+div.RTE.Word10	>div.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
+div.RTE.Word10	>div.rteTop>a,
+div.RTE.Word10	>div.rteRibbons>div a{ margin:4px 1px; text-decoration:none; vertical-align:top;  border-radius:3px; height:21px; width:22px; }
+div.RTE.Word10	>div.rteTabs { overflow:hidden; position:relative; background-image:linear-gradient(top, rgba(255,255,255,0.8), #FFF);
+						background-image:-ms-linear-gradient(top, rgba(255,255,255,0.8), #FFF); background-image:-moz-linear-gradient(top, rgba(255,255,255,0.8), #FFF);
+						background-image:-webkit-linear-gradient(top, rgba(255,255,255,0.8), #FFF);}
+div.RTE.Word10	>div.rteTabs:before { position:absolute; content:' '; width:100%; bottom:0; left:0; border-bottom:1px solid #AAA; z-index:1; }
+div.RTE.Word10	>div.rteTabs>a{padding:0 12px; margin:0 2px; vertical-align:top; font: 12px/24px 'MS Sans Serif', Geneva, sans-serif; color:black;}
+div.RTE.Word10	>div.rteTabs>a:hover,
+div.RTE.Word10	>div.rteTabs>a.rteSelected,
+div.RTE.Word10	>div.rteTabs>a.rteFileTab{ border:1px solid #aaa; border-bottom:0; border-radius:4px 4px 0 0; padding:0 11px;}
+div.RTE.Word10	>div.rteTabs>a.rteFileTab{ box-shadow:none; color:white; background-image:linear-gradient(top,#418add,#2862ad 40%,#3e87d8); background-image:-moz-linear-gradient(top,#418add,#2862ad 40%,#3e87d8);
+						background-image:-ms-linear-gradient(top,#418add,#2862ad 40%,#3e87d8); background-image:-webkit-linear-gradient(top,#418add,#2862ad 40%,#3e87d8); }
+div.RTE.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab){ position:relative; background:#FFF; z-index:2; box-shadow:0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #FFF; }
+div.RTE.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):before, 
+div.RTE.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):after { border:1px solid #AAA; position:absolute; bottom:-1px; width:5px; height:5px; content:' '; }
+div.RTE.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):before{ left:-6px; border-bottom-right-radius:6px; border-width:0 1px 1px 0; box-shadow: 2px 2px 0 #FFF; }
+div.RTE.Word10	>div.rteTabs>a.rteSelected:not(.rteFileTab):after { right:-6px; border-bottom-left-radius:6px; border-width:0 0 1px 1px; box-shadow:-2px 2px 0 #FFF; XOR:#D1D1D1;}
 
-div.MooRTE div.Word10	>div.rteTop>a:hover, 
-div.MooRTE div.Word10	>div.rteTop>a.rteSelected:hover,
-/*div.MooRTE div.Word10	>div.rteRibbons>div a.rteSelected:hover,*/
-div.MooRTE div.Word10	>div.rteRibbons>div a:hover{ border:1px solid black; background-color:#FFB874;
-div.MooRTE div.Word10	>div.rteTop>a.rteSelected,
-div.MooRTE div.Word10	>div.rteRibbons>div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
-div.MooRTE div.Word10	>div.rteRibbons>div>div:after{ text-align:center; color:rgb(155,155,155); font:12px/35px Arial; height:25px; display:block; }
-div.MooRTE div.Word10	>div.rteRibbons div.rteClipGroup:after{content:'Clipboard' }
-div.MooRTE div.Word10	>div.rteRibbons div.rteFontGroup:after{content:'Font' }
-div.MooRTE div.Word10	>div.rteRibbons div.rteParaGroup:after{content:'Paragraph'}
-div.MooRTE div.Word10	>div.rteRibbons div.rteFileGroup:after{content:'File'}
-div.MooRTE div.Word10	>div.rteRibbons div.rteStylGroup:after{content:'Styles'}
-div.MooRTE div.Word10	>div.rteRibbons div.rteEditGroup:after{content:'Editing'}
-div.MooRTE div.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
-div.MooRTE div.Word10	>div.rteTabs>a,
-div.MooRTE div.Word10	a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; }
-div.MooRTE div.Word10	.displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
-div.MooRTE div.Word10	.rtefontsize,
-div.MooRTE div.Word10	.rtefontdropdown{width:96px; height:19px; margin:4px 0 0 1px; overflow:hidden; border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block;}
-div.MooRTE div.Word10	.rtefontsize {width:41px; margin-left:0;}
+div.RTE.Word10	>div.rteTop>a:hover, 
+div.RTE.Word10	>div.rteTop>a.rteSelected:hover,
+/*div.RTE.Word10	>div.rteRibbons>div a.rteSelected:hover,*/
+div.RTE.Word10	>div.rteRibbons>div a:hover{ border:1px solid black; background-color:#FFB874;
+div.RTE.Word10	>div.rteTop>a.rteSelected,
+div.RTE.Word10	>div.rteRibbons>div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
+div.RTE.Word10	>div.rteRibbons>div>div:after{ text-align:center; color:rgb(155,155,155); font:12px/35px Arial; height:25px; display:block; }
+div.RTE.Word10	>div.rteRibbons div.rteClipGroup:after{content:'Clipboard' }
+div.RTE.Word10	>div.rteRibbons div.rteFontGroup:after{content:'Font' }
+div.RTE.Word10	>div.rteRibbons div.rteParaGroup:after{content:'Paragraph'}
+div.RTE.Word10	>div.rteRibbons div.rteFileGroup:after{content:'File'}
+div.RTE.Word10	>div.rteRibbons div.rteStylGroup:after{content:'Styles'}
+div.RTE.Word10	>div.rteRibbons div.rteEditGroup:after{content:'Editing'}
+div.RTE.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
+div.RTE.Word10	>div.rteTabs>a,
+div.RTE.Word10	a.rteText{background-image:url(); min-width:38px; text-align:center; text-decoration:none; color:#000; }
+div.RTE.Word10	.displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
+div.RTE.Word10	.rtefontsize,
+div.RTE.Word10	.rtefontdropdown{width:96px; height:19px; margin:4px 0 0 1px; overflow:hidden; border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block;}
+div.RTE.Word10	.rtefontsize {width:41px; margin-left:0;}
+div.RTE.Word10	>div.rteRibbons{ background-color:white; border:1px solid #8B9096; border-top:0;
+						background-image:linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-webkit-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
+						background-image:-moz-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);background-image:-ms-linear-gradient(bottom,#E5E9ED 0,#FFF 50px); }
+div.RTE.Word10	>div.rteRibbons>div{ padding:5px 0; }
+div.RTE.Word10	>div.rteRibbons>div>div{ margin:5px 0; padding:1px;  xpadding-top:1px; display:table-cell; border-right:3px solid #d1d1d1; vertical-align:top; -moz-border-right-colors: #fff #1d1d1 #fff; }
+div.RTE.Word10	>div.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
+div.RTE.Word10	>div.rteTop>a,
+div.RTE.Word10	>div.rteRibbons>div a{ margin:4px 1px; text-decoration:none; vertical-align:top;  border-radius:3px; height:21px; width:22px;
 						-moz-box-sizing: border-box; -webkit-moz-box-sizing: border-box; box-sizing: border-box; background-image:url('images/Word10.png'); }
 
-div.MooRTE>div.Word10	div.rteRibbons div.rteStylGroup{position:relative;}
-div.MooRTE>div.Word10	div.rteRibbons div.rteStylGroup>div{ border:1px solid #c6cacd; overflow-x:hidden; overflow-y:auto; scrollbar-arrow-color: green; overflow: -moz-scrollbars-vertical; cursor:pointer; height:52px; margin-right:35px; }
-div.MooRTE>div.Word10	.rteStylGroup>div>div{ border:1px solid #fff; float:left; margin:1px; }
-div.MooRTE>div.Word10	.rteStylGroup>div>div.rteSelected,
-div.MooRTE>div.Word10	.rteStylGroup>div>div:hover{ border-color: #c2a35c; border-radius:4px; linear-gradient("top", #fff 7px, #ffce65 75%, #fff)  }
-div.MooRTE>div.Word10	.rteStylGroup>div>div>div{ margin:3px; background-color:#fff; padding:3px; width:58px; overflow:hidden; }
-div.MooRTE>div.Word10	.rteStylGroup>div>div>div:before{ line-height:24px; content:'Aa Bb Cc Dd Ee Ff Gg'; white-space:nowrap;}
-div.MooRTE>div.Word10	.rteStylGroup>div>div>div:after{ text-align:center; display:block; color:#555; font:12px/12px Tahoma;}
+div.RTE.Word10	div.rteRibbons div.rteStylGroup{position:relative;}
+div.RTE.Word10	div.rteRibbons div.rteStylGroup>div{ border:1px solid #c6cacd; overflow-x:hidden; overflow-y:auto; scrollbar-arrow-color: green; overflow: -moz-scrollbars-vertical; cursor:pointer; height:52px; margin-right:35px; }
+div.RTE.Word10	.rteStylGroup>div>div{ border:1px solid #fff; float:left; margin:1px; }
+div.RTE.Word10	.rteStylGroup>div>div.rteSelected,
+div.RTE.Word10	.rteStylGroup>div>div:hover{ border-color: #c2a35c; border-radius:4px; linear-gradient("top", #fff 7px, #ffce65 75%, #fff)  }
+div.RTE.Word10	.rteStylGroup>div>div>div{ margin:3px; background-color:#fff; padding:3px; width:58px; overflow:hidden; }
+div.RTE.Word10	.rteStylGroup>div>div>div:before{ line-height:24px; content:'Aa Bb Cc Dd Ee Ff Gg'; white-space:nowrap;}
+div.RTE.Word10	.rteStylGroup>div>div>div:after{ text-align:center; display:block; color:#555; font:12px/12px Tahoma;}
 						background-image:url('images/Word10.png'), -moz-linear-gradient(top,#ffe387,#fff292); background-image:url('images/Word10.png'), -ms-linear-gradient(top,#ffe387,#fff292);
 						background-image:url('images/Word10.png'), -webkit-linear-gradient(top,#ffe387,#fff292);  background-image:url('images/Word10.png'), linear-gradient(top,#ffe387,#fff292)}
 
-div.MooRTE>div.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3px;}
-div.MooRTE>div.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:4px; width:150px; font:12px Arial;
+div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3px;}
+div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:4px; width:150px; font:12px Arial;
 							-moz-box-sizing:border-box; -webkit-box-sizing:border-box; -ms-box-sizing:border-box; box-sizing:border-box }
-div.MooRTE>div.Word10	.rteFlyouts > div > div:hover{ border:1px solid #999; }
-div.MooRTE>div.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; border-right:#e2e4e7 solid 1px; height:100%; width:25px; vertical-align:middle;}
-div.MooRTE>div.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
+div.RTE.Word10	.rteFlyouts > div > div:hover{ border:1px solid #999; }
+div.RTE.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; border-right:#e2e4e7 solid 1px; height:100%; width:25px; vertical-align:middle;}
+div.RTE.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
 
-div.MooRTE>div.Word10	.flyout{ position:relative; padding-right:10px; vertical-align:top; cursor:pointer; margin:4px 1px;}
-div.MooRTE>div.Word10	.flyout:hover{background-color:#FFB874; border:1px solid;
+div.RTE.Word10	.flyout{ position:relative; padding-right:10px; vertical-align:top; cursor:pointer; margin:4px 1px;}
+div.RTE.Word10	.flyout:hover{background-color:#FFB874; border:1px solid;
 									background-image:-moz-linear-gradient(top,#ffe387,#fff292); background-image:-ms-linear-gradient(top,#ffe387,#fff292);
 									background-image:-webkit-linear-gradient(top,#ffe387,#fff292);  background-image:linear-gradient(top,#ffe387,#fff292)}
-div.MooRTE>div.Word10	span.flyout>a{margin: 0 !important; border-width:0 1px 0 0 !important; border-radius:0 !important;}
-div.MooRTE>div.Word10	.flyout:after {width:0; height:0; line-height:0; border:solid transparent 3px; border-top:3px solid #000; border-width:3px 3px 0; content:''; position:absolute; top:8px; right:3px; }
+div.RTE.Word10	span.flyout>a{margin: 0 !important; border-width:0 1px 0 0 !important; border-radius:0 !important;}
+div.RTE.Word10	.flyout:after {width:0; height:0; line-height:0; border:solid transparent 3px; border-top:3px solid #000; border-width:3px 3px 0; content:''; position:absolute; top:8px; right:3px; }
 
-xdiv.MooRTE>div.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }
+xdiv.RTE.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }
 
-div.MooRTE>div.Word10	.f_h1 { color:#365f91; font:bold 14pt Cambria; }
-div.MooRTE>div.Word10	.f_h2 { color:#4f81bd; font:bold 13pt Cambria; } 
-div.MooRTE>div.Word10	.f_h3 { color:#4f81bd; font:bold 11pt Cambria; }
-div.MooRTE>div.Word10	.f_h4 { color:#4f81bd; font:bold italic 11pt Cambria; }
-div.MooRTE>div.Word10	.f_h5 { color:#243f60; font:11pt Cambria; }
-div.MooRTE>div.Word10	.f_h6 { color:#243f60; font:italic 11pt Cambria; }
-div.MooRTE>div.Word10	.f_h7 { color:#404040; font:italic 11pt Cambria; }
-div.MooRTE>div.Word10	.f_h8 { color:#404040; font:10pt Cambria; }
-div.MooRTE>div.Word10	.f_h9 { color:#404040; font:italic 10pt Cambria; }
 
-div.MooRTE>div.Word10	.f_normal			{ font:11pt Calibri }
-div.MooRTE>div.Word10	.f_noSpacing		{ letter-spacing: 0; word-spacing:-3pt;}
-div.MooRTE>div.Word10	.f_refSubtle		{ color:#c0504d; font:underline small-caps 11pt Calibri;  }
-div.MooRTE>div.Word10	.f_refIntense		{ color:#c0504d; font:bold italic small-caps 11pt Calibri; }
-div.MooRTE>div.Word10	.f_subtitle  		{ color:#4f81bd; font:italic 11pt Cambria; } 
-div.MooRTE>div.Word10	.f_emphasis  		{ font:italic 11pt Calibri; }
-div.MooRTE>div.Word10	.f_emphasisSubtle 	{ color:#808080; font:italic 11pt Calibri; }
-div.MooRTE>div.Word10	.f_emphasisIntense	{ color:#4f81bd; font:bold italic 11pt Calibri; }
-div.MooRTE>div.Word10	.f_strong 			{ font:bold 11pt Calibri; }
-div.MooRTE>div.Word10	.f_quote  			{ font:italic 11pt Calibri; }
-div.MooRTE>div.Word10	.f_quoteIntense 	{ color:#4f81bd; font:bold italic 11pt Calibri; border-bottom:solid #4f81bd 1px; }  
-div.MooRTE>div.Word10	.f_bookTitle 		{ font:bold small-caps 11pt Calibri; }
-div.MooRTE>div.Word10	.f_listParagraph 	{ font: 11pt Calibri; indent-left:1.27 cm; /*Don't add space between paragraphs of the same style*/}
-div.MooRTE>div.Word10	.f_indent			{ /* Left:  1.65 cm Right:  1.65 cm, Space  Before:  10 pt */}
-div.MooRTE>div.Word10	.f_title 			{ color:rgb(23,54,93); font:26pt Cambria border-bottom:solid rgb(23,54,93) 1px;/*seems to be underlined but underline and bottom border are both not selected*/ }
+div.RTE.Word10	.f_h1 { color:#365f91; font:bold 14pt Cambria; }
+div.RTE.Word10	.f_h2 { color:#4f81bd; font:bold 13pt Cambria; } 
+div.RTE.Word10	.f_h3 { color:#4f81bd; font:bold 11pt Cambria; }
+div.RTE.Word10	.f_h4 { color:#4f81bd; font:bold italic 11pt Cambria; }
+div.RTE.Word10	.f_h5 { color:#243f60; font:11pt Cambria; }
+div.RTE.Word10	.f_h6 { color:#243f60; font:italic 11pt Cambria; }
+div.RTE.Word10	.f_h7 { color:#404040; font:italic 11pt Cambria; }
+div.RTE.Word10	.f_h8 { color:#404040; font:10pt Cambria; }
+div.RTE.Word10	.f_h9 { color:#404040; font:italic 10pt Cambria; }
 
-div.MooRTE>div.Word10	.f_h1>div:after{ content: 'Heading 1' }
-div.MooRTE>div.Word10	.f_h2>div:after{ content: 'Heading 2' } 
-div.MooRTE>div.Word10	.f_h3>div:after{ content: 'Heading 3' }
-div.MooRTE>div.Word10	.f_h4>div:after{ content: 'Heading 4' }
-div.MooRTE>div.Word10	.f_h5>div:after{ content: 'Heading 5' }
-div.MooRTE>div.Word10	.f_h6>div:after{ content: 'Heading 6' }
-div.MooRTE>div.Word10	.f_h7>div:after{ content: 'Heading 7' }
-div.MooRTE>div.Word10	.f_h8>div:after{ content: 'Heading 8' }
-div.MooRTE>div.Word10	.f_h9>div:after{ content: 'Heading 9' }
+div.RTE.Word10	.f_normal			{ font:11pt Calibri }
+div.RTE.Word10	.f_noSpacing		{ letter-spacing: 0; word-spacing:-3pt;}
+div.RTE.Word10	.f_refSubtle		{ color:#c0504d; font:underline small-caps 11pt Calibri;  }
+div.RTE.Word10	.f_refIntense		{ color:#c0504d; font:bold italic small-caps 11pt Calibri; }
+div.RTE.Word10	.f_subtitle  		{ color:#4f81bd; font:italic 11pt Cambria; } 
+div.RTE.Word10	.f_emphasis  		{ font:italic 11pt Calibri; }
+div.RTE.Word10	.f_emphasisSubtle 	{ color:#808080; font:italic 11pt Calibri; }
+div.RTE.Word10	.f_emphasisIntense	{ color:#4f81bd; font:bold italic 11pt Calibri; }
+div.RTE.Word10	.f_strong 			{ font:bold 11pt Calibri; }
+div.RTE.Word10	.f_quote  			{ font:italic 11pt Calibri; }
+div.RTE.Word10	.f_quoteIntense 	{ color:#4f81bd; font:bold italic 11pt Calibri; border-bottom:solid #4f81bd 1px; }  
+div.RTE.Word10	.f_bookTitle 		{ font:bold small-caps 11pt Calibri; }
+div.RTE.Word10	.f_listParagraph 	{ font: 11pt Calibri; indent-left:1.27 cm; /*Don't add space between paragraphs of the same style*/}
+div.RTE.Word10	.f_indent			{ /* Left:  1.65 cm Right:  1.65 cm, Space  Before:  10 pt */}
+div.RTE.Word10	.f_title 			{ color:rgb(23,54,93); font:26pt Cambria border-bottom:solid rgb(23,54,93) 1px;/*seems to be underlined but underline and bottom border are both not selected*/ }
 
-div.MooRTE>div.Word10	.f_normal		>div:after{ content: "Normal" }
-div.MooRTE>div.Word10	.f_noSpacing	>div:after{ content: 'No Spacing'}		
-div.MooRTE>div.Word10	.f_refSubtle	>div:after{ content: ''}
-div.MooRTE>div.Word10	.f_refIntense	>div:after{ content: }
-div.MooRTE>div.Word10	.f_subtitle		>div:after{ content: }
-div.MooRTE>div.Word10	.f_emphasis		>div:after{ content: }
-div.MooRTE>div.Word10	.f_emphasisSubtle>div:after{ content: }
-div.MooRTE>div.Word10	.f_emphasisIntense>div:after{content: }
-div.MooRTE>div.Word10	.f_strong		>div:after{ content: }
-div.MooRTE>div.Word10	.f_quote		>div:after{ content: }
-div.MooRTE>div.Word10	.f_quoteIntense	>div:after{ content: } 	
-div.MooRTE>div.Word10	.f_bookTitle 	>div:after{ content: }
-div.MooRTE>div.Word10	.f_listParagraph>div:after{content: }
-div.MooRTE>div.Word10	.f_indent		>div:after{ content: }	
-div.MooRTE>div.Word10	.f_title 		>div:after{ content: }	
+div.RTE.Word10	.f_h1>div:after{ content: 'Heading 1' }
+div.RTE.Word10	.f_h2>div:after{ content: 'Heading 2' } 
+div.RTE.Word10	.f_h3>div:after{ content: 'Heading 3' }
+div.RTE.Word10	.f_h4>div:after{ content: 'Heading 4' }
+div.RTE.Word10	.f_h5>div:after{ content: 'Heading 5' }
+div.RTE.Word10	.f_h6>div:after{ content: 'Heading 6' }
+div.RTE.Word10	.f_h7>div:after{ content: 'Heading 7' }
+div.RTE.Word10	.f_h8>div:after{ content: 'Heading 8' }
+div.RTE.Word10	.f_h9>div:after{ content: 'Heading 9' }
 
-div.MooRTE>div.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
-div.MooRTE>div.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
-div.MooRTE>div.Word10	.f_comic:after { content:'Comic (Body)';   font-family:Comic Sans; }
+div.RTE.Word10	.f_normal		>div:after{ content: "Normal" }
+div.RTE.Word10	.f_noSpacing	>div:after{ content: 'No Spacing'}		
+div.RTE.Word10	.f_refSubtle	>div:after{ content: ''}
+div.RTE.Word10	.f_refIntense	>div:after{ content: }
+div.RTE.Word10	.f_subtitle		>div:after{ content: }
+div.RTE.Word10	.f_emphasis		>div:after{ content: }
+div.RTE.Word10	.f_emphasisSubtle>div:after{ content: }
+div.RTE.Word10	.f_emphasisIntense>div:after{content: }
+div.RTE.Word10	.f_strong		>div:after{ content: }
+div.RTE.Word10	.f_quote		>div:after{ content: }
+div.RTE.Word10	.f_quoteIntense	>div:after{ content: } 	
+div.RTE.Word10	.f_bookTitle 	>div:after{ content: }
+div.RTE.Word10	.f_listParagraph>div:after{content: }
+div.RTE.Word10	.f_indent		>div:after{ content: }	
+div.RTE.Word10	.f_title 		>div:after{ content: }	
 
-div.Word10 .rteundo{background-position:-81px -140px;}
-div.Word10 .rteunderline{background-position:-101px -140px;}
-div.Word10 .rtethemefont{background-position:-121px -140px;}
-div.Word10 .rtesuperscript{background-position:-141px -140px;}
-div.Word10 .rtesubscript{background-position:0px -159px;}
-div.Word10 .rtestyleset{background-position:-20px -159px;}
-div.Word10 .rtestyle{background-position:-40px -159px;}
-div.Word10 .rtestrikethrough{background-position:-60px -159px;}
-div.Word10 .rtesort{background-position:-80px -159px;}
-div.Word10 .rteselect{background-position:-100px -159px;}
-div.Word10 .rtesave32{background-position:-120px -159px;}
-div.Word10 .rtereplace{background-position:-140px -159px;}
-div.Word10 .rteremoveformat{background-position:-160px -159px;}
-div.Word10 .rteprintquick{background-position:-180px 0px;}
-div.Word10 .rtepastespecial{background-position:-180px -19px;}
-div.Word10 .rtepastelink{background-position:-180px -38px;}
-div.Word10 .rtepaste{background-position:-180px -57px;}
-div.Word10 .rtepageblank{background-position:-180px -76px;}
-div.Word10 .rteoutdent{background-position:-180px -95px;}
-div.Word10 .rteoptions{background-position:-180px -114px;}
-div.Word10 .rteopen{background-position:-180px -133px;}
-div.Word10 .rtejustifyright{background-position:-180px -152px;}
-div.Word10 .rtejustifyleft{background-position:0px -178px;}
-div.Word10 .rtejustifyfull{background-position:-20px -178px;}
-div.Word10 .rtejustifycenter{background-position:-40px -178px;}
-div.Word10 .rteitalic{background-position:-60px -178px;}
-div.Word10 .rteinvisiblechars{background-position:-80px -178px;}
-div.Word10 .rteinsertunorderedlist{background-position:-100px -178px;}
-div.Word10 .rteinsertorderedlist{background-position:-120px -178px;}
-div.Word10 .rteindent{background-position:-140px -178px;}
-div.Word10 .rteincreasefontsize{background-position:-160px -178px;}
-div.Word10 .rtehilight{background-position:-180px -178px;}
-div.Word10 .rtegoto{background-position:-200px 0px;}
-div.Word10 .rtefontcolor{background-position:-200px -19px;}
-div.Word10 .rtefill{background-position:-200px -38px;}
-div.Word10 .rteexit16{background-position:-200px -57px;}
-div.Word10 .rtedecreasefontsize{background-position:-200px -76px;}
-div.Word10 .rtecut{background-position:-200px -95px;}
-div.Word10 .rtecopyformat{background-position:-200px -114px;}
-div.Word10 .rtecopy{background-position:-200px -133px;}
-div.Word10 .rteborderbottom{background-position:-200px -152px;}
-div.Word10 .rtebold{background-position:-200px -171px;}
-div.Word10 .rtewordtemplate{background-position:0px 0px;width:36px;height:35px;}
-div.Word10 .rteworddocument{background-position:-36px 0px;width:36px;height:35px;}
-div.Word10 .rteword2003doc{background-position:0px -35px;width:36px;height:35px;}
-div.Word10 .rtestylechange{background-position:-36px -35px;width:36px;height:35px;}
-div.Word10 .rtesend{background-position:-72px 0px;width:36px;height:35px;}
-div.Word10 .rtesaveas{background-position:-72px -35px;width:36px;height:35px;}
-div.Word10 .rtesave{background-position:0px -70px;width:36px;height:35px;}
-div.Word10 .rtepublish{background-position:-36px -70px;width:36px;height:35px;}
-div.Word10 .rteprintquick32{background-position:-72px -70px;width:36px;height:35px;}
-div.Word10 .rteprintpreview{background-position:-108px 0px;width:36px;height:35px;}
-div.Word10 .rteprint{background-position:-108px -35px;width:36px;height:35px;}
-div.Word10 .rteprepare{background-position:-108px -70px;width:36px;height:35px;}
-div.Word10 .rtepaste32{background-position:0px -105px;width:36px;height:35px;}
-div.Word10 .rteopen32{background-position:-36px -105px;width:36px;height:35px;}
-div.Word10 .rtenewdocument{background-position:-72px -105px;width:36px;height:35px;}
-div.Word10 .rteinsertpicture{background-position:-108px -105px;width:36px;height:35px;}
-div.Word10 .rtefind{background-position:-144px 0px;width:36px;height:35px;}
-div.Word10 .rteclose32{background-position:-144px -35px;width:36px;height:35px;}
-div.Word10 .rteaddons{background-position:-144px -70px;width:36px;height:35px;}
-div.Word10 .rtetexteffect{background-position:-144px -105px;width:27px;height:19px;}
-div.Word10 .rteparagraphspacing{background-position:0px -140px;width:27px;height:19px;}
-div.Word10 .rtemultilevellist{background-position:-27px -140px;width:27px;height:19px;}
-div.Word10 .rtechangecase{background-position:-54px -140px;width:27px;height:19px;}
+div.RTE.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
+div.RTE.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
+div.RTE.Word10	.f_comic:after { content:'Comic (Body)';   font-family:Comic Sans; }
+
+div.RTE.Word10 .rteundo{background-position:-81px -140px;}
+div.RTE.Word10 .rteunderline{background-position:-101px -140px;}
+div.RTE.Word10 .rtethemefont{background-position:-121px -140px;}
+div.RTE.Word10 .rtesuperscript{background-position:-141px -140px;}
+div.RTE.Word10 .rtesubscript{background-position:0px -159px;}
+div.RTE.Word10 .rtestyleset{background-position:-20px -159px;}
+div.RTE.Word10 .rtestyle{background-position:-40px -159px;}
+div.RTE.Word10 .rtestrikethrough{background-position:-60px -159px;}
+div.RTE.Word10 .rtesort{background-position:-80px -159px;}
+div.RTE.Word10 .rteselect{background-position:-100px -159px;}
+div.RTE.Word10 .rtesave32{background-position:-120px -159px;}
+div.RTE.Word10 .rtereplace{background-position:-140px -159px;}
+div.RTE.Word10 .rteremoveformat{background-position:-160px -159px;}
+div.RTE.Word10 .rteprintquick{background-position:-180px 0px;}
+div.RTE.Word10 .rtepastespecial{background-position:-180px -19px;}
+div.RTE.Word10 .rtepastelink{background-position:-180px -38px;}
+div.RTE.Word10 .rtepaste{background-position:-180px -57px;}
+div.RTE.Word10 .rtepageblank{background-position:-180px -76px;}
+div.RTE.Word10 .rteoutdent{background-position:-180px -95px;}
+div.RTE.Word10 .rteoptions{background-position:-180px -114px;}
+div.RTE.Word10 .rteopen{background-position:-180px -133px;}
+div.RTE.Word10 .rtejustifyright{background-position:-180px -152px;}
+div.RTE.Word10 .rtejustifyleft{background-position:0px -178px;}
+div.RTE.Word10 .rtejustifyfull{background-position:-20px -178px;}
+div.RTE.Word10 .rtejustifycenter{background-position:-40px -178px;}
+div.RTE.Word10 .rteitalic{background-position:-60px -178px;}
+div.RTE.Word10 .rteinvisiblechars{background-position:-80px -178px;}
+div.RTE.Word10 .rteinsertunorderedlist{background-position:-100px -178px;}
+div.RTE.Word10 .rteinsertorderedlist{background-position:-120px -178px;}
+div.RTE.Word10 .rteindent{background-position:-140px -178px;}
+div.RTE.Word10 .rteincreasefontsize{background-position:-160px -178px;}
+div.RTE.Word10 .rtehilight{background-position:-180px -178px;}
+div.RTE.Word10 .rtegoto{background-position:-200px 0px;}
+div.RTE.Word10 .rtefontcolor{background-position:-200px -19px;}
+div.RTE.Word10 .rtefill{background-position:-200px -38px;}
+div.RTE.Word10 .rteexit16{background-position:-200px -57px;}
+div.RTE.Word10 .rtedecreasefontsize{background-position:-200px -76px;}
+div.RTE.Word10 .rtecut{background-position:-200px -95px;}
+div.RTE.Word10 .rtecopyformat{background-position:-200px -114px;}
+div.RTE.Word10 .rtecopy{background-position:-200px -133px;}
+div.RTE.Word10 .rteborderbottom{background-position:-200px -152px;}
+div.RTE.Word10 .rtebold{background-position:-200px -171px;}
+div.RTE.Word10 .rtewordtemplate{background-position:0px 0px;width:36px;height:35px;}
+div.RTE.Word10 .rteworddocument{background-position:-36px 0px;width:36px;height:35px;}
+div.RTE.Word10 .rteword2003doc{background-position:0px -35px;width:36px;height:35px;}
+div.RTE.Word10 .rtestylechange{background-position:-36px -35px;width:36px;height:35px;}
+div.RTE.Word10 .rtesend{background-position:-72px 0px;width:36px;height:35px;}
+div.RTE.Word10 .rtesaveas{background-position:-72px -35px;width:36px;height:35px;}
+div.RTE.Word10 .rtesave{background-position:0px -70px;width:36px;height:35px;}
+div.RTE.Word10 .rtepublish{background-position:-36px -70px;width:36px;height:35px;}
+div.RTE.Word10 .rteprintquick32{background-position:-72px -70px;width:36px;height:35px;}
+div.RTE.Word10 .rteprintpreview{background-position:-108px 0px;width:36px;height:35px;}
+div.RTE.Word10 .rteprint{background-position:-108px -35px;width:36px;height:35px;}
+div.RTE.Word10 .rteprepare{background-position:-108px -70px;width:36px;height:35px;}
+div.RTE.Word10 .rtepaste32{background-position:0px -105px;width:36px;height:35px;}
+div.RTE.Word10 .rteopen32{background-position:-36px -105px;width:36px;height:35px;}
+div.RTE.Word10 .rtenewdocument{background-position:-72px -105px;width:36px;height:35px;}
+div.RTE.Word10 .rteinsertpicture{background-position:-108px -105px;width:36px;height:35px;}
+div.RTE.Word10 .rtefind{background-position:-144px 0px;width:36px;height:35px;}
+div.RTE.Word10 .rteclose32{background-position:-144px -35px;width:36px;height:35px;}
+div.RTE.Word10 .rteaddons{background-position:-144px -70px;width:36px;height:35px;}
+div.RTE.Word10 .rtetexteffect{background-position:-144px -105px;width:27px;height:19px;}
+div.RTE.Word10 .rteparagraphspacing{background-position:0px -140px;width:27px;height:19px;}
+div.RTE.Word10 .rtemultilevellist{background-position:-27px -140px;width:27px;height:19px;}
+div.RTE.Word10 .rtechangecase{background-position:-54px -140px;width:27px;height:19px;}
