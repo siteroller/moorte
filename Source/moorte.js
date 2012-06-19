@@ -744,7 +744,7 @@ MooRTE.Elements =
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteClipGroup:[div:[paste,cut,copy,formatpainter]]\
+   						'div.rteClipGroup:[div:[paste32,cut,copy,formatPainter]]\
    						,div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase\
    							,span.divide,removeformat,span.divide,bold,italic,span.flyout:underline,strikethrough\
    							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontcolor]]\
@@ -829,6 +829,7 @@ MooRTE.Elements =
 									: MooRTE.Utilities.exec(action); 
 							}
 						 }
+						 ,paste32:{} 
    , save			:{ img:27
 						 , src:'http://siteroller.net/test/save.php'
 						 , onClick:function(){
@@ -1006,7 +1007,7 @@ MooRTE.Elements =
 					 }
 	, fontdropdown:{ tag:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
 
-	, changecase:	{ img: 23, 'class':'flyout', onClick: 
+	, changecase:	{ img: 23, onClick: 
 							{tabs:
 								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
@@ -1049,7 +1050,8 @@ MooRTE.Elements =
 	, paragraphspacing:	{}				
 	, borderbottom:	{}				
 	, stylechange:	{}				
-	, insertpicture:{}				
+	, insertpicture:{}
+	, formatPainter:{}				
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
