@@ -726,8 +726,8 @@ Elements.implement({moorte:MooRTE.extensions});
 
 MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
 	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
-   	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
-   	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
+	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
+	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
  	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
 	, RibbonOpts	:{ place:'Ribbons'}
 	}
@@ -737,22 +737,28 @@ MooRTE.Elements =
    { Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,onClick:'onLoad'}
    , File			:{text:'File'  , 'class':'rteText rteFile', onClick:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
    , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
-   , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
+ //  , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
 	// Word 10 Groups.
 	, HomeTab:		{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase\
+   						'div.rteClipGroup:[div:[paste,cut,copy,formatpainter]]\
+   						,div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase\
    							,span.divide,removeformat,span.divide,bold,italic,span.flyout:underline,strikethrough\
    							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontcolor]]\
-			 				,div.rteParaGroup:[div:[ULists:insertunorderedlist,OLists:insertorderedlist,indent,outdent,justifyleft,justifycenter,justifyright,justifyfull]]\
-			 				,div.rteStylGroup:[div:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div]]'
+			 				,div.rteParaGroup:[div:[ULists:insertunorderedlist,OLists:insertorderedlist,multilevellist\
+			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisiblechars,justifyleft,justifycenter\
+			 					,justifyright,justifyfull,span.divide,paragraphspacing,span.divide,fill,borderbottom]]\
+			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],stylechange]]\
+			 				,div.rteEditGroup:[div:[find,replace,select]]'
 						}
-	, FileTab		:{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon	:{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
-						    
+	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
+	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
+	, InsertRibbon:{ tag:'div', contains:'div.rteFileGroup:[div:[insertpicture]]' }
+
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists_old		:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
@@ -1037,6 +1043,13 @@ MooRTE.Elements =
 	, style: {}				
 	, hilight:		{}
 	, fontcolor:	{}				
+	, multilevellist:	{}			
+	, fill:	{}			
+	, invisiblechars:	{}				
+	, paragraphspacing:	{}				
+	, borderbottom:	{}				
+	, stylechange:	{}				
+	, insertpicture:{}				
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
