@@ -20,27 +20,25 @@ div.RTE.Word07	{  background-color:#B9D2F8;
 					background-image:-ms-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);
 					background-image:-moz-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); 
 					background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); }
+div.RTE.Word07	.rteTop{ background-color:#fefefe; }
+
 div.RTE.Word10	{ left:0; bottom:0; width:100%; }
-div.RTE.Word10	span { height:20px; margin:1px; display:inline-block; width:auto;}
-div.RTE.Word10	input{ height:20px; width:100px; }
-div.RTE.Word10	a    { display:inline-block;}
+div.RTE.Word10	a,
+div.RTE.Word10	span { display:inline-block; }
+div.RTE.Word10	input{ height:20px; border:1px solid grey;}
 
 /* RteTop: Top Row */
-div.RTE.Word10	.rteTop{ background-color:#fefefe; background-color:rgba(254,254,254,0.8); }
-div.RTE.Word10	.rteTop>a{ margin:2px; }
-div.RTE.Word10	.rteTop>a:hover, 
-div.RTE.Word10	.rteTop>a.rteSelected:hover,
-/*div.RTE.Word10	>div.rteRibbons>div a.rteSelected:hover,*/
-div.RTE.Word10	.rteRibbons>div a:hover{ border:1px solid black; background-color:#FFB874;
+div.RTE.Word10	.rteTop{ background-color:rgba(254,254,254,0.8); }
+div.RTE.Word10	div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
+div.RTE.Word10	.rteTop a,
+div.RTE.Word10	.rteRibbons a{ margin:3px 0; border:1px transparent solid; border-radius:3px; vertical-align:top;  
+					height:19px; width:20px; background-image:url('images/Word10.png'); text-decoration:none; }
+div.RTE.Word10	.rteTop a:hover,
+div.RTE.Word10	.rteRibbons a:hover{ border-color:black; background-color:#FFB874;
 					background-image:url('images/Word10.png'), linear-gradient(top,#ffe387,#fff292);
 					background-image:url('images/Word10.png'), -ms-linear-gradient(top,#ffe387,#fff292);
 					background-image:url('images/Word10.png'), -moz-linear-gradient(top,#ffe387,#fff292);
 					background-image:url('images/Word10.png'), -webkit-linear-gradient(top,#ffe387,#fff292)}
-div.RTE.Word10	.rteTop>a.rteSelected,
-div.RTE.Word10	.rteRibbons>div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
-div.RTE.Word10	.rteTop>a,
-div.RTE.Word10	.rteRibbons a{ margin:3px 0; border:1px transparent solid; text-decoration:none; vertical-align:top;  
-					border-radius:3px; height:19px; width:20px; background-image:url('images/Word10.png'); }
 
 /* RteTabs: Second Row, the tabs */
 div.RTE.Word10	.rteTabs { overflow:hidden; position:relative; 
@@ -55,7 +53,7 @@ div.RTE.Word10	.rteTabs>a{padding:0 12px; margin:0 2px; vertical-align:top; colo
 div.RTE.Word10	.rteTabs>a:hover,
 div.RTE.Word10	.rteTabs>a.rteSelected,
 div.RTE.Word10	.rteTabs>a.rteFileTab{ border:1px solid #aaa; border-bottom:0; padding:0 11px;
-					border-radius:4px 4px 0 0; }
+					border-radius:3px 3px 0 0; }
 div.RTE.Word10	.rteTabs>a.rteFileTab{ box-shadow:none; color:white; 
 					background-image:linear-gradient(top,#418add,#2862ad 40%,#3e87d8); 
 					background-image:-ms-linear-gradient(top,#418add,#2862ad 40%,#3e87d8); 
@@ -67,7 +65,7 @@ div.RTE.Word10	.rteTabs>a.rteSelected:not(.rteFileTab):before,
 div.RTE.Word10	.rteTabs>a.rteSelected:not(.rteFileTab):after { border:1px solid #AAA; 
 					position:absolute; bottom:-1px; width:5px; height:5px; content:' '; }
 div.RTE.Word10	.rteTabs>a.rteSelected:not(.rteFileTab):before{ border-bottom-right-radius:6px; 
-					left:-6px; border-width:0 1px 1px 0; box-shadow: 2px 2px 0 #FFF; }
+					left:-6px; border-width:0 1px 1px 0; box-shadow:2px 2px 0 #FFF; }
 div.RTE.Word10	.rteTabs>a.rteSelected:not(.rteFileTab):after { border-bottom-left-radius:6px; 
 					right:-6px; border-width:0 0 1px 1px; box-shadow:-2px 2px 0 #FFF; }
 div.RTE.Word10	.rteTabs>a,
@@ -75,7 +73,7 @@ div.RTE.Word10	a.rteText{background-image:url(); min-width:38px; text-align:cent
 					text-decoration:none; color:#000; }
 
 /* RteRibbons: Third Row, the content. */
-div.RTE.Word10	.rteRibbons{ border:1px solid #8B9096; border-top:0; background-color:white;
+div.RTE.Word10	.rteRibbons{ border:1px solid #8B9096; border-top:0; background-color:white; text-align:center;
 					background-image:linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
 					background-image:-ms-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
 					background-image:-moz-linear-gradient(bottom,#E5E9ED 0,#FFF 50px);
@@ -86,16 +84,20 @@ div.RTE.Word10	.rteRibbons>div>div{ margin:5px 0; padding:1px; display:table-cel
 div.RTE.Word10	.rteRibbons>div>div:after{ height:25px; display:block; text-align:center; 
 					color:rgb(155,155,155); font:12px/35px Arial; }
 div.RTE.Word10	.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
-div.RTE.Word10	.rteRibbons div.rteClipGroup:after{content:'Clipboard' }
-div.RTE.Word10	.rteRibbons div.rteFontGroup:after{content:'Font' }
-div.RTE.Word10	.rteRibbons div.rteParaGroup:after{content:'Paragraph'}
-div.RTE.Word10	.rteRibbons div.rteFileGroup:after{content:'File'}
-div.RTE.Word10	.rteRibbons div.rteStylGroup:after{content:'Styles'}
-div.RTE.Word10	.rteRibbons div.rteEditGroup:after{content:'Editing'}
+/* RteRibbons: Groups */
+div.RTE.Word10	.rteClipGroup:after{content:'Clipboard' }
+div.RTE.Word10	.rteFontGroup:after{content:'Font' }
+div.RTE.Word10	.rteParaGroup:after{content:'Paragraph'}
+div.RTE.Word10	.rteFileGroup:after{content:'File'}
+div.RTE.Word10	.rteStylGroup:after{content:'Styles'}
+div.RTE.Word10	.rteEditGroup:after{content:'Editing'}
+div.RTE.Word10	.rteClipGroup > div{ width:115px;}
+div.RTE.Word10	.rteFontGroup > div{ width:250px }
+div.RTE.Word10	.rteParaGroup > div{ width:200px }
 
 /* RteFlyouts: Fourth row, flyouts */
-div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3px;}
-div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:4px; width:150px; font:12px Arial;
+div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3x;}
+div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px; font:12px Arial;
 							-moz-box-sizing:border-box; -webkit-box-sizing:border-box; -ms-box-sizing:border-box; box-sizing:border-box }
 div.RTE.Word10	.rteFlyouts > div > div:hover{ border:1px solid #999; }
 div.RTE.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; 
@@ -115,7 +117,12 @@ div.RTE.Word10	.flyout:after {width:0; height:0; line-height:0; border:solid tra
 					border-top:3px solid #000; border-width:3px 3px 0; content:''; position:absolute; right:3px; }
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteClipGroup: */
-div.RTE.Word10	.rteClipGroup a{float:left;}
+div.RTE.Word10	.rteClipGroup a{float:left; width:auto; height:auto; min-height:21px;}
+div.RTE.Word10	.rteClipGroup a:after{ margin-left:25px; color:#000;}
+div.RTE.Word10	a.rtepaste32:after{ content:'Paste'; margin:32px 0 0; display:block; } 
+div.RTE.Word10	.rtecut:after{ content:'Cut'; } 
+div.RTE.Word10	.rtecopy:after{content:'Copy'}
+div.RTE.Word10	.rteformatPainter:after{content:'Format Painter'}
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteStylGroup: */
 div.RTE.Word10	.rteStylGroup>div{position:relative;}
@@ -124,7 +131,7 @@ div.RTE.Word10	.stylesCollection{ border:1px solid #c6cacd; overflow-x:hidden; m
 					cursor:pointer; height:52px; margin-right:50px; }
 div.RTE.Word10	.stylesCollection>div{ border:1px solid #fff; float:left; margin:1px; }
 div.RTE.Word10	.stylesCollection>div.rteSelected,
-div.RTE.Word10	.stylesCollection>div:hover{ border-color: #c2a35c; border-radius:4px; linear-gradient("top", #fff 7px, #ffce65 75%, #fff)  }
+div.RTE.Word10	.stylesCollection>div:hover{ border-color: #c2a35c; border-radius:3px; linear-gradient("top", #fff 7px, #ffce65 75%, #fff)  }
 div.RTE.Word10	.stylesCollection>div>div{ margin:3px; background-color:#fff; padding:3px; width:58px; overflow:hidden; }
 div.RTE.Word10	.stylesCollection>div>div:before{ line-height:24px; content:'Aa Bb Cc Dd Ee Ff Gg'; white-space:nowrap;}
 div.RTE.Word10	.stylesCollection>div>div:after{ text-align:center; display:block; color:#555; font:12px/12px Tahoma;}
@@ -180,11 +187,11 @@ div.RTE.Word10	.f_listParagraph>div:after{ content: }
 div.RTE.Word10	.f_indent		>div:after{ content: }	
 div.RTE.Word10	.f_title 		>div:after{ content: }	
 
-/* [RteRibbons>div.rteHomeRibbon>div.rteFontGroup>div].rtefontdropdown>div: Font Combinations */
-div.RTE.Word10	.rtefontsize,
-div.RTE.Word10	.rtefontdropdown{ width:96px; height:19px; margin:4px 0 0 1px; overflow:hidden; 
-					border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block;}
-div.RTE.Word10	.rtefontsize {width:41px; margin-left:0;}
+/* [RteRibbons>div.rteHomeRibbon>div.rteFontGroup>div].rtefontDropdown>div: Font Combinations */
+div.RTE.Word10	.rtefontSize,
+div.RTE.Word10	.rtefontDropdown{ width:96px; height:19px; margin:3px 0 0 1px; overflow:hidden; 
+					border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block; text-align:left;}
+div.RTE.Word10	.rtefontSize {width:41px; margin-left:0;}
 
 div.RTE.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
 div.RTE.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
@@ -259,6 +266,17 @@ div.RTE.Word10 a.rtedecreaseFontSize{background-position:-225px -190px}
 div.RTE.Word10 a.rteborderBottom{background-position:0px -216px}
 div.RTE.Word10 a.rtebold{background-position:-20px -216px}
 div.RTE.Word10 a.rtearrow{background-position:-196px -140px;width:9px}
+
+
+div.RTE.Word10 a.rtestyleChange{position:absolute;right:5px;top:0;}
+div.RTE.Word10 span.divide{ background-position:-108px -57px;width:5px;height:24px;background-image:url('images/Word10.png') }
+div.RTE.Word10	.rteEditGroup>div>a{display:block;}
+div.RTE.Word10	.rtefontDropdown > input{width:96px;}
+div.RTE.Word10	.rtefontSize>input{width:41px;}
+
+div.RTE.Word10	.rtefind:after{ content:'Find'; } 
+div.RTE.Word10	.rtereplace:after{content:'Replace'}
+div.RTE.Word10	.rteselection:after{content:'Select'}
 
 /*
 div.RTE.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
