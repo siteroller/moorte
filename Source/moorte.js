@@ -451,7 +451,7 @@ MooRTE.Utilities = {
 		return collection[1] ? collection : collection[0];	
 	}
 	, tabs: function(tabGroup){ //[, elements][, options], name, event 
-		
+
 		//MooRTE.btnVals.combine(['onExpand','onHide','onShow','onUpdate']);
 
 		var args = Array.from(arguments)
@@ -752,18 +752,18 @@ MooRTE.Elements =
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteClipGroup:[div:[paste32,cut,copy,formatPainter]]\
+   						'div.rteClipGroup:[div:[paste32,span:[cut,copy,formatPainter]]]\
    						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
    							,span.divide,removeFormat,bold,italic,span.flyout:underline,strikethrough\
    							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontColor]]\
 			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
 			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
-			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,fill,borderBottom]]\
+			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,span.flyout:fill,span.flyout:borderBottom]]\
 			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],styleChange]]\
 			 				,div.rteEditGroup:[div:[find,replace,selection]]'
 						}
 	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
+	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[insertHorizontalRule]]' }
 	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
 	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[coverPage,blankPage,pageBreak]]\
 							,div.rteTablGroup:[div:table]\
@@ -787,32 +787,30 @@ MooRTE.Elements =
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
-   , bold		 	:{ img:1, key:'b', source:'<b>' }
-   , italic		 	:{ img:2, key:'i', source:'<i>' }
-   , underline	 	:{ img:3, key:'u', source:'<u>' }
-   , strikethrough:{ img:4 }
-   , justifyLeft	:{ img:6, title:'Justify Left'  }
-   , justifyFull	:{ img:7, title:'Justify Full'  }
-   , justifyCenter:{ img:8, title:'Justify Center'}
-   , justifyRight	:{ img:9, title:'Justify Right' }
-   , subscript		:{ img:18 }
-   , superscript	:{ img:17 }
-   , outdent		:{ img:11 }
-   , indent			:{ img:12 }
+   , strikethrough:{}
+   , justifyLeft	:{}
+   , justifyFull	:{}
+   , justifyCenter:{}
+   , justifyRight	:{}
+   , subscript		:{}
+   , superscript	:{}
+   , outdent		:{}
+   , indent			:{}
+   , insertHorizontalRule:{}
+   , bold		 	:{ key:'b', source:'<b>' }
+   , italic		 	:{ key:'i', source:'<i>' }
+   , underline	 	:{ key:'u', source:'<u>' }
    , insertOrderedList:  { img:14, title:'Numbered List' }
    , insertUnorderedList:{ img:15, title:'Bulleted List' }
-   , selectall   	:{ img:25, title:'Select All (Ctrl + A)' }
-   , removeFormat	:{ img:26, title:'Clear Formatting' }
-   , undo        	:{ img:31, title:'Undo (Ctrl + Z)' }
-   , redo         :{ img:32, title:'Redo (Ctrl + Y)' }
-   , insertHorizontalRule:{img:56, title:'Insert Horizontal Line'}
-   , cut				:{ img:20
-						 , title:'Cut (Ctrl+X)'
+   , selectall   	:{ title:'Select All (Ctrl + A)' }
+   , removeFormat	:{ title:'Clear Formatting' }
+   , undo        	:{ title:'Undo (Ctrl + Z)' }
+   , redo         :{ title:'Redo (Ctrl + Y)' }
+   , cut				:{ title:'Cut (Ctrl+X)'
 						 , onLoad:MooRTE.Utilities.clipStickyWin
 						 , onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						 }
-   , copy			:{ img:21
-						 , title:'Copy (Ctrl+C)'
+   , copy			:{ title:'Copy (Ctrl+C)'
 						 , onLoad:MooRTE.Utilities.clipStickyWin
 						 ,	onClick: function(action){ 
 								Browser.firefox 
@@ -820,8 +818,7 @@ MooRTE.Elements =
 									: MooRTE.Utilities.exec(action); 
 							}
 						 }
-   , paste			:{ img:22
-						 , title: 'Paste (Ctrl+V)'
+   , paste			:{ title: 'Paste (Ctrl+V)'
 						 , onLoad: MooRTE.Utilities.clipStickyWin //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
 						 , onClick: function(action){ 
 								Browser.firefox || Browser.webkit 
@@ -857,7 +854,7 @@ MooRTE.Elements =
 								).send(Object.toQueryString(content));
 							}
 						 }
-   , 'Html/Text'	:{ img:'26', onClick:['DisplayHTML'] }
+   , 'Html/Text'	:{ onClick:['DisplayHTML'] }
    , DisplayHTML	:{ tag: 'textarea'
 						 , unselectable:'off'
 						 , 'class': 'displayHtml'
@@ -877,8 +874,7 @@ MooRTE.Elements =
 							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							var hex = [c[0],c[2],c[1]].rgbToHex();
 						 }}
-   , hyperlink		:{ img:46
-					   , title:'Create hyperlink'
+   , hyperlink		:{ title:'Create hyperlink'
 					   , onClick:function(){
 								MooRTE.Range.create();
 								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
@@ -975,6 +971,11 @@ MooRTE.Elements =
 						});
 						return s.replace(/\s+/g, ' ');
 					} }
+
+   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', onClick:{flyout:['fontSizeFlyouts']} }
+   , inputFontSize:{ tag: 'input', type:'text', value:12}
+   , fontSizeFlyouts: {tag:'div',onLoad: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
+	
    , decreaseFontSize:{  img:42, 
 						onClick: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
@@ -1010,13 +1011,7 @@ MooRTE.Elements =
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
-   , fontSize:	{ tag:'div' 
-   				, contains:'fontsizeinput'
-   				, onLoad: function(){ // Why is onLoad running BEFORE the contains runs?
-					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); console.log(Element.clone(this)) },this);
-					 	}
-   				, onClick: function(){ console.log(23, this.get('value'))}
-					}
+
 	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
 	, changeCase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
@@ -1026,9 +1021,6 @@ MooRTE.Elements =
 	, wordCase:		{ tag:'div', text:'Word Case'}
 	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
- 	, insertImage:	{}
- 	, foreColor:	{}			
- 	, formatBlock:	{}
  	, backColor		:{ img:43,
 						onLoad:function(){
 							MooRTE.Utilities.assetLoader({
@@ -1043,6 +1035,10 @@ MooRTE.Elements =
 							var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
 						}
 					}
+
+	, insertImage:	{}
+ 	, foreColor:	{}			
+ 	, formatBlock:	{}
 	, style: {}				
 	, hilight:		{}
 	, fontColor:	{}				
@@ -1054,7 +1050,6 @@ MooRTE.Elements =
 	, styleChange:	{}				
 	, insertPicture:{}
 	, formatPainter:{}
-	, fontsizeinput:{title:'', tag:'input', type:'text'}
 	, find: {}
 	, replace: {}
 	, selection: {}
