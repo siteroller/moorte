@@ -727,7 +727,7 @@ Elements.implement({moorte:MooRTE.extensions});
 MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
 	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
 	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
-	, Font : {Toolbar:['start','fontsize','decreasefontsize','increasefontsize','backcolor','forecolor']}
+	, Font : {Toolbar:['start','fontsize','decreaseFontSize','increaseFontSize','backcolor','forecolor']}
  	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
 	, RibbonOpts	:{ place:'Ribbons'}
 	}
@@ -745,67 +745,53 @@ MooRTE.Elements =
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteClipGroup:[div:[paste32,cut,copy,formatPainter]]\
-   						,div.rteFontGroup:[div:[fontdropdown,fontsize,increasefontsize,decreasefontsize,changecase\
-   							,span.divide,removeformat,span.divide,bold,italic,span.flyout:underline,strikethrough\
-   							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontcolor]]\
-			 				,div.rteParaGroup:[div:[ULists:insertunorderedlist,OLists:insertorderedlist,multilevellist\
-			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisiblechars,justifyleft,justifycenter\
-			 					,justifyright,justifyfull,span.divide,paragraphspacing,span.divide,fill,borderbottom]]\
-			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],stylechange]]\
-			 				,div.rteEditGroup:[div:[find,replace,select]]'
+   						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
+   							,span.divide,removeFormat,bold,italic,span.flyout:underline,strikethrough\
+   							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontColor]]\
+			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
+			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
+			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,fill,borderBottom]]\
+			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],styleChange]]\
+			 				,div.rteEditGroup:[div:[find,replace,selection]]'
 						}
 	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
-	, InsertRibbon:{ tag:'div', contains:'div.rteFileGroup:[div:[insertpicture]]' }
+	, InsertRibbon:{ tag:'div', contains:'div.rteFileGroup:[div:[insertPicture]]' }
 
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists_old		:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
-   , OLists: 		{'class':'flyout', tag:'span', onClick: //function(){alert(3)}
-							{tabs:
-								['flyouts', 'div.listFlyouts:[insertorderedlist,insertunorderedlist]'
-								, {place:'Flyouts', events:{show:
-										function(flyout){
-											var pos = this.getCoordinates(this.getParent('.MooRTE'));
-											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-											}
-									}} 
-								]}
-						}
-   , ULists:		{'class':'flyout', tag:'span', onClick: 
-							{tabs:
-								['flyouts', 'div.listFlyouts:[insertorderedlist,insertunorderedlist]'
-								, {place:'Flyouts', events:{show:
-										function(flyout){
-											var pos = this.getCoordinates(this.getParent('.MooRTE'));
-											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-											}
-									}} 
-								]}
-						}
+   , OLists:		{ 'class':'flyout', tag:'span'
+   					, onClick:{flyout:['div.olistFlyouts:[insertorderedlist,insertunorderedlist]']}
+   					}
+   //, changecase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+
+   , ULists:		{ 'class':'flyout', tag:'span'
+   					, onClick: {flyout:['div.ulistFlyouts:[insertorderedlist,insertunorderedlist]']}
+   					}
    , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
-   , bold		 	:{ img:1, shortcut:'b', source:'<b>' }
-   , italic		 	:{ img:2, shortcut:'i', source:'<i>' }
-   , underline	 	:{ img:3, shortcut:'u', source:'<u>' }
+   , bold		 	:{ img:1, key:'b', source:'<b>' }
+   , italic		 	:{ img:2, key:'i', source:'<i>' }
+   , underline	 	:{ img:3, key:'u', source:'<u>' }
    , strikethrough:{ img:4 }
-   , justifyleft	:{ img:6, title:'Justify Left'  }
-   , justifyfull	:{ img:7, title:'Justify Full'  }
-   , justifycenter:{ img:8, title:'Justify Center'}
-   , justifyright	:{ img:9, title:'Justify Right' }
+   , justifyLeft	:{ img:6, title:'Justify Left'  }
+   , justifyFull	:{ img:7, title:'Justify Full'  }
+   , justifyCenter:{ img:8, title:'Justify Center'}
+   , justifyRight	:{ img:9, title:'Justify Right' }
    , subscript		:{ img:18 }
    , superscript	:{ img:17 }
    , outdent		:{ img:11 }
    , indent			:{ img:12 }
-   , insertorderedlist:  { img:14, title:'Numbered List' }
-   , insertunorderedlist:{ img:15, title:'Bulleted List' }
+   , insertOrderedList:  { img:14, title:'Numbered List' }
+   , insertUnorderedList:{ img:15, title:'Bulleted List' }
    , selectall   	:{ img:25, title:'Select All (Ctrl + A)' }
-   , removeformat	:{ img:26, title:'Clear Formatting' }
+   , removeFormat	:{ img:26, title:'Clear Formatting' }
    , undo        	:{ img:31, title:'Undo (Ctrl + Z)' }
-   , redo         :{ img:32, title:'Redo (Ctrl+Y)' }
-   , inserthorizontalrule:{img:56, title:'Insert Horizontal Line'}
+   , redo         :{ img:32, title:'Redo (Ctrl + Y)' }
+   , insertHorizontalRule:{img:56, title:'Insert Horizontal Line'}
    , cut				:{ img:20
 						 , title:'Cut (Ctrl+X)'
 						 , onLoad:MooRTE.Utilities.clipStickyWin
@@ -964,7 +950,7 @@ MooRTE.Elements =
 						});
 						return s.replace(/\s+/g, ' ');
 					} }
-   , decreasefontsize:{  img:42, 
+   , decreaseFontSize:{  img:42, 
 						onClick: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
 						}()
@@ -994,20 +980,18 @@ MooRTE.Elements =
 								*/
 								//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
 					}
-   , increasefontsize:{	img:41, 
+   , increaseFontSize:{	img:41, 
 						onClick: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
-   , fontsize		:{ tag:'div'
    					 , onLoad: function(){
    					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this)
    					 	}
    					 , onClick: function(){ console.log(this.get('value'))}
 					 }
-	, fontdropdown:{ tag:'div', contains:'div.f_calibri,div.f_tahoma,div.f_comic'}
+   , fontSize:	{ tag:'div' 
 
-	, changecase:	{ img: 23, onClick: 
 							{tabs:
 								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
@@ -1018,16 +1002,17 @@ MooRTE.Elements =
 									}} 
 								]}
 						}
+	, changeCase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
 	, uppercase:	{ tag:'div', text:'UPPERCASE'}
-	, wordcase:		{ tag:'div', text:'Word Case'}
+	, wordCase:		{ tag:'div', text:'Word Case'}
 	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
- 	, insertimage:	{}
- 	, forecolor:	{}			
- 	, formatblock:	{}
- 	, backcolor		:{ img:43,
+ 	, insertImage:	{}
+ 	, foreColor:	{}			
+ 	, formatBlock:	{}
+ 	, backColor		:{ img:43,
 						onLoad:function(){
 							MooRTE.Utilities.assetLoader({
 								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
@@ -1043,15 +1028,20 @@ MooRTE.Elements =
 					}
 	, style: {}				
 	, hilight:		{}
-	, fontcolor:	{}				
-	, multilevellist:	{}			
+	, fontColor:	{}				
+	, multiLevelList:	{}			
 	, fill:	{}			
-	, invisiblechars:	{}				
-	, paragraphspacing:	{}				
-	, borderbottom:	{}				
-	, stylechange:	{}				
-	, insertpicture:{}
-	, formatPainter:{}				
+	, invisibleChars:	{}				
+	, paragraphSpacing:	{}				
+	, borderBottom:	{}				
+	, styleChange:	{}				
+	, insertPicture:{}
+	, formatPainter:{}
+	, fontsizeinput:{title:'', tag:'input', type:'text'}
+	, find: {}
+	, replace: {}
+	, selection: {}
+	,sort:{}			
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
