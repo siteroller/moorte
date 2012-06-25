@@ -393,16 +393,15 @@ MooRTE.Utilities = {
 				  , input = 'text,password,checkbox,file,radio'.contains(val.type)  
 				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
 
-				var properties = Object.append({
-					href:'javascript:void(0)',
-					unselectable:(input || textarea ? 'off' : 'on'),
-					title: btn + (val.shortcut ? ' (Ctrl+'+val.shortcut.capitalize()+')':''),	
-				//	styles: val.img ? (isNaN(val.img) 
-				//		? {'background-image':'url('+val.img+')'} : {'background-position':'0 '+(-20*val.img)+'px'}) : {},
-					styles: val.img && isNaN(val.img) ? {'background-image':'url('+val.img+')'} : {},
-					
-					events: {
+				var properties = Object.append(
+					{ href:'javascript:void(0)'
+					, unselectable:(input || textarea ? 'off' : 'on')
+					, title: btn.replace
+							(/([0-9]+|[A-Z][a-z]+|[A-Z]+(?=[A-Z][a-z]|[0-9])|^[a-z]+)/g, "$1 ")
+								.trim().capitalize() + (val.key ? ' (Ctrl+'+ val.key.toUpperCase()+')' : '')		
+					, events: {
 						mousedown: function(e){
+
 							MooRTE.activeBar = bar;
 							var source = bar.retrieve('source')
 							  , fields = bar.retrieve('fields');
