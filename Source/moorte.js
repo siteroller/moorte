@@ -390,7 +390,7 @@ MooRTE.Utilities = {
 				var bgPos = 0
 				  , val = MooRTE.Elements[btn]
 				  , textarea = (val.tag && val.tag.toLowerCase() == 'textarea')
-				  , input = 'text,password,submit,button,checkbox,file,hidden,image,radio,reset'.contains(val.type)
+				  , input = 'text,password,checkbox,file,radio'.contains(val.type)  
 				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
 
 				var properties = Object.append({
