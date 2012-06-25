@@ -486,6 +486,14 @@ MooRTE.Utilities = {
 		if (!MooRTE.Tabs[tabGroup][tabName]) MooRTE.Tabs[tabGroup][tabName] = [];
 		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
+	, flyout: function(content, btn, event){
+		console.log(arguments)
+		var show = function(flyout){
+			var pos = this.getCoordinates(this.getParent('.MooRTE'));
+			flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+			}
+		MooRTE.Utilities.tabs.call(this, 'flyouts', content, {place:'Flyouts', events:{show:show}}, btn, event);
+		}
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) AssetLoader.javascript(['mootools-more.js','StickyWinModalUI.js'], {
@@ -814,7 +822,18 @@ MooRTE.Elements =
 									: MooRTE.Utilities.exec(action); 
 							}
 						 }
-						 ,paste32:{} 
+	,paste32:{} 
+/*		, changecase2:	{ img: 23, onClick:{tabs:
+								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
+								, {place:'Flyouts', events:{show:
+										function(flyout){
+											var pos = this.getCoordinates(this.getParent('.MooRTE'));
+											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+											}
+									}} 
+								]}
+						}
+*/
    , save			:{ img:27
 						 , src:'http://siteroller.net/test/save.php'
 						 , onClick:function(){
@@ -926,12 +945,12 @@ MooRTE.Elements =
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
-   , input			:{ img:59, 
+/*   , input			:{ img:59, 
 						onClick:function(){ MooRTE.Range.insert("<input>") } 
 					}
    , submit			:{ img:59, 
 						onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
-					}
+					}*/
    , cleanWord		:{	onClick: function() {
 						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
 						var rs = [
@@ -984,23 +1003,15 @@ MooRTE.Elements =
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
-   					 , onLoad: function(){
-   					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this)
-   					 	}
-   					 , onClick: function(){ console.log(this.get('value'))}
-					 }
    , fontSize:	{ tag:'div' 
+   				, contains:'fontsizeinput'
+   				, onLoad: function(){ // Why is onLoad running BEFORE the contains runs?
+					 	[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); console.log(Element.clone(this)) },this);
+					 	}
+   				, onClick: function(){ console.log(23, this.get('value'))}
+					}
+	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
-							{tabs:
-								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
-								, {place:'Flyouts', events:{show:
-										function(flyout){
-											var pos = this.getCoordinates(this.getParent('.MooRTE'));
-											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-											}
-									}} 
-								]}
-						}
 	, changeCase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
