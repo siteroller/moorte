@@ -25,7 +25,8 @@ div.RTE.Word07	.rteTop{ background-color:#fefefe; }
 div.RTE.Word10	{ left:0; bottom:0; width:100%; }
 div.RTE.Word10	a,
 div.RTE.Word10	span { display:inline-block; }
-div.RTE.Word10	input{ height:20px; border:1px solid grey;}
+div.RTE.Word10	a{text-decoration:none; font:12px/18px Arial; color:black;}
+div.RTE.Word10	input{ height:19px; border:1px solid grey;}
 
 /* RteTop: Top Row */
 div.RTE.Word10	.rteTop{ background-color:rgba(254,254,254,0.8); }
@@ -81,19 +82,15 @@ div.RTE.Word10	.rteRibbons{ border:1px solid #8B9096; border-top:0; background-c
 div.RTE.Word10	.rteRibbons>div{ padding:5px 0; }
 div.RTE.Word10	.rteRibbons>div>div{ margin:5px 0; padding:1px; display:table-cell; vertical-align:top;
 					border-right:3px solid #d1d1d1; -moz-border-right-colors: #fff #1d1d1 #fff; }
-div.RTE.Word10	.rteRibbons>div>div:after{ height:25px; display:block; text-align:center; 
-					color:rgb(155,155,155); font:12px/35px Arial; }
-div.RTE.Word10	.rteRibbons>div>div>div{ height:56px; overflow:hidden;}
+div.RTE.Word10	.rteRibbons>div>div:after{ height:15px; display:block; text-align:center; 
+					color:rgb(155,155,155); font:12px/15px Arial; }
+div.RTE.Word10	.rteRibbons>div>div>div{ height:65px; overflow:hidden;}
+
 /* RteRibbons: Groups */
-div.RTE.Word10	.rteClipGroup:after{content:'Clipboard' }
-div.RTE.Word10	.rteFontGroup:after{content:'Font' }
-div.RTE.Word10	.rteParaGroup:after{content:'Paragraph'}
-div.RTE.Word10	.rteFileGroup:after{content:'File'}
-div.RTE.Word10	.rteStylGroup:after{content:'Styles'}
-div.RTE.Word10	.rteEditGroup:after{content:'Editing'}
-div.RTE.Word10	.rteClipGroup > div{ width:115px;}
+div.RTE.Word10	.rteClipGroup > div{ width:150px }
 div.RTE.Word10	.rteFontGroup > div{ width:250px }
 div.RTE.Word10	.rteParaGroup > div{ width:200px }
+div.RTE.Word10	.rteEditGroup > div{ width:75px  }
 
 /* RteFlyouts: Fourth row, flyouts */
 div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3x;}
@@ -117,12 +114,11 @@ div.RTE.Word10	.flyout:after {width:0; height:0; line-height:0; border:solid tra
 					border-top:3px solid #000; border-width:3px 3px 0; content:''; position:absolute; right:3px; }
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteClipGroup: */
-div.RTE.Word10	.rteClipGroup a{float:left; width:auto; height:auto; min-height:21px;}
-div.RTE.Word10	.rteClipGroup a:after{ margin-left:25px; color:#000;}
-div.RTE.Word10	a.rtepaste32:after{ content:'Paste'; margin:32px 0 0; display:block; } 
-div.RTE.Word10	.rtecut:after{ content:'Cut'; } 
-div.RTE.Word10	.rtecopy:after{content:'Copy'}
-div.RTE.Word10	.rteformatPainter:after{content:'Format Painter'}
+div.RTE.Word10	.rteClipGroup a,
+div.RTE.Word10	.rteEditGroup a{float:left; width:auto; margin:0; clear:left; }
+div.RTE.Word10	.rteClipGroup a:after,
+div.RTE.Word10	.rteEditGroup a:after{ margin:0 5px 0 25px; }
+div.RTE.Word10	a.rtepaste32:after{ margin:32px 0 0; display:block; } 
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteStylGroup: */
 div.RTE.Word10	.rteStylGroup>div{position:relative;}
@@ -162,6 +158,142 @@ div.RTE.Word10	.f_listParagraph 	{ font: 11pt Calibri; indent-left:1.27 cm; /*Do
 div.RTE.Word10	.f_indent			{ /* Left:  1.65 cm Right:  1.65 cm, Space  Before:  10 pt */}
 div.RTE.Word10	.f_title 			{ color:rgb(23,54,93); font:26pt Cambria border-bottom:solid rgb(23,54,93) 1px;/*seems to be underlined but underline and bottom border are both not selected*/ }
 
+
+
+/* [RteRibbons>div.rteHomeRibbon>div.rteFontGroup>div].rtefontDropdown>div: Font Combinations */
+div.RTE.Word10	.rtefontSize,
+div.RTE.Word10	.rtefontDropdown{ width:96px; height:19px; margin:3px 0 0 1px; overflow:hidden; 
+					border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block; text-align:left;}
+div.RTE.Word10	.rtefontSize {width:41px; margin-left:0;}
+
+div.RTE.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
+div.RTE.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
+div.RTE.Word10	.f_comic:after { content:'Comic (Body)';   font-family:Comic Sans; }
+
+/* [All buttons with a background */
+div.RTE.Word10	a.rtesignatureLine{background-position:0px 0px;}
+div.RTE.Word10	a.rteselection{background-position:0px -19px;}
+div.RTE.Word10	a.rtereplace{background-position:0px -38px;}
+div.RTE.Word10	a.rteobject{background-position:0px -57px;}
+div.RTE.Word10	a.rteformatPainter{background-position:0px -76px;}
+div.RTE.Word10	a.rtefind{background-position:0px -95px;}
+div.RTE.Word10	a.rtedateTime{background-position:-118px 0px;}
+div.RTE.Word10	a.rtecut{background-position:-118px -19px;}
+div.RTE.Word10	a.rtecopy{background-position:-118px -38px;}
+div.RTE.Word10	a.rtetable{background-position:-118px -57px;width:38px;height:35px;}
+div.RTE.Word10	a.rtewordTemplate{background-position:-156px -57px;width:36px;height:35px;}
+div.RTE.Word10	a.rtewordDocument{background-position:-192px -57px;width:36px;height:35px;}
+div.RTE.Word10	a.rtewordArt{background-position:0px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rteword2003Doc{background-position:-36px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rtetextBox{background-position:-72px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rtesymbol{background-position:-108px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rtestyleChange{background-position:-144px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rtesmartArt{background-position:-180px -114px;width:36px;height:35px;}
+div.RTE.Word10	a.rteshapes{background-position:0px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtesend{background-position:-36px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtescreenshot{background-position:-72px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtesaveAs{background-position:-108px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtesave32{background-position:-144px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtequickParts{background-position:-180px -149px;width:36px;height:35px;}
+div.RTE.Word10	a.rtepublish{background-position:0px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rteprintQuick32{background-position:-36px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rteprintPreview{background-position:-72px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rteprint{background-position:-108px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rteprepare{background-position:-144px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rtepaste32{background-position:-180px -184px;width:36px;height:35px;}
+div.RTE.Word10	a.rtepageNumber{background-position:-236px 0px;width:36px;height:35px;}
+div.RTE.Word10	a.rtepageBreak{background-position:-236px -35px;width:36px;height:35px;}
+div.RTE.Word10	a.rteopen32{background-position:-236px -70px;width:36px;height:35px;}
+div.RTE.Word10	a.rtenewDocument{background-position:-236px -105px;width:36px;height:35px;}
+div.RTE.Word10	a.rtepicture{background-position:-236px -140px;width:36px;height:35px;}
+div.RTE.Word10	a.rtehyperlink{background-position:-236px -175px;width:36px;height:35px;}
+div.RTE.Word10	a.rteheader{background-position:0px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rtefooter{background-position:-36px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rtefind32{background-position:-72px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rteequation{background-position:-108px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rtedropCap{background-position:-144px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rtecross-reference{background-position:-180px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rtecoverPage{background-position:-216px -219px;width:36px;height:35px;}
+div.RTE.Word10	a.rteclose32{background-position:-272px 0px;width:36px;height:35px;}
+div.RTE.Word10	a.rteclipArt{background-position:-272px -35px;width:36px;height:35px;}
+div.RTE.Word10	a.rtechart{background-position:-272px -70px;width:36px;height:35px;}
+div.RTE.Word10	a.rtebookmark{background-position:-272px -105px;width:36px;height:35px;}
+div.RTE.Word10	a.rteblankPage{background-position:-272px -140px;width:36px;height:35px;}
+div.RTE.Word10	a.rteaddOns{background-position:-272px -175px;width:36px;height:35px;}
+div.RTE.Word10	a.rtetexteffect{background-position:-272px -210px;width:27px;}
+div.RTE.Word10	a.rteparagraphSpacing{background-position:-272px -229px;width:27px;}
+div.RTE.Word10	a.rtemultiLevelList{background-position:-118px -92px;width:27px;}
+div.RTE.Word10	a.rtechangeCase{background-position:-145px -92px;width:27px;}
+div.RTE.Word10	a.rtedivider{background-position:-228px -57px;width:5px;height:24px;}
+div.RTE.Word10	a.rteundo{background-position:-172px -92px;}
+div.RTE.Word10	a.rteunderline{background-position:-192px -92px;}
+div.RTE.Word10	a.rtethemefont{background-position:-212px -92px;}
+div.RTE.Word10	a.rtesuperscript{background-position:-216px -114px;}
+div.RTE.Word10	a.rtesubscript{background-position:-216px -149px;}
+div.RTE.Word10	a.rtestyleset{background-position:-216px -184px;}
+div.RTE.Word10	a.rtestyle{background-position:-252px -219px;}
+div.RTE.Word10	a.rtestrikethrough{background-position:0px -254px;}
+div.RTE.Word10	a.rtesort{background-position:-20px -254px;}
+div.RTE.Word10	a.rtesave{background-position:-40px -254px;}
+div.RTE.Word10	a.rteremoveFormat{background-position:-60px -254px;}
+div.RTE.Word10	a.rteprintQuick{background-position:-80px -254px;}
+div.RTE.Word10	a.rtepasteSpecial{background-position:-100px -254px;}
+div.RTE.Word10	a.rtepasteLink{background-position:-120px -254px;}
+div.RTE.Word10	a.rtepaste{background-position:-140px -254px;}
+div.RTE.Word10	a.rtepageBlank{background-position:-160px -254px;}
+div.RTE.Word10	a.rteoutdent{background-position:-180px -254px;}
+div.RTE.Word10	a.rteoptions{background-position:-200px -254px;}
+div.RTE.Word10	a.rteopen{background-position:-220px -254px;}
+div.RTE.Word10	a.rtejustifyRight{background-position:-240px -254px;}
+div.RTE.Word10	a.rtejustifyLeft{background-position:-260px -254px;}
+div.RTE.Word10	a.rtejustifyFull{background-position:-280px -254px;}
+div.RTE.Word10	a.rtejustifyCenter{background-position:0px -273px;}
+div.RTE.Word10	a.rteitalic{background-position:-20px -273px;}
+div.RTE.Word10	a.rteinvisibleChars{background-position:-40px -273px;}
+div.RTE.Word10	a.rteinsertUnorderedList{background-position:-60px -273px;}
+div.RTE.Word10	a.rteinsertOrderedList{background-position:-80px -273px;}
+div.RTE.Word10	a.rteindent{background-position:-100px -273px;}
+div.RTE.Word10	a.rteincreaseFontSize{background-position:-120px -273px;}
+div.RTE.Word10	a.rtehilight{background-position:-140px -273px;}
+div.RTE.Word10	a.rtegoto{background-position:-160px -273px;}
+div.RTE.Word10	a.rtefontColor{background-position:-180px -273px;}
+div.RTE.Word10	a.rtefill{background-position:-200px -273px;}
+div.RTE.Word10	a.rteexit16{background-position:-220px -273px;}
+div.RTE.Word10	a.rtedecreaseFontSize{background-position:-240px -273px;}
+div.RTE.Word10	a.rteborderBottom{background-position:-260px -273px;}
+div.RTE.Word10	a.rtebold{background-position:-280px -273px;}
+div.RTE.Word10	a.rtearrow{background-position:-299px -210px;width:9px;}
+
+div.RTE.Word10 a.rtestyleChange{position:absolute;right:5px;top:0;}
+div.RTE.Word10 span.divide{ background-position:-108px -57px;width:5px;height:24px;background-image:url('images/Word10.png') }
+div.RTE.Word10	.rtefontDropdown > input{width:96px;}
+div.RTE.Word10	.rtefontsizeinput {width:41px;}
+
+/* English Language */
+div.RTE.Word10	.rteClipGroup:after{content:'Clipboard' }
+div.RTE.Word10	.rtepaste32:after{ content:'Paste'; } 
+div.RTE.Word10	.rtecut:after{ content:'Cut'; } 
+div.RTE.Word10	.rtecopy:after{content:'Copy'}
+div.RTE.Word10	.rteformatPainter:after{content:'Format Painter'}
+
+div.RTE.Word10	.rteFontGroup:after{content:'Font' }
+div.RTE.Word10	.rteParaGroup:after{content:'Paragraph'}
+div.RTE.Word10	.rteFileGroup:after{content:'File'}
+div.RTE.Word10	.rteStylGroup:after{content:'Styles'}
+
+div.RTE.Word10	.rteEditGroup:after{content:'Editing'}
+div.RTE.Word10	.rtefind:after{ content:'Find'; } 
+div.RTE.Word10	.rtereplace:after{content:'Replace'}
+div.RTE.Word10	.rteselection:after{content:'Select'}
+
+div.RTE.Word10 .rtePageGroup:after{ content:'Pages';}
+div.RTE.Word10 .rteTablGroup:after{ content:'Tables';}
+div.RTE.Word10 .rteIlluGroup:after{ content:'Illustrations';}
+div.RTE.Word10 .rteLinkGroup:after{ content:'Links';}
+div.RTE.Word10 .rteHeadGroup:after{ content:'Header & Footer';}
+div.RTE.Word10 .rteTextGroup:after{ content:'Text';}
+div.RTE.Word10 .rteSymbGroup:after{ content:'Symbols';}
+
 div.RTE.Word10	.f_h1				>div:after{ content: 'Heading 1' }
 div.RTE.Word10	.f_h2				>div:after{ content: 'Heading 2' } 
 div.RTE.Word10	.f_h3				>div:after{ content: 'Heading 3' }
@@ -186,97 +318,6 @@ div.RTE.Word10	.f_bookTitle 	>div:after{ content: }
 div.RTE.Word10	.f_listParagraph>div:after{ content: }
 div.RTE.Word10	.f_indent		>div:after{ content: }	
 div.RTE.Word10	.f_title 		>div:after{ content: }	
-
-/* [RteRibbons>div.rteHomeRibbon>div.rteFontGroup>div].rtefontDropdown>div: Font Combinations */
-div.RTE.Word10	.rtefontSize,
-div.RTE.Word10	.rtefontDropdown{ width:96px; height:19px; margin:3px 0 0 1px; overflow:hidden; 
-					border:1px solid #d4d6d9; font-size:12px; line-height:20px; display:inline-block; text-align:left;}
-div.RTE.Word10	.rtefontSize {width:41px; margin-left:0;}
-
-div.RTE.Word10	.f_calibri:after { content:'Calibri (Body)'; font-family:Calibri; }
-div.RTE.Word10	.f_tahoma:after { content:'Tahoma (Body)';  font-family:Tahoma; }
-div.RTE.Word10	.f_comic:after { content:'Comic (Body)';   font-family:Comic Sans; }
-
-/* [All buttons with a background */
-div.RTE.Word10 a.rteformatPainter{background-position:0px 0px}
-div.RTE.Word10 a.rtecut{background-position:0px -19px}
-div.RTE.Word10 a.rtecopy{background-position:0px -38px}
-div.RTE.Word10 a.rtewordTemplate{background-position:0px -57px;width:36px;height:35px}
-div.RTE.Word10 a.rtewordDocument{background-position:-36px -57px;width:36px;height:35px}
-div.RTE.Word10 a.rteword2003Doc{background-position:-72px -57px;width:36px;height:35px}
-div.RTE.Word10 a.rtestyleChange{background-position:0px -92px;width:36px;height:35px}
-div.RTE.Word10 a.rtesend{background-position:-36px -92px;width:36px;height:35px}
-div.RTE.Word10 a.rtesaveAs{background-position:-72px -92px;width:36px;height:35px}
-div.RTE.Word10 a.rtesave32{background-position:-133px 0px;width:36px;height:35px}
-div.RTE.Word10 a.rtepublish{background-position:-133px -35px;width:36px;height:35px}
-div.RTE.Word10 a.rteprintQuick32{background-position:-133px -70px;width:36px;height:35px}
-div.RTE.Word10 a.rteprintPreview{background-position:0px -127px;width:36px;height:35px}
-div.RTE.Word10 a.rteprint{background-position:-36px -127px;width:36px;height:35px}
-div.RTE.Word10 a.rteprepare{background-position:-72px -127px;width:36px;height:35px}
-div.RTE.Word10 a.rtepaste32{background-position:-108px -127px;width:36px;height:35px}
-div.RTE.Word10 a.rteopen32{background-position:-169px 0px;width:36px;height:35px}
-div.RTE.Word10 a.rtenewDocument{background-position:-169px -35px;width:36px;height:35px}
-div.RTE.Word10 a.rteinsertPicture{background-position:-169px -70px;width:36px;height:35px}
-div.RTE.Word10 a.rtefind32{background-position:-169px -105px;width:36px;height:35px}
-div.RTE.Word10 a.rteclose32{background-position:0px -162px;width:36px;height:35px}
-div.RTE.Word10 a.rteaddOns{background-position:-36px -162px;width:36px;height:35px}
-div.RTE.Word10 a.rtetexteffect{background-position:-169px -140px;width:27px}
-div.RTE.Word10 a.rteparagraphSpacing{background-position:-133px -105px;width:27px}
-div.RTE.Word10 a.rtemultiLevelList{background-position:-72px -162px;width:27px}
-div.RTE.Word10 a.rtechangeCase{background-position:-99px -162px;width:27px}
-div.RTE.Word10 a.rtedivider{background-position:-108px -57px;width:5px;height:24px}
-div.RTE.Word10 a.rteundo{background-position:-113px -57px}
-div.RTE.Word10 a.rteunderline{background-position:-108px -92px}
-div.RTE.Word10 a.rtethemefont{background-position:-144px -127px}
-div.RTE.Word10 a.rtesuperscript{background-position:-126px -162px}
-div.RTE.Word10 a.rtesubscript{background-position:-146px -162px}
-div.RTE.Word10 a.rtestyleset{background-position:-166px -162px}
-div.RTE.Word10 a.rtestyle{background-position:-205px 0px}
-div.RTE.Word10 a.rtestrikethrough{background-position:-205px -19px}
-div.RTE.Word10 a.rtesort{background-position:-205px -38px}
-div.RTE.Word10 a.rteselection{background-position:-205px -57px}
-div.RTE.Word10 a.rtesave{background-position:-205px -76px}
-div.RTE.Word10 a.rtereplace{background-position:-205px -95px}
-div.RTE.Word10 a.rteremoveFormat{background-position:-205px -114px}
-div.RTE.Word10 a.rteprintQuick{background-position:-205px -133px}
-div.RTE.Word10 a.rtepasteSpecial{background-position:-205px -152px}
-div.RTE.Word10 a.rtepasteLink{background-position:-205px -171px}
-div.RTE.Word10 a.rtepaste{background-position:0px -197px}
-div.RTE.Word10 a.rtepageBlank{background-position:-20px -197px}
-div.RTE.Word10 a.rteoutdent{background-position:-40px -197px}
-div.RTE.Word10 a.rteoptions{background-position:-60px -197px}
-div.RTE.Word10 a.rteopen{background-position:-80px -197px}
-div.RTE.Word10 a.rtejustifyRight{background-position:-100px -197px}
-div.RTE.Word10 a.rtejustifyLeft{background-position:-120px -197px}
-div.RTE.Word10 a.rtejustifyFull{background-position:-140px -197px}
-div.RTE.Word10 a.rtejustifyCenter{background-position:-160px -197px}
-div.RTE.Word10 a.rteitalic{background-position:-180px -197px}
-div.RTE.Word10 a.rteinvisibleChars{background-position:-200px -197px}
-div.RTE.Word10 a.rteinsertUnorderedList{background-position:-225px 0px}
-div.RTE.Word10 a.rteinsertOrderedList{background-position:-225px -19px}
-div.RTE.Word10 a.rteindent{background-position:-225px -38px}
-div.RTE.Word10 a.rteincreaseFontSize{background-position:-225px -57px}
-div.RTE.Word10 a.rtehilight{background-position:-225px -76px}
-div.RTE.Word10 a.rtegoto{background-position:-225px -95px}
-div.RTE.Word10 a.rtefontColor{background-position:-225px -114px}
-div.RTE.Word10 a.rtefind{background-position:-225px -133px}
-div.RTE.Word10 a.rtefill{background-position:-225px -152px}
-div.RTE.Word10 a.rteexit16{background-position:-225px -171px}
-div.RTE.Word10 a.rtedecreaseFontSize{background-position:-225px -190px}
-div.RTE.Word10 a.rteborderBottom{background-position:0px -216px}
-div.RTE.Word10 a.rtebold{background-position:-20px -216px}
-div.RTE.Word10 a.rtearrow{background-position:-196px -140px;width:9px}
-
-
-div.RTE.Word10 a.rtestyleChange{position:absolute;right:5px;top:0;}
-div.RTE.Word10 span.divide{ background-position:-108px -57px;width:5px;height:24px;background-image:url('images/Word10.png') }
-div.RTE.Word10	.rteEditGroup>div>a{display:block;}
-div.RTE.Word10	.rtefontDropdown > input{width:96px;}
-div.RTE.Word10	.rtefontSize>input{width:41px;}
-
-div.RTE.Word10	.rtefind:after{ content:'Find'; } 
-div.RTE.Word10	.rtereplace:after{content:'Replace'}
-div.RTE.Word10	.rteselection:after{content:'Select'}
 
 /*
 div.RTE.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}

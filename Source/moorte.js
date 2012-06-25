@@ -765,7 +765,13 @@ MooRTE.Elements =
 	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[superscript]]' }
 	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
-	, InsertRibbon:{ tag:'div', contains:'div.rteFileGroup:[div:[insertPicture]]' }
+	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[coverPage,blankPage,pageBreak]]\
+							,div.rteTablGroup:[div:table]\
+							,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
+							,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
+							,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
+							,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
+							,div.rteSymbGroup:[div:[equation,symbol]]' }
 
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -1052,7 +1058,33 @@ MooRTE.Elements =
 	, find: {}
 	, replace: {}
 	, selection: {}
-	,sort:{}			
+	, sort:{}
+	, coverPage:{}
+	, blankPage:{}
+	, pageBreak:{}
+	, table:{}
+	, picture:{}
+	, clipArt:{}
+	, shapes:{}
+	, smartArt:{}
+	, chart:{}
+	, screenshot:{}
+	, hyperlink:{}
+	, bookmark:{}
+	, 'cross-reference':{}
+	, header:{}
+	, footer:{}
+	, pageNumber:{}
+	, textBox:{}
+	, quickParts:{}
+	, wordArt:{}
+	, dropCap:{}
+	, signatureLine:{}
+	, dateTime:{}
+	, object:{}
+	, equation:{}
+	, symbol:{}
+
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
