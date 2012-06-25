@@ -436,7 +436,6 @@ MooRTE.Utilities = {
 							.test(btn) ? 'value' : (state ? 'state' : 'custom')
 					].push([btn, e, val.onUpdate]);
 				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
-				MooRTE.Utilities.eventHandler('onLoad', e, btn);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
 
@@ -445,6 +444,8 @@ MooRTE.Utilities = {
 				MooRTE.Utilities.addElements(sub, e, options.inherit ? options : {});
 			e.removeClass('rteHide');
 			collection.push(e);
+
+			if (!newEl) MooRTE.Utilities.eventHandler('onLoad', e, btn);
 		});
 		
 		return collection[1] ? collection : collection[0];	
