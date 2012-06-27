@@ -335,7 +335,7 @@ MooRTE.Utilities = {
 		}
 	}
 	, addElements: function(elements, place, options){
-		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','onClick','img','onLoad','source','contains']);
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','click','img','onLoad','source','contains']);
 		if (!place) place = MooRTE.activeBar.getFirst();
 		else if (Type.isArray(place)){
 			var relative = place[1]; 
@@ -413,9 +413,9 @@ MooRTE.Utilities = {
 								(MooRTE.activeField = fields[0]).focus();
 
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-							!val.onClick && !source && (!val.tag || val.tag == 'a')
+							!val.click && !source && (!val.tag || val.tag == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)
-								: MooRTE.Utilities.eventHandler(source || 'onClick', this, btn);
+								: MooRTE.Utilities.eventHandler(source || 'click', this, btn);
 						}
 					}
 				}, val);
@@ -741,14 +741,14 @@ MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE
 	
 MooRTE.Elements =
 	// TabGroup Triggers. Samples, these can be created dynamically or manually.
-   { Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,onClick:'onLoad'}
-   , File			:{text:'File'  , 'class':'rteText rteFile', onClick:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
-   , Font			:{text:'Font'  , 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
- //  , Insert			:{text:'Insert', 'class':'rteText', onClick:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
-   , View			:{text:'Views' , 'class':'rteText', onClick:{tabs: {Toolbar:['start','Html/Text']}} }
+   { Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'onLoad'}
+   , File			:{text:'File'  , 'class':'rteText rteFile', click:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
+   , Font			:{text:'Font'  , 'class':'rteText', click:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
+ //  , Insert			:{text:'Insert', 'class':'rteText', click:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
+   , View			:{text:'Views' , 'class':'rteText', click:{tabs: {Toolbar:['start','Html/Text']}} }
 	// Word 10 Groups.
 	, HomeTab:		{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
-   					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
+   					, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
@@ -761,9 +761,9 @@ MooRTE.Elements =
 			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],span.menus:[changeStyles]]]\
 			 				,div.rteEditGroup:[div:[find,replace,selection]]'
 						}
-	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+	, FileTab:		{ text:'File', click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[insertHorizontalRule]]' }
-	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
+	, InsertTab:	{ text:'Insert', click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
 	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[span.menus:[coverPage],blankPage,pageBreak]]\
 							,div.rteTablGroup:[div:[span.menus:table]]\
 							,div.rteIlluGroup:[div:[picture,clipArt,span.menus:[shapes],smartArt,chart,span.menus:[screenshot]]]\
@@ -776,12 +776,12 @@ MooRTE.Elements =
    , Justify		:{'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
    , Lists_old		:{'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
    , OLists:		{ 'class':'flyout', tag:'span'
-   					, onClick:{flyout:['div.olistFlyouts:[insertorderedlist,insertunorderedlist]']}
+   					, click:{flyout:['div.olistFlyouts:[insertorderedlist,insertunorderedlist]']}
    					}
-   //, changecase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+   //, changecase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 
    , ULists:		{ 'class':'flyout', tag:'span'
-   					, onClick: {flyout:['div.ulistFlyouts:[insertorderedlist,insertunorderedlist]']}
+   					, click: {flyout:['div.ulistFlyouts:[insertorderedlist,insertunorderedlist]']}
    					}
    , Indents		:{'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
@@ -807,11 +807,11 @@ MooRTE.Elements =
    , redo         :{ title:'Redo (Ctrl + Y)' }
    , cut				:{ title:'Cut (Ctrl+X)'
 						 , onLoad:MooRTE.Utilities.clipStickyWin
-						 , onClick:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+						 , click:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						 }
    , copy			:{ title:'Copy (Ctrl+C)'
 						 , onLoad:MooRTE.Utilities.clipStickyWin
-						 ,	onClick: function(action){ 
+						 ,	click: function(action){ 
 								Browser.firefox 
 									? MooRTE.Elements.clipPop.show() 
 									: MooRTE.Utilities.exec(action); 
@@ -819,14 +819,14 @@ MooRTE.Elements =
 						 }
    , paste			:{ title: 'Paste (Ctrl+V)'
 						 , onLoad: MooRTE.Utilities.clipStickyWin //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
-						 , onClick: function(action){ 
+						 , click: function(action){ 
 								Browser.firefox || Browser.webkit 
 									? MooRTE.Elements.clipPop.show() 
 									: MooRTE.Utilities.exec(action); 
 							}
 						 }
 	, paste32:{ 'class':'bigIcons', title:'Paste' } 
-/*		, changecase2:	{ onClick:{tabs:
+/*		, changecase2:	{ click:{tabs:
 								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
 										function(flyout){
@@ -838,7 +838,7 @@ MooRTE.Elements =
 						}
 */
    , save			:{ src:'http://siteroller.net/test/save.php'
-						 , onClick:function(){
+						 , click:function(){
 								var content = { 'page': window.location.pathname }
 								  , next = 0; 
 								content.content = []; 
@@ -852,7 +852,7 @@ MooRTE.Elements =
 								).send(Object.toQueryString(content));
 							}
 						 }
-   , 'Html/Text'	:{ onClick:['DisplayHTML'] }
+   , 'Html/Text'	:{ click:['DisplayHTML'] }
    , DisplayHTML	:{ tag: 'textarea'
 						 , unselectable:'off'
 						 , 'class': 'displayHtml'
@@ -863,7 +863,7 @@ MooRTE.Elements =
 								this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
 							}
 						 }
-   , colorpicker	:{ tag:'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', onClick:function(){
+   , colorpicker	:{ tag:'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
 							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
 							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
 							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
@@ -873,7 +873,7 @@ MooRTE.Elements =
 							var hex = [c[0],c[2],c[1]].rgbToHex();
 						 }}
    , hyperlink		:{ title:'Create hyperlink'
-					   , onClick:function(){
+					   , click:function(){
 								MooRTE.Range.create();
 								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
 								MooRTE.Elements.linkPop.show();
@@ -889,7 +889,7 @@ MooRTE.Elements =
 									  , buttons = 
 										[ { text:'cancel' }
 										, { text:'OK'
-										  , onClick: function(){
+										  , click: function(){
 												// if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
 												MooRTE.Range.set();
 												var value = $('popURL').get('value');
@@ -925,9 +925,9 @@ MooRTE.Elements =
 					  }
 					}
 	, stylesCollection:{tag:'div', contains:'div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div'}
-   , blockquote	:{ onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , blockquote	:{ click:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ tag:'span' }
-   , viewSource	:{ onClick:'source', source:function(btn){
+   , viewSource	:{ click:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 						if(this.hasClass('rteSelected')){
 							bar.eliminate('source');
@@ -946,9 +946,9 @@ MooRTE.Elements =
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
-/*   , input:  {onClick:function(){ MooRTE.Range.insert("<input>") } }
-   , submit:   {onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}*/
-   , cleanWord		:{	onClick: function() {
+/*   , input:  {click:function(){ MooRTE.Range.insert("<input>") } }
+   , submit:   {click:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}*/
+   , cleanWord		:{	click: function() {
 						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
 						var rs = [
 							/<!--.+?-->/g,			// Comments
@@ -966,11 +966,11 @@ MooRTE.Elements =
 						return s.replace(/\s+/g, ' ');
 					} }
 
-   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', onClick:{flyout:['fontSizeFlyouts']} }
+   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
    , inputFontSize:{ tag: 'input', type:'text', value:12}
    , fontSizeFlyouts: {tag:'div',onLoad: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
 	
-   , decreaseFontSize:{ onClick: function(){
+   , decreaseFontSize:{ click: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
 						}()
 						/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
@@ -999,14 +999,14 @@ MooRTE.Elements =
 								*/
 								//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
 					}
-   , increaseFontSize:{	onClick: function(){
+   , increaseFontSize:{	click: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
 
 	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
-	, changeCase:	{ onClick:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+	, changeCase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
 	, uppercase:	{ tag:'div', text:'UPPERCASE'}
@@ -1022,7 +1022,7 @@ MooRTE.Elements =
 								}
 							})
 						},
-						onClick: function(){
+						click: function(){
 							var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
 						}
 					}
