@@ -22,18 +22,22 @@ div.RTE.Word07	{  background-color:#B9D2F8;
 					background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); }
 div.RTE.Word07	.rteTop{ background-color:#fefefe; }
 
-div.RTE.Word10	{ left:0; bottom:0; width:100%; }
+div.RTE.Word10	{ font:12px/18px Arial,Helvetica,'MS Sans Serif',Geneva,sans-serif}
 div.RTE.Word10	a,
-div.RTE.Word10	span { display:inline-block; }
-div.RTE.Word10	a{text-decoration:none; font:12px/18px Arial; color:black;}
+div.RTE.Word10	span{ display:inline-block; }
+div.RTE.Word10	a{ text-decoration:none; color:black; vertical-align:top; 
+						font:12px/18px Arial,Helvetica,'MS Sans Serif',Geneva,sans-serif;
+						}
 div.RTE.Word10	input{ height:19px; border:1px solid grey;}
 
 /* RteTop: Top Row */
 div.RTE.Word10	.rteTop{ background-color:rgba(254,254,254,0.8); }
 div.RTE.Word10	div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
+
 div.RTE.Word10	.rteTop a,
-div.RTE.Word10	.rteRibbons a{ margin:3px 0; border:1px transparent solid; border-radius:3px; vertical-align:top;  
-					height:19px; width:20px; background-image:url('images/Word10.png'); text-decoration:none; }
+div.RTE.Word10	.rteRibbons a{ margin:3px 0; border:1px transparent solid; border-radius:3px;  
+					background-image:url('images/Word10.png'); }
+
 div.RTE.Word10	.rteTop a:hover,
 div.RTE.Word10	.rteRibbons a:hover{ border-color:black; background-color:#FFB874;
 					background-image:url('images/Word10.png'), linear-gradient(top,#ffe387,#fff292);
@@ -82,19 +86,22 @@ div.RTE.Word10	.rteRibbons{ border:1px solid #8B9096; border-top:0; background-c
 div.RTE.Word10	.rteRibbons>div{ padding:5px 0; }
 div.RTE.Word10	.rteRibbons>div>div{ margin:5px 0; padding:1px; display:table-cell; vertical-align:top;
 					border-right:3px solid #d1d1d1; -moz-border-right-colors: #fff #1d1d1 #fff; }
-div.RTE.Word10	.rteRibbons>div>div:after{ height:15px; display:block; text-align:center; 
-					color:rgb(155,155,155); font:12px/15px Arial; }
+div.RTE.Word10	.rteRibbons>div>div:after{ height:15px; display:block; text-align:center; color:rgb(155,155,155); }
 div.RTE.Word10	.rteRibbons>div>div>div{ height:65px; overflow:hidden;}
 
-/* RteRibbons: Groups */
-div.RTE.Word10	.rteClipGroup > div{ width:150px }
+/* RteRibbons: Group Widths */
+div.RTE.Word10	.rteClipGroup > div{ width:160px; x:150px }
 div.RTE.Word10	.rteFontGroup > div{ width:250px }
 div.RTE.Word10	.rteParaGroup > div{ width:200px }
 div.RTE.Word10	.rteEditGroup > div{ width:75px  }
+div.RTE.Word10	.rtePageGroup > div{ width:132px  }
+div.RTE.Word10	.rteTablGroup > div{ width:42px  }
+div.RTE.Word10	.rteIlluGroup > div{ width:285px  }
+div.RTE.Word10	.rteLinkGroup > div{ width:202px  }
 
 /* RteFlyouts: Fourth row, flyouts */
 div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3x;}
-div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px; font:12px Arial;
+div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px;
 							-moz-box-sizing:border-box; -webkit-box-sizing:border-box; -ms-box-sizing:border-box; box-sizing:border-box }
 div.RTE.Word10	.rteFlyouts > div > div:hover{ border:1px solid #999; }
 div.RTE.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; 
@@ -104,6 +111,7 @@ div.RTE.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
 /* RteRibbons[>div.rteHomeRibbon div].flyout: Triggers for flyout menus */
 div.RTE.Word10	.flyout{ position:relative; padding-right:10px; vertical-align:top; cursor:pointer; 
 					margin:3px 0; border:1px solid transparent; border-radius:3px; }
+div.RTE.Word10	.menus>span:hover,
 div.RTE.Word10	.flyout:hover{ background-color:#FFB874; border:1px solid;
 					background-image:linear-gradient(top,#ffe387,#fff292);
 					background-image:-ms-linear-gradient(top,#ffe387,#fff292);
@@ -114,15 +122,14 @@ div.RTE.Word10	.flyout:after {width:0; height:0; line-height:0; border:solid tra
 					border-top:3px solid #000; border-width:3px 3px 0; content:''; position:absolute; right:3px; }
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteClipGroup: */
-div.RTE.Word10	.rteClipGroup a,
-div.RTE.Word10	.rteEditGroup a{float:left; width:auto; margin:0; clear:left; }
+div.RTE.Word10	div.rteClipGroup a,
+div.RTE.Word10	div.rteEditGroup a{float:left; width:auto; margin:0; clear:left; }
 div.RTE.Word10	.rteClipGroup a:after,
-div.RTE.Word10	.rteEditGroup a:after{ margin:0 5px 0 25px; }
-div.RTE.Word10	a.rtepaste32:after{ margin:32px 0 0; display:block; } 
+div.RTE.Word10	.rteEditGroup a:after{ margin:0 5px 0 25px; } 
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteStylGroup: */
 div.RTE.Word10	.rteStylGroup>div{position:relative;}
-div.RTE.Word10	.stylesCollection{ border:1px solid #c6cacd; overflow-x:hidden; min-width:100px;
+div.RTE.Word10	.stylesCollection{ border:1px solid #c6cacd; overflow-x:hidden; min-width:100px; max-width:575px;
 					overflow-y:auto; scrollbar-arrow-color: green; overflow: -moz-scrollbars-vertical; 
 					cursor:pointer; height:52px; margin-right:50px; }
 div.RTE.Word10	.stylesCollection>div{ border:1px solid #fff; float:left; margin:1px; }
@@ -158,8 +165,6 @@ div.RTE.Word10	.f_listParagraph 	{ font: 11pt Calibri; indent-left:1.27 cm; /*Do
 div.RTE.Word10	.f_indent			{ /* Left:  1.65 cm Right:  1.65 cm, Space  Before:  10 pt */}
 div.RTE.Word10	.f_title 			{ color:rgb(23,54,93); font:26pt Cambria border-bottom:solid rgb(23,54,93) 1px;/*seems to be underlined but underline and bottom border are both not selected*/ }
 
-
-
 /* [RteRibbons>div.rteHomeRibbon>div.rteFontGroup>div].rtefontDropdown>div: Font Combinations */
 div.RTE.Word10	.rtefontSize,
 div.RTE.Word10	.rtefontDropdown{ width:96px; height:19px; margin:3px 0 0 1px; overflow:hidden; 
@@ -180,51 +185,51 @@ div.RTE.Word10	a.rtefind{background-position:0px -95px;}
 div.RTE.Word10	a.rtedateTime{background-position:-118px 0px;}
 div.RTE.Word10	a.rtecut{background-position:-118px -19px;}
 div.RTE.Word10	a.rtecopy{background-position:-118px -38px;}
-div.RTE.Word10	a.rtetable{background-position:-118px -57px;width:38px;height:35px;}
-div.RTE.Word10	a.rtewordTemplate{background-position:-156px -57px;width:36px;height:35px;}
-div.RTE.Word10	a.rtewordDocument{background-position:-192px -57px;width:36px;height:35px;}
-div.RTE.Word10	a.rtewordArt{background-position:0px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rteword2003Doc{background-position:-36px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rtetextBox{background-position:-72px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rtesymbol{background-position:-108px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rtestyleChange{background-position:-144px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rtesmartArt{background-position:-180px -114px;width:36px;height:35px;}
-div.RTE.Word10	a.rteshapes{background-position:0px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtesend{background-position:-36px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtescreenshot{background-position:-72px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtesaveAs{background-position:-108px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtesave32{background-position:-144px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtequickParts{background-position:-180px -149px;width:36px;height:35px;}
-div.RTE.Word10	a.rtepublish{background-position:0px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rteprintQuick32{background-position:-36px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rteprintPreview{background-position:-72px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rteprint{background-position:-108px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rteprepare{background-position:-144px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rtepaste32{background-position:-180px -184px;width:36px;height:35px;}
-div.RTE.Word10	a.rtepageNumber{background-position:-236px 0px;width:36px;height:35px;}
-div.RTE.Word10	a.rtepageBreak{background-position:-236px -35px;width:36px;height:35px;}
-div.RTE.Word10	a.rteopen32{background-position:-236px -70px;width:36px;height:35px;}
-div.RTE.Word10	a.rtenewDocument{background-position:-236px -105px;width:36px;height:35px;}
-div.RTE.Word10	a.rtepicture{background-position:-236px -140px;width:36px;height:35px;}
-div.RTE.Word10	a.rtehyperlink{background-position:-236px -175px;width:36px;height:35px;}
-div.RTE.Word10	a.rteheader{background-position:0px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rtefooter{background-position:-36px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rtefind32{background-position:-72px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rteequation{background-position:-108px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rtedropCap{background-position:-144px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rtecross-reference{background-position:-180px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rtecoverPage{background-position:-216px -219px;width:36px;height:35px;}
-div.RTE.Word10	a.rteclose32{background-position:-272px 0px;width:36px;height:35px;}
-div.RTE.Word10	a.rteclipArt{background-position:-272px -35px;width:36px;height:35px;}
-div.RTE.Word10	a.rtechart{background-position:-272px -70px;width:36px;height:35px;}
-div.RTE.Word10	a.rtebookmark{background-position:-272px -105px;width:36px;height:35px;}
-div.RTE.Word10	a.rteblankPage{background-position:-272px -140px;width:36px;height:35px;}
-div.RTE.Word10	a.rteaddOns{background-position:-272px -175px;width:36px;height:35px;}
-div.RTE.Word10	a.rtetexteffect{background-position:-272px -210px;width:27px;}
-div.RTE.Word10	a.rteparagraphSpacing{background-position:-272px -229px;width:27px;}
-div.RTE.Word10	a.rtemultiLevelList{background-position:-118px -92px;width:27px;}
-div.RTE.Word10	a.rtechangeCase{background-position:-145px -92px;width:27px;}
-div.RTE.Word10	a.rtedivider{background-position:-228px -57px;width:5px;height:24px;}
+div.RTE.Word10	a.rtetable{background-position:-118px -57px;}
+div.RTE.Word10	a.rtewordTemplate{background-position:-156px -57px;}
+div.RTE.Word10	a.rtewordDocument{background-position:-192px -57px;}
+div.RTE.Word10	a.rtewordArt{background-position:0px -114px;}
+div.RTE.Word10	a.rteword2003Doc{background-position:-36px -114px;}
+div.RTE.Word10	a.rtetextBox{background-position:-72px -114px;}
+div.RTE.Word10	a.rtesymbol{background-position:-108px -114px;}
+div.RTE.Word10	a.rtechangeStyles{background-position:-144px -114px;}
+div.RTE.Word10	a.rtesmartArt{background-position:-180px -114px;}
+div.RTE.Word10	a.rteshapes{background-position:0px -149px;}
+div.RTE.Word10	a.rtesend{background-position:-36px -149px;}
+div.RTE.Word10	a.rtescreenshot{background-position:-72px -149px;}
+div.RTE.Word10	a.rtesaveAs{background-position:-108px -149px;}
+div.RTE.Word10	a.rtesave32{background-position:-144px -149px;}
+div.RTE.Word10	a.rtequickParts{background-position:-180px -149px;}
+div.RTE.Word10	a.rtepublish{background-position:0px -184px;}
+div.RTE.Word10	a.rteprintQuick32{background-position:-36px -184px;}
+div.RTE.Word10	a.rteprintPreview{background-position:-72px -184px;}
+div.RTE.Word10	a.rteprint{background-position:-108px -184px;}
+div.RTE.Word10	a.rteprepare{background-position:-144px -184px;}
+div.RTE.Word10	a.rtepaste32{background-position:-180px -184px;}
+div.RTE.Word10	a.rtepageNumber{background-position:-236px 0px;}
+div.RTE.Word10	a.rtepageBreak{background-position:-236px -35px;}
+div.RTE.Word10	a.rteopen32{background-position:-236px -70px;}
+div.RTE.Word10	a.rtenewDocument{background-position:-236px -105px;}
+div.RTE.Word10	a.rtepicture{background-position:-236px -140px;}
+div.RTE.Word10	a.rtehyperlink{background-position:-236px -175px;}
+div.RTE.Word10	a.rteheader{background-position:0px -219px;}
+div.RTE.Word10	a.rtefooter{background-position:-36px -219px;}
+div.RTE.Word10	a.rtefind32{background-position:-72px -219px;}
+div.RTE.Word10	a.rteequation{background-position:-108px -219px;}
+div.RTE.Word10	a.rtedropCap{background-position:-144px -219px;}
+div.RTE.Word10	a.rtecross-reference{background-position:-180px -219px;}
+div.RTE.Word10	a.rtecoverPage{background-position:-216px -219px;}
+div.RTE.Word10	a.rteclose32{background-position:-272px 0px;}
+div.RTE.Word10	a.rteclipArt{background-position:-272px -35px;}
+div.RTE.Word10	a.rtechart{background-position:-272px -70px;}
+div.RTE.Word10	a.rtebookmark{background-position:-272px -105px;}
+div.RTE.Word10	a.rteblankPage{background-position:-272px -140px;}
+div.RTE.Word10	a.rteaddOns{background-position:-272px -175px;}
+div.RTE.Word10	a.rtetexteffect{background-position:-272px -210px;}
+div.RTE.Word10	a.rteparagraphSpacing{background-position:-272px -229px;}
+div.RTE.Word10	a.rtemultiLevelList{background-position:-118px -92px;}
+div.RTE.Word10	a.rtechangeCase{background-position:-145px -92px;}
+div.RTE.Word10	a.rtedivider{background-position:-228px -57px;}
 div.RTE.Word10	a.rteundo{background-position:-172px -92px;}
 div.RTE.Word10	a.rteunderline{background-position:-192px -92px;}
 div.RTE.Word10	a.rtethemefont{background-position:-212px -92px;}
@@ -262,37 +267,115 @@ div.RTE.Word10	a.rteexit16{background-position:-220px -273px;}
 div.RTE.Word10	a.rtedecreaseFontSize{background-position:-240px -273px;}
 div.RTE.Word10	a.rteborderBottom{background-position:-260px -273px;}
 div.RTE.Word10	a.rtebold{background-position:-280px -273px;}
-div.RTE.Word10	a.rtearrow{background-position:-299px -210px;width:9px;}
+div.RTE.Word10	a.rtearrow{background-position:-299px -210px;}
 
-div.RTE.Word10 a.rtestyleChange{position:absolute;right:5px;top:0;}
+/* Added on bottom till can be reorganized */
+div.RTE.Word10 a.rtechangeStyles{position:absolute;right:5px;top:0;}
 div.RTE.Word10 span.divide{ background-position:-108px -57px;width:5px;height:24px;background-image:url('images/Word10.png') }
 div.RTE.Word10	.rtefontDropdown > input{width:96px;}
 div.RTE.Word10	.rtefontsizeinput {width:41px;}
+div.RTE.Word10	div.rteInsertRibbon a{ width:40px; height:36px; }
+div.RTE.Word10	a.rtearrow{width:9px;}
+div.RTE.Word10	a.rtetexteffect,
+div.RTE.Word10	a.rteparagraphSpacing,
+div.RTE.Word10	a.rtemultiLevelList,
+div.RTE.Word10	a.rtechangeCase{width:27px;}
+div.RTE.Word10	a.rtedivider{width:5px;height:24px;}
+
+div.RTE.Word10	.menus{ width:38px; padding:1px; border:1px solid transparent; vertical-align:top; 
+								cursor:pointer; border-radius:3px; overflow:hidden;}
+div.RTE.Word10	.menus:hover{ border-color:#F5D368; }
+div.RTE.Word10	.menus > *{border:0px !important; width:38px;}
+div.RTE.Word10	.menus>a{ border-radius:3px 3px 0 0 !important; }
+div.RTE.Word10	.menus>span{ border-radius:0 0 3px 3px; margin-top:3px; text-align:center}
+div.RTE.Word10	.menus:hover>span{ outline:solid #F5D368 1px; outline-offset:1px; }
+div.RTE.Word10	.menus>span:after{ width:0; height:0; line-height:0; border:solid transparent 3px;
+						border-top:3px solid #000; border-width:3px 3px 0; content:''; display:block; margin:auto;}
+
+div.RTE.Word10	.rteRibbons a.bigIcons,
+div.RTE.Word10	.rteInsertRibbon a{ width:38px; height:34px; }
+div.RTE.Word10	a.smallIcon,
+div.RTE.Word10	.rteTop a,
+div.RTE.Word10	.rteRibbons a{ height:19px; width:20px; }
 
 /* English Language */
-div.RTE.Word10	.rteClipGroup:after{content:'Clipboard' }
-div.RTE.Word10	.rtepaste32:after{ content:'Paste'; } 
-div.RTE.Word10	.rtecut:after{ content:'Cut'; } 
-div.RTE.Word10	.rtecopy:after{content:'Copy'}
+div.RTE.Word10	.rteClipGroup:after{ content:'Clipboard' } 
+div.RTE.Word10	      .rtecut:after{ content:'Cut' } 
+div.RTE.Word10	     .rtecopy:after{ content:'Copy'}
+div.RTE.Word10	.rtepasteMenu:before{ content:'Paste' }
 div.RTE.Word10	.rteformatPainter:after{content:'Format Painter'}
 
-div.RTE.Word10	.rteFontGroup:after{content:'Font' }
-div.RTE.Word10	.rteParaGroup:after{content:'Paragraph'}
-div.RTE.Word10	.rteFileGroup:after{content:'File'}
-div.RTE.Word10	.rteStylGroup:after{content:'Styles'}
+div.RTE.Word10	.rteFontGroup:after{ content:'Font' }
+div.RTE.Word10	.rteParaGroup:after{ content:'Paragraph'}
+div.RTE.Word10	.rteFileGroup:after{ content:'File'}
+div.RTE.Word10	.rteStylGroup:after{ content:'Styles'}
 
-div.RTE.Word10	.rteEditGroup:after{content:'Editing'}
-div.RTE.Word10	.rtefind:after{ content:'Find'; } 
-div.RTE.Word10	.rtereplace:after{content:'Replace'}
-div.RTE.Word10	.rteselection:after{content:'Select'}
+div.RTE.Word10	.rteEditGroup:after{ content:'Editing'}
+div.RTE.Word10	     .rtefind:after{ content:'Find'; } 
+div.RTE.Word10	  .rtereplace:after{ content:'Replace'}
+div.RTE.Word10	.rteselection:after{ content:'Select'}
 
 div.RTE.Word10 .rtePageGroup:after{ content:'Pages';}
+div.RTE.Word10 .rtecoverPage:after{ content:'Cover Page'}
+div.RTE.Word10 .rteblankPage:after{ content:'Blank Page'}
+div.RTE.Word10 .rtepageBreak:after{ content:'Page Break'}
+
 div.RTE.Word10 .rteTablGroup:after{ content:'Tables';}
+div.RTE.Word10 .rtetable:after{ content:'Table';}
+
 div.RTE.Word10 .rteIlluGroup:after{ content:'Illustrations';}
+div.RTE.Word10 .rtepicture:after{ content:'Picture';}
+div.RTE.Word10 .rteclipArt:after{ content:'Clip Art';}
+div.RTE.Word10 .rteshapes:after{ content:'Shapes';}
+div.RTE.Word10 .rtesmartArt:after{ content:'SmartArt';}
+div.RTE.Word10 .rtechart:after{ content:'Chart';}
+div.RTE.Word10 .rtescreenshot:after{ content:'Screenshot';}
+
 div.RTE.Word10 .rteLinkGroup:after{ content:'Links';}
+div.RTE.Word10 .rtehyperlink:after{ content:'Hyperlink';}
+div.RTE.Word10 .rtebookmark:after{ content:'Bookmark';}
+div.RTE.Word10 .rtecross-reference:after{ content:'Cross-reference';}
+
 div.RTE.Word10 .rteHeadGroup:after{ content:'Header & Footer';}
+div.RTE.Word10 .rteheader:after{ content:'Header';}
+div.RTE.Word10 .rtefooter:after{ content:'Footer';}
+div.RTE.Word10 .rtepageNumber:after{ content:'Page Number';}
+
 div.RTE.Word10 .rteTextGroup:after{ content:'Text';}
+div.RTE.Word10 .rtetextBox:after{ content:'Text Box';}
+div.RTE.Word10 .rtequickParts:after{ content:'Quick Parts';}
+div.RTE.Word10 .rtewordArt:after{ content:'WordArt';}
+div.RTE.Word10 .rtedropCap:after{ content:'Drop Cap';}
+
 div.RTE.Word10 .rteSymbGroup:after{ content:'Symbols';}
+div.RTE.Word10 .rteequation:after{ content:'Equation';}
+div.RTE.Word10 .rtesymbol:after{ content:'Symbol';}
+
+div.RTE.Word10 .coverPage:{}
+div.RTE.Word10 .blankPage:{}
+div.RTE.Word10 .pageBreak:{}
+div.RTE.Word10 .table:{}
+div.RTE.Word10 .picture:{}
+div.RTE.Word10 .clipArt:{}
+div.RTE.Word10 .shapes:{}
+div.RTE.Word10 .smartArt:{}
+div.RTE.Word10 .chart:{}
+div.RTE.Word10 .screenshot:{}
+div.RTE.Word10 .hyperlink:{}
+div.RTE.Word10 .bookmark:{}
+div.RTE.Word10 .cross-reference:{}
+div.RTE.Word10 .header:{}
+div.RTE.Word10 .footer:{}
+div.RTE.Word10 .pageNumber:{}
+div.RTE.Word10 .textBox:{}
+div.RTE.Word10 .quickParts:{}
+div.RTE.Word10 .wordArt:{}
+div.RTE.Word10 .dropCap:{}
+div.RTE.Word10 .signatureLine:{}
+div.RTE.Word10 .dateTime:{}
+div.RTE.Word10 .object:{}
+div.RTE.Word10 .equation:{}
+div.RTE.Word10 .symbol:{}
 
 div.RTE.Word10	.f_h1				>div:after{ content: 'Heading 1' }
 div.RTE.Word10	.f_h2				>div:after{ content: 'Heading 2' } 
@@ -322,5 +405,5 @@ div.RTE.Word10	.f_title 		>div:after{ content: }
 /*
 div.RTE.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
 div.RTE.Word10	.displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
-div.RTE.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }
+div.RTE.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }
 */

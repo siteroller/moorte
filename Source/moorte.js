@@ -752,26 +752,26 @@ MooRTE.Elements =
    					, onClick:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteClipGroup:[div:[paste32,span:[cut,copy,formatPainter]]]\
+   						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
    						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
    							,span.divide,removeFormat,bold,italic,span.flyout:underline,strikethrough\
    							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontColor]]\
 			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
 			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
 			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,span.flyout:fill,span.flyout:borderBottom]]\
-			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],styleChange]]\
+			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],span.menus:[changeStyles]]]\
 			 				,div.rteEditGroup:[div:[find,replace,selection]]'
 						}
 	, FileTab:		{ text:'File', onClick:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[insertHorizontalRule]]' }
 	, InsertTab:	{ text:'Insert', onClick:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
-	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[coverPage,blankPage,pageBreak]]\
-							,div.rteTablGroup:[div:table]\
-							,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
+	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[span.menus:[coverPage],blankPage,pageBreak]]\
+							,div.rteTablGroup:[div:[span.menus:table]]\
+							,div.rteIlluGroup:[div:[picture,clipArt,span.menus:[shapes],smartArt,chart,span.menus:[screenshot]]]\
 							,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
-							,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
-							,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
-							,div.rteSymbGroup:[div:[equation,symbol]]' }
+							,div.rteHeadGroup:[div:[span.menus:[header],span.menus:[footer],span.menus:[pageNumber]]]\
+							,div.rteTextGroup:[div:[span.menus:[textBox],span.menus:[quickParts],span.menus:[wordArt],span.menus:[dropCap],signatureLine,dateTime,object]]\
+							,div.rteSymbGroup:[div:[span.menus:[equation],span.menus:[symbol]]]' }
 
    // Groups (Flyouts)
    , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -826,7 +826,7 @@ MooRTE.Elements =
 									: MooRTE.Utilities.exec(action); 
 							}
 						 }
-	,paste32:{} 
+	, paste32:{ 'class':'bigIcons', title:'Paste' } 
 /*		, changecase2:	{ img: 23, onClick:{tabs:
 								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
@@ -927,6 +927,7 @@ MooRTE.Elements =
 							})
 					  }
 					}
+	, stylesCollection:{tag:'div', contains:'div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div'}
    , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ tag:'span' }
    , viewSource	:{ img:35, onClick:'source', source:function(btn){
@@ -1047,7 +1048,7 @@ MooRTE.Elements =
 	, invisibleChars:	{}				
 	, paragraphSpacing:	{}				
 	, borderBottom:	{}				
-	, styleChange:	{}				
+	, changeStyles:	{'class':'bigIcons'}				
 	, insertPicture:{}
 	, formatPainter:{}
 	, find: {}
@@ -1079,6 +1080,7 @@ MooRTE.Elements =
 	, object:{}
 	, equation:{}
 	, symbol:{}
+	, pasteMenu:{tag:'span'}
 
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
