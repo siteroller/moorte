@@ -387,8 +387,7 @@ MooRTE.Utilities = {
 				 
 			if (newEl) var e = newEl.inject(place, relative);
 			else if (!e || !options.ifExists){
-				var bgPos = 0
-				  , val = MooRTE.Elements[btn]
+				var val = MooRTE.Elements[btn]
 				  , textarea = (val.tag && val.tag.toLowerCase() == 'textarea')
 				  , input = 'text,password,checkbox,file,radio'.contains(val.type)  
 				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
@@ -774,8 +773,8 @@ MooRTE.Elements =
 							,div.rteSymbGroup:[div:[span.menus:[equation],span.menus:[symbol]]]' }
 
    // Groups (Flyouts)
-   , Justify		:{img:06, 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
-   , Lists_old		:{img:14, 'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
+   , Justify		:{'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
+   , Lists_old		:{'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
    , OLists:		{ 'class':'flyout', tag:'span'
    					, onClick:{flyout:['div.olistFlyouts:[insertorderedlist,insertunorderedlist]']}
    					}
@@ -784,7 +783,7 @@ MooRTE.Elements =
    , ULists:		{ 'class':'flyout', tag:'span'
    					, onClick: {flyout:['div.ulistFlyouts:[insertorderedlist,insertunorderedlist]']}
    					}
-   , Indents		:{img:11, 'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
+   , Indents		:{'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
 	                
    // Buttons
    , strikethrough:{}
@@ -800,8 +799,8 @@ MooRTE.Elements =
    , bold		 	:{ key:'b', source:'<b>' }
    , italic		 	:{ key:'i', source:'<i>' }
    , underline	 	:{ key:'u', source:'<u>' }
-   , insertOrderedList:  { img:14, title:'Numbered List' }
-   , insertUnorderedList:{ img:15, title:'Bulleted List' }
+   , insertOrderedList:  { title:'Numbered List' }
+   , insertUnorderedList:{ title:'Bulleted List' }
    , selectall   	:{ title:'Select All (Ctrl + A)' }
    , removeFormat	:{ title:'Clear Formatting' }
    , undo        	:{ title:'Undo (Ctrl + Z)' }
@@ -827,7 +826,7 @@ MooRTE.Elements =
 							}
 						 }
 	, paste32:{ 'class':'bigIcons', title:'Paste' } 
-/*		, changecase2:	{ img: 23, onClick:{tabs:
+/*		, changecase2:	{ onClick:{tabs:
 								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
 								, {place:'Flyouts', events:{show:
 										function(flyout){
@@ -838,8 +837,7 @@ MooRTE.Elements =
 								]}
 						}
 */
-   , save			:{ img:27
-						 , src:'http://siteroller.net/test/save.php'
+   , save			:{ src:'http://siteroller.net/test/save.php'
 						 , onClick:function(){
 								var content = { 'page': window.location.pathname }
 								  , next = 0; 
@@ -905,8 +903,7 @@ MooRTE.Elements =
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload    :{ img: 15
-					, onLoad: function(){
+   , mooupload    :{ onLoad: function(){
 						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
 							onComplete:function(){
 								var uploader = new MooUpload(this,
@@ -928,9 +925,9 @@ MooRTE.Elements =
 					  }
 					}
 	, stylesCollection:{tag:'div', contains:'div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div'}
-   , blockquote	:{ img:59, onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
+   , blockquote	:{ onClick:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ tag:'span' }
-   , viewSource	:{ img:35, onClick:'source', source:function(btn){
+   , viewSource	:{ onClick:'source', source:function(btn){
 						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
 						if(this.hasClass('rteSelected')){
 							bar.eliminate('source');
@@ -949,12 +946,8 @@ MooRTE.Elements =
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
-/*   , input			:{ img:59, 
-						onClick:function(){ MooRTE.Range.insert("<input>") } 
-					}
-   , submit			:{ img:59, 
-						onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }
-					}*/
+/*   , input:  {onClick:function(){ MooRTE.Range.insert("<input>") } }
+   , submit:   {onClick:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}*/
    , cleanWord		:{	onClick: function() {
 						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
 						var rs = [
@@ -977,8 +970,7 @@ MooRTE.Elements =
    , inputFontSize:{ tag: 'input', type:'text', value:12}
    , fontSizeFlyouts: {tag:'div',onLoad: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
 	
-   , decreaseFontSize:{  img:42, 
-						onClick: function(){
+   , decreaseFontSize:{ onClick: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
 						}()
 						/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
@@ -1007,8 +999,7 @@ MooRTE.Elements =
 								*/
 								//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
 					}
-   , increaseFontSize:{	img:41, 
-						onClick: function(){
+   , increaseFontSize:{	onClick: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
 						}()
 					}
@@ -1022,8 +1013,7 @@ MooRTE.Elements =
 	, wordCase:		{ tag:'div', text:'Word Case'}
 	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
- 	, backColor		:{ img:43,
-						onLoad:function(){
+ 	, backColor		:{ onLoad:function(){
 							MooRTE.Utilities.assetLoader({
 								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
 								styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
