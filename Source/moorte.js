@@ -335,7 +335,7 @@ MooRTE.Utilities = {
 		}
 	}
 	, addElements: function(elements, place, options){
-		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','click','img','onLoad','source','contains']);
+		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','click','img','load','source','contains']);
 		if (!place) place = MooRTE.activeBar.getFirst();
 		else if (Type.isArray(place)){
 			var relative = place[1]; 
@@ -444,7 +444,7 @@ MooRTE.Utilities = {
 			e.removeClass('rteHide');
 			collection.push(e);
 
-			if (!newEl) MooRTE.Utilities.eventHandler('onLoad', e, btn);
+			if (!newEl) MooRTE.Utilities.eventHandler('load', e, btn);
 		});
 		
 		return collection[1] ? collection : collection[0];	
@@ -741,16 +741,16 @@ MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE
 	
 MooRTE.Elements =
 	// TabGroup Triggers. Samples, these can be created dynamically or manually.
-   { Main			:{text:'Main'  , 'class':'rteText', onLoad :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'onLoad'}
+   { Main			:{text:'Main'  , 'class':'rteText', load :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'load'}
    , File			:{text:'File'  , 'class':'rteText rteFile', click:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
    , Font			:{text:'Font'  , 'class':'rteText', click:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
  //  , Insert			:{text:'Insert', 'class':'rteText', click:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
    , View			:{text:'Views' , 'class':'rteText', click:{tabs: {Toolbar:['start','Html/Text']}} }
 	// Word 10 Groups.
-	, HomeTab:		{ text:'Home', 'class':'rteSelected', onLoad: {addTab:['RibbonTabs']}
+	, HomeTab:		{ text:'Home', 'class':'rteSelected', load: {addTab:['RibbonTabs']}
    					, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    					}
-   , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+   , HomeRibbon:	{ tag:'div', load:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
    						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
    							,span.divide,removeFormat,bold,italic,span.flyout:[underline,underlineFlyout],strikethrough\
@@ -807,11 +807,11 @@ MooRTE.Elements =
    , undo        	:{ title:'Undo (Ctrl + Z)' }
    , redo         :{ title:'Redo (Ctrl + Y)' }
    , cut				:{ title:'Cut (Ctrl+X)'
-						 , onLoad:MooRTE.Utilities.clipStickyWin
+						 , load:MooRTE.Utilities.clipStickyWin
 						 , click:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
 						 }
    , copy			:{ title:'Copy (Ctrl+C)'
-						 , onLoad:MooRTE.Utilities.clipStickyWin
+						 , load:MooRTE.Utilities.clipStickyWin
 						 ,	click: function(action){ 
 								Browser.firefox 
 									? MooRTE.Elements.clipPop.show() 
@@ -819,7 +819,7 @@ MooRTE.Elements =
 							}
 						 }
    , paste			:{ title: 'Paste (Ctrl+V)'
-						 , onLoad: MooRTE.Utilities.clipStickyWin //onLoad:function() { MooRTE.Utilities.clipStickyWin(1) },
+						 , load: MooRTE.Utilities.clipStickyWin //load:function() { MooRTE.Utilities.clipStickyWin(1) },
 						 , click: function(action){ 
 								Browser.firefox || Browser.webkit 
 									? MooRTE.Elements.clipPop.show() 
@@ -879,7 +879,7 @@ MooRTE.Elements =
 								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
 								MooRTE.Elements.linkPop.show();
 						}
-					   , onLoad: function(){
+					   , load: function(){
 							if (window.Asset) new Asset.javascript('StickyWinModalUI.js', {
 								self: this
 								//, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
@@ -904,7 +904,7 @@ MooRTE.Elements =
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload    :{ onLoad: function(){
+   , mooupload    :{ load: function(){
 						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
 							onComplete:function(){
 								var uploader = new MooUpload(this,
@@ -943,7 +943,7 @@ MooRTE.Elements =
 							} else MooRTE.Utilities.group.apply(this, ['source', btn]);
 						}
 					}}
-   , source			:{ tag:'textarea', 'class':'displayHtml', unselectable:'off', onLoad:function(){ 
+   , source			:{ tag:'textarea', 'class':'displayHtml', unselectable:'off', load:function(){ 
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
@@ -969,7 +969,7 @@ MooRTE.Elements =
 
    , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
    , inputFontSize:{ tag: 'input', type:'text', value:12}
-   , fontSizeFlyouts: {tag:'div',onLoad: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
+   , fontSizeFlyouts: {tag:'div',load: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
 	
    , decreaseFontSize:{ click: function(){
 							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
@@ -1014,7 +1014,7 @@ MooRTE.Elements =
 	, wordCase:		{ tag:'div', text:'Word Case'}
 	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
- 	, backColor		:{ onLoad:function(){
+ 	, backColor		:{ load:function(){
 							MooRTE.Utilities.assetLoader({
 								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
 								styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
