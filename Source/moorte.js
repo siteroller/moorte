@@ -753,7 +753,7 @@ MooRTE.Elements =
    , HomeRibbon:	{ tag:'div', onLoad:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
    						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
-   							,span.divide,removeFormat,bold,italic,span.flyout:underline,strikethrough\
+   							,span.divide,removeFormat,bold,italic,span.flyout:[underline,underlineFlyout],strikethrough\
    							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontColor]]\
 			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
 			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
@@ -764,13 +764,14 @@ MooRTE.Elements =
 	, FileTab:		{ text:'File', click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
 	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[insertHorizontalRule]]' }
 	, InsertTab:	{ text:'Insert', click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
-	, InsertRibbon:{ tag:'div', contains:'div.rtePageGroup:[div:[span.menus:[coverPage],blankPage,pageBreak]]\
-							,div.rteTablGroup:[div:[span.menus:table]]\
-							,div.rteIlluGroup:[div:[picture,clipArt,span.menus:[shapes],smartArt,chart,span.menus:[screenshot]]]\
+	, InsertRibbon:{ tag:'div', contains:
+							'div.rtePageGroup:[div:[coverPage,blankPage,pageBreak]]\
+							,div.rteTablGroup:[div:table]\
+							,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
 							,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
-							,div.rteHeadGroup:[div:[span.menus:[header],span.menus:[footer],span.menus:[pageNumber]]]\
-							,div.rteTextGroup:[div:[span.menus:[textBox],span.menus:[quickParts],span.menus:[wordArt],span.menus:[dropCap],signatureLine,dateTime,object]]\
-							,div.rteSymbGroup:[div:[span.menus:[equation],span.menus:[symbol]]]' }
+							,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
+							,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
+							,div.rteSymbGroup:[div:[span.menus:[equation,equationMenu],symbol]]' }
 
    // Groups (Flyouts)
    , Justify		:{'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
@@ -1006,7 +1007,7 @@ MooRTE.Elements =
 
 	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
-	, changeCase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+	, changeCase:	{ 'class':'wideIcon', click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
 	, uppercase:	{ tag:'div', text:'UPPERCASE'}
@@ -1033,12 +1034,13 @@ MooRTE.Elements =
 	, style: {}				
 	, hilight:		{}
 	, fontColor:	{}				
-	, multiLevelList:	{}			
+	, multiLevelList:	{'class':'wideIcon'}			
 	, fill:	{}			
 	, invisibleChars:	{}				
-	, paragraphSpacing:	{}				
+	, paragraphSpacing:	{'class':'wideIcon'}				
 	, borderBottom:	{}				
 	, changeStyles:	{'class':'bigIcons'}				
+	, textEffect:		{'class':'bigIcons'}				
 	, insertPicture:{}
 	, formatPainter:{}
 	, find: {}
@@ -1071,6 +1073,7 @@ MooRTE.Elements =
 	, equation:{}
 	, symbol:{}
 	, pasteMenu:{tag:'span'}
+	, underlineFlyout:{tag:'span'}
 
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
