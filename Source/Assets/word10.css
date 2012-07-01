@@ -111,11 +111,11 @@ div.RTE.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; dis
 div.RTE.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
 
 /* RteRibbons[>div.rteHomeRibbon div].flyout: Triggers for flyout menus */
-div.RTE.Word10	.flyout{vertical-align:top; margin:3px 0; border:1px solid transparent;}
-div.RTE.Word10	.flyout:hover{border-color:#F5D368;}
-div.RTE.Word10	.flyout>span{ padding:3px 0; cursor:pointer; border-radius:3px; width:10px; border:1px solid transparent;}
+div.RTE.Word10	.flyout{vertical-align:top; margin:3px 0; border:1px solid transparent; height:19px;}
+div.RTE.Word10	.flyout:hover{ border-color:#F5D368; }
+div.RTE.Word10	.flyout>span{ padding:7px 0 8px; cursor:pointer; border-radius:0 3px 3px 0; width:10px }
 div.RTE.Word10	.menus>span:hover,
-div.RTE.Word10	.flyout>span:hover{ background-color:#FFB874; border:1px solid;
+div.RTE.Word10	.flyout>span:hover{ background-color:#FFB874;
 					background-image:linear-gradient(top,#ffe387,#fff292);
 					background-image:-ms-linear-gradient(top,#ffe387,#fff292);
 					background-image:-moz-linear-gradient(top,#ffe387,#fff292); 

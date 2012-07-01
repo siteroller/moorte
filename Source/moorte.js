@@ -465,7 +465,7 @@ MooRTE.Utilities = {
 			if (els[1]) els[1].addClass('rteHide');
 			if ((options.events||{}).hide) options.events.hide.call(this, name);
 			}, this);
-
+console.log(this, arguments)
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		if (entry = MooRTE.Tabs[tabGroup][name]){
 			if (!entry[0]) entry[0] = this;
@@ -487,12 +487,17 @@ MooRTE.Utilities = {
 		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
 	, flyout: function(content, btn, event){
-		console.log(arguments)
 		var show = function(flyout){
 			var pos = this.getCoordinates(this.getParent('.MooRTE'));
 			flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
 			}
 		MooRTE.Utilities.tabs.call(this, 'flyouts', content, {place:'Flyouts', events:{show:show}}, btn, event);
+		}
+	, flyoutWrap: function(btn, event){
+		new Element('span.flyout').wraps(this).grab(
+			new Element('span',{events:{click:function(){
+				MooRTE.Utilities.flyout.call(this, btn+'Flyout', '', event); }
+				}}));
 		}
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
@@ -753,8 +758,8 @@ MooRTE.Elements =
    , HomeRibbon:	{ tag:'div', load:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
    						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
    						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
-   							,span.divide,removeFormat,bold,italic,span.flyout:[underline,underlineFlyout],strikethrough\
-   							,subscript,superscript,span.divide,span.flyout:style,span.flyout:hilight,span.flyout:fontColor]]\
+   							,span.divide,removeFormat,bold,italic,underline,strikethrough\
+   							,subscript,superscript,span.divide,style,hilight,fontColor]]\
 			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
 			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
 			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,span.flyout:fill,span.flyout:borderBottom]]\
@@ -799,7 +804,7 @@ MooRTE.Elements =
    , insertHorizontalRule:{}
    , bold		 	:{ key:'b', source:'<b>' }
    , italic		 	:{ key:'i', source:'<i>' }
-   , underline	 	:{ key:'u', source:'<u>' }
+   , underline	 	:{ key:'u', source:'<u>', load:{flyoutWrap:[]}}
    , insertOrderedList:  { title:'Numbered List' }
    , insertUnorderedList:{ title:'Bulleted List' }
    , selectall   	:{ title:'Select All (Ctrl + A)' }
@@ -1031,9 +1036,9 @@ MooRTE.Elements =
 	, insertImage:	{}
  	, foreColor:	{}			
  	, formatBlock:	{}
-	, style: {}				
-	, hilight:		{}
-	, fontColor:	{}				
+	, style: {load:{flyoutWrap:[]}}				
+	, hilight:		{load:{flyoutWrap:[]}}
+	, fontColor:	{load:{flyoutWrap:[]}}				
 	, multiLevelList:	{'class':'wideIcon'}			
 	, fill:	{}			
 	, invisibleChars:	{}				
