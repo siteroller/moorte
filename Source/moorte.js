@@ -739,64 +739,9 @@ if (false) Object.extend(MooRTE.Utilities,
 
 Element.implement({moorte:MooRTE.extensions});
 Elements.implement({moorte:MooRTE.extensions});
-
-MooRTE.Groups = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
-	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
-	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
-	, Font : {Toolbar:['start','fontsize','decreaseFontSize','increaseFontSize','backcolor','forecolor']}
- 	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
-	, RibbonOpts	:{ place:'Ribbons'}
-	}
 	
 MooRTE.Elements =
-	// TabGroup Triggers. Samples, these can be created dynamically or manually.
-   { Main			:{text:'Main'  , 'class':'rteText', load :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'load'}
-   , File			:{text:'File'  , 'class':'rteText rteFile', click:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
-   , Font			:{text:'Font'  , 'class':'rteText', click:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
- //  , Insert			:{text:'Insert', 'class':'rteText', click:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
-   , View			:{text:'Views' , 'class':'rteText', click:{tabs: {Toolbar:['start','Html/Text']}} }
-	// Word 10 Groups.
-	, HomeTab:		{ text:'Home', 'class':'rteSelected', load: {addTab:['RibbonTabs']}
-   					, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
-   					}
-   , HomeRibbon:	{ tag:'div', load:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
-   						'div.rteClipGroup:[div:[span.menus:[paste32,pasteMenu],span:[cut,copy,formatPainter]]]\
-   						,div.rteFontGroup:[div:[fontDropdown,fontSize,increaseFontSize,decreaseFontSize,span.divide,changeCase\
-   							,span.divide,removeFormat,bold,italic,underline,strikethrough\
-   							,subscript,superscript,span.divide,style,hilight,fontColor]]\
-			 				,div.rteParaGroup:[div:[ULists:insertUnorderedList,OLists:insertOrderedList,multiLevelList\
-			 					,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
-			 					,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,span.flyout:fill,span.flyout:borderBottom]]\
-			 				,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],span.menus:[changeStyles]]]\
-			 				,div.rteEditGroup:[div:[find,replace,selection]]'
-						}
-	, FileTab:		{ text:'File', click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
-	, FileRibbon:	{ tag:'div', contains:'div.rteFileGroup:[div:[insertHorizontalRule]]' }
-	, InsertTab:	{ text:'Insert', click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
-	, InsertRibbon:{ tag:'div', contains:
-							'div.rtePageGroup:[div:[coverPage,blankPage,pageBreak]]\
-							,div.rteTablGroup:[div:table]\
-							,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
-							,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
-							,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
-							,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
-							,div.rteSymbGroup:[div:[span.menus:[equation,equationMenu],symbol]]' }
-
-   // Groups (Flyouts)
-   , Justify		:{'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
-   , Lists_old		:{'class':'Flyout', contains:'div.Flyout:[insertorderedlist,insertunorderedlist]' }
-   , OLists:		{ 'class':'flyout', tag:'span'
-   					, click:{flyout:['div.olistFlyouts:[insertorderedlist,insertunorderedlist]']}
-   					}
-   //, changecase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
-
-   , ULists:		{ 'class':'flyout', tag:'span'
-   					, click: {flyout:['div.ulistFlyouts:[insertorderedlist,insertunorderedlist]']}
-   					}
-   , Indents		:{'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
-	                
-   // Buttons
-   , strikethrough:{}
+	{ strikethrough:{}
    , justifyLeft	:{}
    , justifyFull	:{}
    , justifyCenter:{}
@@ -808,71 +753,69 @@ MooRTE.Elements =
    , insertHorizontalRule:{}
    , bold		 	:{ key:'b', source:'<b>' }
    , italic		 	:{ key:'i', source:'<i>' }
-   , underline	 	:{ key:'u', source:'<u>', load:{flyoutWrap:[]}}
+   , underline	 	:{ key:'u', source:'<u>' }
    , insertOrderedList:  { title:'Numbered List' }
    , insertUnorderedList:{ title:'Bulleted List' }
    , selectall   	:{ title:'Select All (Ctrl + A)' }
    , removeFormat	:{ title:'Clear Formatting' }
    , undo        	:{ title:'Undo (Ctrl + Z)' }
    , redo         :{ title:'Redo (Ctrl + Y)' }
-   , cut				:{ title:'Cut (Ctrl+X)'
-						 , load:MooRTE.Utilities.clipStickyWin
-						 , click:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-						 }
-   , copy			:{ title:'Copy (Ctrl+C)'
-						 , load:MooRTE.Utilities.clipStickyWin
-						 ,	click: function(action){ 
-								Browser.firefox 
-									? MooRTE.Elements.clipPop.show() 
-									: MooRTE.Utilities.exec(action); 
-							}
-						 }
-   , paste			:{ title: 'Paste (Ctrl+V)'
-						 , load: MooRTE.Utilities.clipStickyWin //load:function() { MooRTE.Utilities.clipStickyWin(1) },
-						 , click: function(action){ 
-								Browser.firefox || Browser.webkit 
-									? MooRTE.Elements.clipPop.show() 
-									: MooRTE.Utilities.exec(action); 
-							}
-						 }
-	, paste32:{ 'class':'bigIcons', title:'Paste' } 
-/*		, changecase2:	{ click:{tabs:
-								['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
-								, {place:'Flyouts', events:{show:
-										function(flyout){
-											var pos = this.getCoordinates(this.getParent('.MooRTE'));
-											flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-											}
-									}} 
-								]}
-						}
-*/
-   , save			:{ src:'http://siteroller.net/test/save.php'
-						 , click:function(){
-								var content = { 'page': window.location.pathname }
-								  , next = 0; 
-								content.content = []; 
-								this.getParent('.MooRTE').retrieve('fields').each(function(el){
-									content['content'][next++] = MooRTE.Utilities.clean(el);
-								});
-								new Request(
-									{ url: MooRTE.Elements.save.src
-									, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}
-									}
-								).send(Object.toQueryString(content));
-							}
-						 }
-   , 'Html/Text'	:{ click:['DisplayHTML'] }
-   , DisplayHTML	:{ tag: 'textarea'
-						 , unselectable:'off'
-						 , 'class': 'displayHtml'
-						 , init:function(){ 
-								var el= this.getParent('.MooRTE').retrieve('fields')
-								  , p = el.getParent()
-								  , size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-								this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
-							}
-						 }
+   , cut:
+   	{ title:'Cut (Ctrl+X)', events:
+			{ load:MooRTE.Utilities.clipStickyWin
+			, click:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
+			}
+		}
+   , copy:
+   	{ title:'Copy (Ctrl+C)', events:
+			{ load:MooRTE.Utilities.clipStickyWin
+			, click: function(action){ 
+				Browser.firefox 
+					? MooRTE.Elements.clipPop.show() 
+					: MooRTE.Utilities.exec(action); 
+				}
+			}
+		}
+   , paste:
+   	{ title:'Paste (Ctrl+V)', events:
+			{ load: MooRTE.Utilities.clipStickyWin //load:function() { MooRTE.Utilities.clipStickyWin(1) },
+			, click: function(action){ 
+				Browser.firefox || Browser.webkit 
+					? MooRTE.Elements.clipPop.show() 
+					: MooRTE.Utilities.exec(action); 
+					}
+			}
+		}
+	, paste32:
+		{ 'class':'bigIcons', title:'Paste (Ctrl+V)' }
+   , save:
+   	{ src:'http://siteroller.net/test/save.php', events:
+			{ click:function(){
+				var content = { 'page': window.location.pathname }
+				  , next = 0; 
+				content.content = []; 
+				this.getParent('.MooRTE').retrieve('fields').each(function(el){
+					content['content'][next++] = MooRTE.Utilities.clean(el);
+					});
+
+				new Request(
+					{ url: MooRTE.Elements.save.src
+					, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}
+					}).send(Object.toQueryString(content));
+				}
+			}
+		}
+   , 'Html/Text':
+   	{ click:['DisplayHTML'] }
+   , DisplayHTML:
+		{ tag: 'textarea', unselectable:'off', 'class': 'displayHtml'
+		, init:function(){
+				var el= this.getParent('.MooRTE').retrieve('fields')
+				  , p = el.getParent()
+				  , size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
+				this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
+			}
+		}
    , colorpicker	:{ tag:'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
 							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
 							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
@@ -934,7 +877,6 @@ MooRTE.Elements =
 							})
 					  }
 					}
-	, stylesCollection:{tag:'div', contains:'div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div'}
    , blockquote	:{ click:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ tag:'span' }
    , viewSource	:{ click:'source', source:function(btn){
@@ -956,8 +898,6 @@ MooRTE.Elements =
 						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
 						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
 					}}
-/*   , input:  {click:function(){ MooRTE.Range.insert("<input>") } }
-   , submit:   {click:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}*/
    , cleanWord		:{	click: function() {
 						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
 						var rs = [
@@ -977,85 +917,80 @@ MooRTE.Elements =
 					} }
 
    , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
-   , inputFontSize:{ tag: 'input', type:'text', value:12}
-   , fontSizeFlyouts: {tag:'div',load: function(){[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);}}
-	
-   , decreaseFontSize:{ click: function(){
-							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1);
-						}()
-						/* 	Fontsize was originally only supposed to accept valuies between 1 - 7.
-								It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
-									http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
-									http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
-									(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
-								
-								Table of values:
-									
-								Webkit is particularly bad:
-									#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
-										Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
-									#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
-										Double the text height, the previous background color will only cover the bottom half of the new text.
-									#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
-										The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
-									The actual ridiculous results of the command:
-										https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
-										Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
-										Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
-										
-										Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
-										http://www.w3schools.com/CSS/pr_font_font-size.asp
-										http://style.cleverchimp.com/font_size_intervals/altintervals.html
-								*/
-								//MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
-					}
-   , increaseFontSize:{	click: function(){
-							if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1);
-						}()
-					}
-
+   , inputFontSize:{ tag:'input', type:'text', value:12 }
+	, decreaseFontSize:
+		{ events:
+			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1) }() }
+			/* Fontsize was originally only supposed to accept valuies between 1 - 7.
+				It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
+					http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
+					http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
+					(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
+				
+				Table of values:
+			
+				Webkit is particularly bad:
+					#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
+						Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
+					#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
+						Double the text height, the previous background color will only cover the bottom half of the new text.
+					#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
+						The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
+					The actual ridiculous results of the command:
+						https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
+						Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
+						Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
+						
+						Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
+						http://www.w3schools.com/CSS/pr_font_font-size.asp
+						http://style.cleverchimp.com/font_size_intervals/altintervals.html
+			*///MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
+		}
+   , increaseFontSize:
+   	{ event:
+			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1) }() }
+		}
 	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
-	, changeCase:	{ 'class':'wideIcon', click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
 	, uppercase:	{ tag:'div', text:'UPPERCASE'}
 	, wordCase:		{ tag:'div', text:'Word Case'}
 	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
 
- 	, backColor		:{ load:function(){
-							MooRTE.Utilities.assetLoader({
-								scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
-								styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'], 
-								onComplete:function(){
-
-								}
-							})
-						},
-						click: function(){
-							var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
-						}
-					}
-
+ 	, backColor:
+ 		{ events:
+	 		{ load:function(){
+				MooRTE.Utilities.assetLoader(
+					{ scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'] 
+					, styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'] 
+					, onComplete:function(){}
+					})
+				}
+			, click: function(){
+				var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
+				}
+			}
+		}
 	, insertImage:	{}
  	, foreColor:	{}			
  	, formatBlock:	{}
-	, style: {load:{flyoutWrap:[]}}				
-	, hilight:		{load:{flyoutWrap:[]}}
-	, fontColor:	{load:{flyoutWrap:[]}}				
-	, multiLevelList:	{'class':'wideIcon'}			
-	, fill:	{}			
-	, invisibleChars:	{}				
-	, paragraphSpacing:	{'class':'wideIcon'}				
-	, borderBottom:	{}				
-	, changeStyles:	{'class':'bigIcons'}				
-	, textEffect:		{'class':'bigIcons'}				
+	, style: 		{}				
+	, hilight:		{}
+	, fontColor:	{}
+	, fill:			{}
+	, invisibleChars:{}
+	, multiLevelList:	{'class':'wideIcon'}
+	, paragraphSpacing:	{'class':'wideIcon'}
+	, borderBottom:{}
+	, changeStyles:{'class':'bigIcons'}
+	, textEffect:	{'class':'bigIcons'}
 	, insertPicture:{}
 	, formatPainter:{}
-	, find: {}
-	, replace: {}
-	, selection: {}
-	, sort:{}
+	, find: 			{}
+	, replace: 		{}
+	, selection: 	{}
+	, sort: 			{}
 	, coverPage:{}
 	, blankPage:{}
 	, pageBreak:{}
@@ -1082,11 +1017,116 @@ MooRTE.Elements =
 	, equation:{}
 	, symbol:{}
 	, pasteMenu:{tag:'span'}
-	, underlineFlyout:{tag:'span'}
 
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
 
+MooRTE.Reserved = ['tag', 'key', 'contains'];
 
-// Note1: insertorderedlist & insertunorderedlist restored to btn loop in MooRTE.Elements. Had been removed due to FF errs when textfield was empty.
+MooRTE.Groups   =	{ RibbonOpts:{ place:'Ribbons'} }
+
+MooRTE.Word10 = // Word 10 Elements
+	{ stylesCollection:
+		{ tag:'div'
+		, contains:'[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div]'
+		}
+	, arrow:		
+		{ events:
+			{ load: function(){
+				var prev = this.getPrevious();
+//				new Element('span.arrow' + +(prev.getSize().y > 25)).wraps(prev, this);
+				}
+			}
+		}
+	
+	// Tabs
+	, FileTab:
+   	{ text:'File', click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+	, HomeTab:	
+		{ text:'Home', 'class':'rteSelected', events:
+			{ load: {addTab:['RibbonTabs']}
+   		, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
+   		}
+   	}
+   , InsertTab:
+		{ text:'Insert', click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
+	
+	// Ribbons
+   , FileRibbon: 
+		{ tag:'div', contains:
+			'div.rteFileGroup:[div:[insertHorizontalRule]]' 
+		}
+	, HomeRibbon:
+   	{ tag:'div', load:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+			'div.rteClipGroup:[div:[paste32,arrow,span:[cut,copy,formatPainter]]]\
+			,div.rteFontGroup:[div:[fontDropdown,arrow,fontSize,arrow,increaseFontSize,decreaseFontSize\
+				,span.divideֿ,changeCase,span.divide,removeFormat,bold,italic,underline,arrow,strikethrough\
+				,subscript,superscript,span.divide,style,arrow,hilight,arrow,fontColor,arrow]]\
+			,div.rteParaGroup:[div:[insertUnorderedList,arrow,insertOrderedList,arrow,multiLevelList\
+				,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
+				,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,fill,arrow,borderBottom,arrow]]\
+			,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],changeStyles,arrow]]\
+			,div.rteEditGroup:[div:[find,replace,selection]]'
+		}
+	, InsertRibbon:
+		{ tag:'div', contains:
+			'div.rtePageGroup:[div:[coverPage,arrow,blankPage,pageBreak]]\
+			,div.rteTablGroup:[div:table]\
+			,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
+			,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
+			,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
+			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
+			,div.rteSymbGroup:[div:[equation,arrow,symbol]]' 
+		}
+
+	// Flyouts
+	, underlineFlyout:  { tag:'span'}
+   , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
+   , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
+   , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordcase,togglecase'}
+   , fontSizeFlyout:  
+   	{ tag:'div', events:
+   		{ load: function(){
+   			[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);
+   			}
+   		}
+   	}
+	}
+Object.merge(MooRTE.Elements,MooRTE.Word10);
+
+// TabGroup Triggers. Samples, these can be created dynamically or manually.
+MooRTE.GroupsDeprecated = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
+	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
+	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
+	, Font : {Toolbar:['start','fontsize','decreaseFontSize','increaseFontSize','backcolor','forecolor']}
+ 	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
+	, RibbonOpts	:{ place:'Ribbons'}
+
+	// Other deprecated elements. Or those waiting till dev on the Word03 skin starts again.
+	, Main			:{text:'Main'  , 'class':'rteText', load :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'load'}
+   , File			:{text:'File'  , 'class':'rteText rteFile', click:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
+   , Font			:{text:'Font'  , 'class':'rteText', click:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
+ 	//, Insert			:{text:'Insert', 'class':'rteText', click:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
+   , View			:{text:'Views' , 'class':'rteText', click:{tabs: {Toolbar:['start','Html/Text']}} }
+   , Indents: {'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
+   , Justify:
+   	{ 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
+   , changeCase:	{ 'class':'wideIcon', click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+	, input:  {click:function(){ MooRTE.Range.insert("<input>") } }
+   , submit:   {click:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}	
+   /*
+   , changecase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+   , changecase2:
+   	{ click:{tabs:
+			['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
+			, {place:'Flyouts', events:{show:
+					function(flyout){
+						var pos = this.getCoordinates(this.getParent('.MooRTE'));
+						flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+						}
+					}}
+				]}
+		}
+	*/
+	}	
