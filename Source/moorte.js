@@ -312,7 +312,7 @@ MooRTE.Utilities = {
 	}
 	, eventHandler: function(onEvent, caller, name){
 		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
-		var event = Type.isFunction(onEvent) ? onEvent : MooRTE.Elements[name][onEvent]
+		var event = Type.isFunction(onEvent) ? onEvent : ((MooRTE.Elements[name]['events']||{})[onEvent])
 		  , provided = {element:name, event:onEvent};
 
 		switch(typeOf(event)){
@@ -413,7 +413,7 @@ MooRTE.Utilities = {
 								(MooRTE.activeField = fields[0]).focus();
 
 							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-							!val.click && !source && (!val.tag || val.tag == 'a')
+							!(val.events||{}).click && !source && (!val.tag || val.tag == 'a')
 								? MooRTE.Utilities.exec(val.args || btn)
 								: MooRTE.Utilities.eventHandler(source || 'click', this, btn);
 						}
@@ -465,7 +465,7 @@ MooRTE.Utilities = {
 			if (els[1]) els[1].addClass('rteHide');
 			if ((options.events||{}).hide) options.events.hide.call(this, name);
 			}, this);
-console.log(this, arguments)
+
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		if (entry = MooRTE.Tabs[tabGroup][name]){
 			if (!entry[0]) entry[0] = this;
@@ -481,11 +481,13 @@ console.log(this, arguments)
 		//console.log(options.events);
 		if ((options.events||{}).show) options.events.show.call(this, {content:group});
 		}
+
 	, addTab: function(tabGroup, tabName){
 		if (!MooRTE.Tabs[tabGroup]) MooRTE.Tabs[tabGroup] = {};
 		if (!MooRTE.Tabs[tabGroup][tabName]) MooRTE.Tabs[tabGroup][tabName] = [];
 		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
+
 	, flyout: function(content, btn, event){
 		var show = function(flyout){
 			var pos = this.getCoordinates(this.getParent('.MooRTE'));
@@ -493,12 +495,14 @@ console.log(this, arguments)
 			}
 		MooRTE.Utilities.tabs.call(this, 'flyouts', content, {place:'Flyouts', events:{show:show}}, btn, event);
 		}
+
 	, flyoutWrap: function(btn, event){
 		new Element('span.flyout').wraps(this).grab(
 			new Element('span',{events:{click:function(){
 				MooRTE.Utilities.flyout.call(this, btn+'Flyout', '', event); }
 				}}));
 		}
+
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) AssetLoader.javascript(['mootools-more.js','StickyWinModalUI.js'], {
