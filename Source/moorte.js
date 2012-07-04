@@ -311,6 +311,7 @@ MooRTE.Utilities = {
 		if (destroy) el.eliminate('rteEvents');
 	}
 	, eventHandler: function(onEvent, caller, name){
+
 		// Must check if orig func or string is modified now that $unlink is gone. Should be OK.
 		var event = Type.isFunction(onEvent) ? onEvent : ((MooRTE.Elements[name]['events']||{})[onEvent])
 		  , provided = {element:name, event:onEvent};
@@ -335,7 +336,7 @@ MooRTE.Utilities = {
 		}
 	}
 	, addElements: function(elements, place, options){
-		if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','click','img','load','source','contains']);
+		//if (!MooRTE.btnVals.args) MooRTE.btnVals.combine(['args','shortcut','element','click','img','load','source','contains']);
 		if (!place) place = MooRTE.activeBar.getFirst();
 		else if (Type.isArray(place)){
 			var relative = place[1]; 
@@ -389,40 +390,43 @@ MooRTE.Utilities = {
 			else if (!e || !options.ifExists){
 				var val = MooRTE.Elements[btn]
 				  , textarea = (val.tag && val.tag.toLowerCase() == 'textarea')
-				  , input = 'text,password,checkbox,file,radio'.contains(val.type)  
-				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);  //Note1
+				  , input = 'text,password,checkbox,file,radio'.contains(val.type)
+				  , state = /bold|italic|underline|strikethrough|unlink|(sub|super)script|insert(un)?orderedlist|justify(left|full|right|center)/i.test(btn);
 
 				var properties = Object.append(
-					{ href:'javascript:void(0)'
-					, unselectable:(input || textarea ? 'off' : 'on')
-					, title: btn.replace
-							(/([0-9]+|[A-Z][a-z]+|[A-Z]+(?=[A-Z][a-z]|[0-9])|^[a-z]+)/g, "$1 ")
-								.trim().capitalize() + (val.key ? ' (Ctrl+'+ val.key.toUpperCase()+')' : '')		
-					, events: {
-						mousedown: function(e){
+					{ title: btn
+						.replace(/([0-9]+|[A-Z][a-z]+|[A-Z]+(?=[A-Z][a-z]|[0-9])|^[a-z]+)/g, "$1 ")
+						.trim().capitalize() + (val.key ? ' (Ctrl+'+ val.key.toUpperCase()+')' : '')
+					, events:{}
+					}, Object.clone(val));
 
-							MooRTE.activeBar = bar;
-							var source = bar.retrieve('source')
-							  , fields = bar.retrieve('fields');
-							
-							// Workaround, see docs.
-							var holder = MooRTE.Range.parent();
-							if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
-							
-							if (!(fields.contains(MooRTE.activeField) && MooRTE.activeField.contains(holder)))
-								(MooRTE.activeField = fields[0]).focus();
-
-							if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-							!(val.events||{}).click && !source && (!val.tag || val.tag == 'a')
-								? MooRTE.Utilities.exec(val.args || btn)
-								: MooRTE.Utilities.eventHandler(source || 'click', this, btn);
-						}
-					}
-				}, val);
+				if (!val.tag || val.tag.test(/^a$/i)) properties.href = 'javascript:void(0)';
+				if (Browser.ie || Browser.opera) unselectable = input || textarea ? 'off' : 'on';
 				
-				MooRTE.btnVals[val.tag ? 'include' : 'erase']('href')
-					.each(function(key){
-						delete properties[key];
+				properties.events.mousedown = function(e){
+					MooRTE.activeBar = bar;
+					var source = bar.retrieve('source')
+					  , fields = bar.retrieve('fields');
+					
+					// Workaround, see docs.
+					var holder = MooRTE.Range.parent();
+					if (Browser.webkit && holder.nodeType == 3) holder = holder.parentElement;
+					
+					if (!(fields.contains(MooRTE.activeField) && MooRTE.activeField.contains(holder)))
+						(MooRTE.activeField = fields[0]).focus();
+
+					if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
+					!(val.events||{}).click && !source && (!val.tag || val.tag == 'a')
+						? MooRTE.Utilities.exec(val.args || btn)
+						: MooRTE.Utilities.eventHandler(source || 'click', this, btn);
+					}
+
+				MooRTE.Reserved.each(function(bye){
+					Type.isString(bye)
+						? delete properties[bye]
+						: Object.each(bye, function(del,where){
+							if (properties[where]) delete properties[where][del]
+							});
 					});
 
 				e = new Element((input && !val.tag ? 'input' : val.tag || 'a'), properties)
@@ -1022,7 +1026,7 @@ MooRTE.Elements =
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
 
-MooRTE.Reserved = ['tag', 'key', 'contains'];
+MooRTE.Reserved = ['tag', 'key', 'contains', 'source', {events:'click'}, {events:'load'}];
 
 MooRTE.Groups   =	{ RibbonOpts:{ place:'Ribbons'} }
 
@@ -1042,7 +1046,9 @@ MooRTE.Word10 = // Word 10 Elements
 	
 	// Tabs
 	, FileTab:
-   	{ text:'File', click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+   	{ text:'File', events:
+   		{click:{tabs: ['RibbonTabs', 'FileRibbon', MooRTE.Groups.RibbonOpts]} }
+   	}
 	, HomeTab:	
 		{ text:'Home', 'class':'rteSelected', events:
 			{ load: {addTab:['RibbonTabs']}
@@ -1050,7 +1056,9 @@ MooRTE.Word10 = // Word 10 Elements
    		}
    	}
    , InsertTab:
-		{ text:'Insert', click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]} }
+		{ text:'Insert', events:{
+			click:{tabs: ['RibbonTabs', 'InsertRibbon', MooRTE.Groups.RibbonOpts]}} 
+		}
 	
 	// Ribbons
    , FileRibbon: 
@@ -1058,7 +1066,9 @@ MooRTE.Word10 = // Word 10 Elements
 			'div.rteFileGroup:[div:[insertHorizontalRule]]' 
 		}
 	, HomeRibbon:
-   	{ tag:'div', load:{addTab:['RibbonTabs', 'HomeTab']}, contains: 
+   	{ tag:'div'
+   	, events:{ load:{addTab:['RibbonTabs', 'HomeTab']} }
+   	, contains: 
 			'div.rteClipGroup:[div:[paste32,arrow,span:[cut,copy,formatPainter]]]\
 			,div.rteFontGroup:[div:[fontDropdown,arrow,fontSize,arrow,increaseFontSize,decreaseFontSize\
 				,span.divideֿ,changeCase,span.divide,removeFormat,bold,italic,underline,arrow,strikethrough\
