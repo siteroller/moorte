@@ -324,7 +324,7 @@ div.RTE.Word10 .rtechangeStyles{background-position:center -2340px;}
 div.RTE.Word10 .rtebookmark{background-position:center -2405px;}
 div.RTE.Word10 .rteblankPage{background-position:center -2470px;}
 div.RTE.Word10 .rteaddOns{background-position:center -2535px;}
-div.RTE.Word10 .rtearrow{background-position:center -2600px}
+/*div.RTE.Word10 .rtearrow{background-position:center -2600px}*/
 
 
 /* Added on bottom till can be reorganized ;*/
@@ -368,7 +368,7 @@ div.RTE.Word10	.arrow0 a.rtearrow{ width:9px; border-radius:0 3px 3px 0}
 div.RTE.Word10	.arrow1 { padding:1px; }
 div.RTE.Word10	.rteRibbons span.arrow1 a{ width:100%; -moz-box-sizing:border-box; }
 div.RTE.Word10	.rteRibbons span.arrow1 > a:first-child{height:35px; margin-bottom:3px; border-radius:3px 3px 0 0; }
-div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; background-position:center bottom}
+div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; xbackground-position:center bottom}
 div.RTE.Word10	.arrow1:hover a.rtearrow{ outline:solid #F5D368 1px; outline-offset:1px; }
 
 div.RTE.Word10	.arrow2 {border-color:grey; border-radius:0;} 
@@ -384,61 +384,63 @@ div.RTE.Word10	.rteRibbons a.bigIcons,
 div.RTE.Word10	div.rteInsertRibbon a{ min-width:40px; padding-top:36px; height:28px; line-height:14px; margin:1px; }
 div.RTE.Word10	div.rteInsertRibbon a:before,
 div.RTE.Word10	div.rteInsertRibbon a:after{ white-space:pre;}
-
+div.RTE.Word10	div.rteInsertRibbon .rtearrow:after,
+div.RTE.Word10	div.rteInsertRibbon > div > div > a:after{ width:0; height:0; line-height:0; content:'';
+		border:solid transparent 3px; border-top-color:#000; vertical-align:middle; display:inline-block;}
 div.RTE.Word10	.rteRibbons a.wideIcon{width:27px;}
 
 /* English Language */
-div.RTE.Word10	.rteClipGroup:after{ content:'Clipboard' } 
-div.RTE.Word10	      .rtecut:after{ content:'Cut' } 
-div.RTE.Word10	     .rtecopy:after{ content:'Copy'}
-div.RTE.Word10	.rteformatPainter:after{content:'Format Painter'}
-div.RTE.Word10	.rtepaste32+a:before{ content:'Paste' }
+div.RTE.Word10	.rteClipGroup:after  { content:'Clipboard' } 
+div.RTE.Word10	.rtecut:after        { content:'Cut' } 
+div.RTE.Word10	.rtecopy:after       { content:'Copy'}
+div.RTE.Word10	.rteformatPainter:after{ content:'Format Painter'}
+div.RTE.Word10	.rtepaste32+a:before { content:'Paste' }
 
-div.RTE.Word10	.rteFontGroup:after{ content:'Font' }
-div.RTE.Word10	.rteParaGroup:after{ content:'Paragraph'}
-div.RTE.Word10	.rteFileGroup:after{ content:'File'}
-div.RTE.Word10	.rteStylGroup:after{ content:'Styles'}
+div.RTE.Word10	.rteFontGroup:after  { content:'Font' }
+div.RTE.Word10	.rteParaGroup:after  { content:'Paragraph'}
+div.RTE.Word10	.rteFileGroup:after  { content:'File'}
+div.RTE.Word10	.rteStylGroup:after  { content:'Styles'}
 
-div.RTE.Word10	.rteEditGroup:after{ content:'Editing'}
-div.RTE.Word10	     .rtefind:after{ content:'Find'; } 
-div.RTE.Word10	  .rtereplace:after{ content:'Replace'}
-div.RTE.Word10	.rteselection:after{ content:'Select'}
+div.RTE.Word10	.rteEditGroup:after  { content:'Editing'}
+div.RTE.Word10	.rtefind:after       { content:'Find'; } 
+div.RTE.Word10	.rtereplace:after    { content:'Replace'}
+div.RTE.Word10	.rteselection:after  { content:'Select'}
 
-div.RTE.Word10  .rtePageGroup:after{ content:'Pages';}
+div.RTE.Word10 .rtePageGroup:after  { content:'Pages';}
 div.RTE.Word10 .rtecoverPage+a:before{ content:'Cover\a Page'}
-div.RTE.Word10 .rteblankPage:before{ content:'Blank\a Page'}
-div.RTE.Word10 .rtepageBreak:before{ content:'Page\a Break'}
+div.RTE.Word10 .rteblankPage:before { content:'Blank\a Page'}
+div.RTE.Word10 .rtepageBreak:before { content:'Page\a Break'}
 
-div.RTE.Word10 .rteTablGroup:after{ content:'Tables';}
-div.RTE.Word10 .rtetable:before{ content:'Table';}
+div.RTE.Word10 .rteTablGroup:after  { content:'Tables';}
+div.RTE.Word10 .rtetable:before     { content:'Table\a';}
 
-div.RTE.Word10 .rteIlluGroup:after{ content:'Illustrations';}
-div.RTE.Word10  .rtepicture:before{ content:'Picture';}
-div.RTE.Word10  .rteclipArt:before{ content:'Clip\a Art';}
-div.RTE.Word10   .rteshapes:before{ content:'Shapes';}
-div.RTE.Word10 .rtesmartArt:before{ content:'SmartArt';}
-div.RTE.Word10    .rtechart:before{ content:'Chart';}
-div.RTE.Word10 .rtescreenshot:before{ content:'Screenshot';}
+div.RTE.Word10 .rteIlluGroup:after  { content:'Illustrations';}
+div.RTE.Word10 .rtepicture:before   { content:'Picture\a';}
+div.RTE.Word10 .rteclipArt:before   { content:'Clip\a Art';}
+div.RTE.Word10 .rteshapes:before    { content:'Shapes\a';}
+div.RTE.Word10 .rtesmartArt:before  { content:'SmartArt\a';}
+div.RTE.Word10 .rtechart:before     { content:'Chart\a';}
+div.RTE.Word10 .rtescreenshot:before{ content:'Screenshot\a';}
 
-div.RTE.Word10 .rteLinkGroup:after{ content:'Links';}
-div.RTE.Word10 .rtehyperlink:before{ content:'Hyperlink';}
-div.RTE.Word10  .rtebookmark:before{ content:'Bookmark';}
-div.RTE.Word10 .rtecross-reference:before{ content:'Cross-reference';}
+div.RTE.Word10 .rteLinkGroup:after  { content:'Links';}
+div.RTE.Word10 .rtehyperlink:before { content:'Hyperlink\a';}
+div.RTE.Word10  .rtebookmark:before { content:'Bookmark\a';}
+div.RTE.Word10 .rtecross-reference:before{ content:'Cross-reference\a';}
 
-div.RTE.Word10 .rteHeadGroup:after{ content:'Header & Footer';}
-div.RTE.Word10 .rteheader:before{ content:'Header';}
-div.RTE.Word10 .rtefooter:before{ content:'Footer';}
+div.RTE.Word10 .rteHeadGroup:after  { content:'Header & Footer';}
+div.RTE.Word10 .rteheader:before    { content:'Header\a';}
+div.RTE.Word10 .rtefooter:before    { content:'Footer\a';}
 div.RTE.Word10 .rtepageNumber:before{ content:'Page\a Number';}
 
-div.RTE.Word10 .rteTextGroup:after{ content:'Text';}
-div.RTE.Word10 .rtetextBox:before{ content:'Text\a Box';}
+div.RTE.Word10 .rteTextGroup:after  { content:'Text';}
+div.RTE.Word10 .rtetextBox:before   { content:'Text\a Box';}
 div.RTE.Word10 .rtequickParts:before{ content:'Quick\a Parts';}
-div.RTE.Word10 .rtewordArt:before{ content:'WordArt';}
-div.RTE.Word10 .rtedropCap:before{ content:'Drop\a Cap';}
+div.RTE.Word10 .rtewordArt:before   { content:'WordArt\a';}
+div.RTE.Word10 .rtedropCap:before   { content:'Drop\a Cap';}
 
-div.RTE.Word10 .rteSymbGroup:after{ content:'Symbols';}
-div.RTE.Word10 .rteequation+a:before{ content:'Equation';} 
-div.RTE.Word10 .rtesymbol:before{ content:'Symbol';}
+div.RTE.Word10 .rteSymbGroup:after  { content:'Symbols';}
+div.RTE.Word10 .rteequation+a:before{ content:'Equation\a';} 
+div.RTE.Word10 .rtesymbol:before    { content:'Symbol\a';}
 
 div.RTE.Word10 .coverPage:{}
 div.RTE.Word10 .blankPage:{}
