@@ -920,9 +920,7 @@ MooRTE.Elements =
 						return s.replace(/\s+/g, ' ');
 					} }
 
-   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
-   , inputFontSize:{ tag:'input', type:'text', value:12 }
-	, decreaseFontSize:
+   , decreaseFontSize:
 		{ events:
 			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1) }() }
 			/* Fontsize was originally only supposed to accept valuies between 1 - 7.
@@ -954,7 +952,6 @@ MooRTE.Elements =
    	{ event:
 			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1) }() }
 		}
-	, fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
 
 	, sentencecase:{ tag:'div', text:'Sentence case' } 
 	, lowercase:	{ tag:'div', text:'lowercase'}
@@ -1021,6 +1018,13 @@ MooRTE.Elements =
 	, equation:{}
 	, symbol:{}
 	, pasteMenu:{tag:'span'}
+	, changeCase:
+		{ 'class':'wideIcon', events:
+			{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+		}
+	,fontSize: {tag:'input', type:'text', value:11}
+	,fontFamily:{tag:'input', type:'text', value:'Calibri (Body)'} 
+	
 
 	// Generic
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
@@ -1039,11 +1043,13 @@ MooRTE.Word10 = // Word 10 Elements
 		{ events:
 			{ load: function(){
 				var prev = this.getPrevious();
-//				new Element('span.arrow' + +(prev.getSize().y > 25)).wraps(prev, this);
+				var which = prev.get('tag') == 'input' ? 2 : +(prev.getSize().y > 25);
+				new Element('span.arrowCase.arrow' + which).wraps(prev).grab(this);
 				}
+			//, click: {'flyout':[prev.get('class').substr(3)+'Flyout']}
 			}
 		}
-	
+
 	// Tabs
 	, FileTab:
    	{ text:'File', events:
@@ -1070,12 +1076,12 @@ MooRTE.Word10 = // Word 10 Elements
    	, events:{ load:{addTab:['RibbonTabs', 'HomeTab']} }
    	, contains: 
 			'div.rteClipGroup:[div:[paste32,arrow,span:[cut,copy,formatPainter]]]\
-			,div.rteFontGroup:[div:[fontDropdown,arrow,fontSize,arrow,increaseFontSize,decreaseFontSize\
-				,span.divideֿ,changeCase,span.divide,removeFormat,bold,italic,underline,arrow,strikethrough\
-				,subscript,superscript,span.divide,style,arrow,hilight,arrow,fontColor,arrow]]\
+			,div.rteFontGroup:[div:[fontFamily,arrow,fontSize,arrow,increaseFontSize,decreaseFontSize\
+				,span.rtedivider,changeCase,span.rtedivider,removeFormat,bold,italic,underline,arrow,strikethrough\
+				,subscript,superscript,span.rtedivider,style,arrow,hilight,arrow,fontColor,arrow]]\
 			,div.rteParaGroup:[div:[insertUnorderedList,arrow,insertOrderedList,arrow,multiLevelList\
-				,span.divide,indent,outdent,span.divide,sort,span.divide,invisibleChars,justifyLeft,justifyCenter\
-				,justifyRight,justifyFull,span.divide,paragraphSpacing,span.divide,fill,arrow,borderBottom,arrow]]\
+				,span.rtedivider,indent,outdent,span.rtedivider,sort,span.rtedivider,invisibleChars,justifyLeft,justifyCenter\
+				,justifyRight,justifyFull,span.rtedivider,paragraphSpacing,span.rtedivider,fill,arrow,borderBottom,arrow]]\
 			,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],changeStyles,arrow]]\
 			,div.rteEditGroup:[div:[find,replace,selection]]'
 		}
@@ -1086,8 +1092,8 @@ MooRTE.Word10 = // Word 10 Elements
 			,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
 			,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
 			,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
-			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,signatureLine,dateTime,object]]\
-			,div.rteSymbGroup:[div:[equation,arrow,symbol]]' 
+			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,span.stacked:[signatureLine,dateTime,object]]]\
+			,div.rteSymbGroup:[div:[equation,arrow,symbol]]'
 		}
 
 	// Flyouts
@@ -1095,6 +1101,7 @@ MooRTE.Word10 = // Word 10 Elements
    , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
    , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
    , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordcase,togglecase'}
+   , fontFamilyFlyout: { contains: 'div.f_calibri,div.f_tahoma,div.f_comic'}
    , fontSizeFlyout:  
    	{ tag:'div', events:
    		{ load: function(){
@@ -1122,10 +1129,12 @@ MooRTE.GroupsDeprecated = 	// Default Word03/Tango Groups. Could be integrated i
    , Indents: {'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
    , Justify:
    	{ 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
-   , changeCase:	{ 'class':'wideIcon', click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
-	, input:  {click:function(){ MooRTE.Range.insert("<input>") } }
+   , input:  {click:function(){ MooRTE.Range.insert("<input>") } }
    , submit:   {click:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}	
-   /*
+   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
+   , inputFontSize:{ tag:'input', type:'text', value:12 }
+   , fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
+	/*
    , changecase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
    , changecase2:
    	{ click:{tabs:
