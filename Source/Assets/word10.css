@@ -198,10 +198,6 @@ div.RTE.Word10 .rtefind{background-position:0px -95px;}
 div.RTE.Word10 .rtedateTime{background-position:-118px 0px;}
 div.RTE.Word10 .rtecut{background-position:-118px -19px;}
 div.RTE.Word10 .rtecopy{background-position:-118px -38px;}
-div.RTE.Word10 .rtewordTemplate{background-position:0px -114px;}
-div.RTE.Word10 .rtewordDocument{background-position:-40px -114px;}
-div.RTE.Word10 .rtewordArt{background-position:-80px -114px;}
-div.RTE.Word10 .rteword2003Doc{background-position:-120px -114px;}
 div.RTE.Word10 .rtetextBox{background-position:-160px -114px;}
 div.RTE.Word10 .rtetable{background-position:-236px 0px;}
 div.RTE.Word10 .rtesymbol{background-position:-236px -65px;}
@@ -209,19 +205,6 @@ div.RTE.Word10 .rtesmartArt{background-position:0px -179px;}
 div.RTE.Word10 .rteshapes{background-position:-40px -179px;}
 div.RTE.Word10 .rtesend{background-position:-80px -179px;}
 div.RTE.Word10 .rtescreenshot{background-position:-120px -179px;}
-div.RTE.Word10 .rtesaveAs{background-position:-160px -179px;}
-div.RTE.Word10 .rtesave32{background-position:-200px -179px;}
-div.RTE.Word10 .rtequickParts{background-position:-278px 0px;}
-div.RTE.Word10 .rtepublish{background-position:-278px -65px;}
-div.RTE.Word10 .rteprintQuick32{background-position:-278px -130px;}
-div.RTE.Word10 .rteprintPreview{background-position:0px -244px;}
-div.RTE.Word10 .rteprint{background-position:-40px -244px;}
-div.RTE.Word10 .rteprepare{background-position:-80px -244px;}
-div.RTE.Word10 .rtepicture{background-position:-120px -244px;}
-div.RTE.Word10 .rtepaste32{background-position:-160px -244px;}
-div.RTE.Word10 .rtepageNumber{background-position:-200px -244px;}
-div.RTE.Word10 .rtepageBreak{background-position:-240px -244px;}
-div.RTE.Word10 .rteopen32{background-position:-318px 0px;}
 div.RTE.Word10 .rtenewDocument{background-position:-318px -65px;}
 div.RTE.Word10 .rtehyperlink{background-position:-318px -130px;}
 div.RTE.Word10 .rteheader{background-position:-318px -195px;}
@@ -229,11 +212,6 @@ div.RTE.Word10 .rtefooter{background-position:-358px 0px;}
 div.RTE.Word10 .rtefind32{background-position:-358px -65px;}
 div.RTE.Word10 .rteequation{background-position:-358px -130px;}
 div.RTE.Word10 .rtedropCap{background-position:-358px -195px;}
-div.RTE.Word10 .rtecross-reference{background-position:0px -309px;}
-div.RTE.Word10 .rtecoverPage{background-position:-40px -309px;}
-div.RTE.Word10 .rteclose32{background-position:-80px -309px;}
-div.RTE.Word10 .rteclipArt{background-position:-120px -309px;}
-div.RTE.Word10 .rtechart{background-position:-160px -309px;}
 div.RTE.Word10 .rtechangeStyles{background-position:-200px -309px;}
 div.RTE.Word10 .rtebookmark{background-position:-240px -309px;}
 div.RTE.Word10 .rteblankPage{background-position:-280px -309px;}
@@ -321,11 +299,6 @@ div.RTE.Word10 .rtechangeStyles{background-position:center -2340px;}
 div.RTE.Word10 .rtebookmark{background-position:center -2405px;}
 div.RTE.Word10 .rteblankPage{background-position:center -2470px;}
 div.RTE.Word10 .rteaddOns{background-position:center -2535px;}
-/*
-div.RTE.Word10 .rtearrow{background-position:center -2600px}
-div.RTE.Word10 .rtearrow{background-position:-385px -260px;}
-*/
-
 
 /* Added on bottom till can be reorganized ;*/
 div.RTE.Word10 div.rteHomeRibbon>div{ padding-top:4px;}
@@ -339,21 +312,6 @@ div.RTE.Word10	span.rtedivider{width:5px;height:24px;background-image:url(images
 div.RTE.Word10	.rteRibbons .stacked>a{float:left; width:auto; margin:0; clear:left; height:19px; padding:0;}
 div.RTE.Word10	.stacked>a:before{ margin:0 5px 0 25px; }
 
-/*
-div.RTE.Word10	.menus{ width:38px; padding:1px; border:1px solid transparent; vertical-align:top; 
-								cursor:pointer; border-radius:3px; overflow:hidden;}
-div.RTE.Word10	.menus:hover{ border-color:#F5D368; }
-div.RTE.Word10	.menus > *{border:0px !important; width:38px;}
-div.RTE.Word10	.rteRibbons span.menus>a{ border-radius:3px 3px 0 0 !important; height:0; }
-div.RTE.Word10	.menus>span{ border-radius:0 0 3px 3px; margin-top:3px; text-align:center}
-div.RTE.Word10	.menus:hover>span{ outline:solid #F5D368 1px; outline-offset:1px; }
-div.RTE.Word10	.menus>span:after{ display:block; margin:auto;}
-div.RTE.Word10	.menus>span:after,
-div.RTE.Word10	.postArrow:before{ width:0; height:0; line-height:0; border:solid transparent 3px;
-						border-top:3px solid #000; border-width:3px 3px 0; content:'';}
-*/
-
-/* Arrow Elements */
 div.RTE.Word10	.arrowCase { border:1px solid transparent; border-radius:3px; vertical-align:top;
 								cursor:pointer; overflow:hidden;}
 div.RTE.Word10	.arrowCase:hover{ border-color:#F5D368; }
@@ -370,7 +328,7 @@ div.RTE.Word10	.arrow0 a.rtearrow{ width:9px; border-radius:0 3px 3px 0}
 div.RTE.Word10	.arrow1 { padding:1px; }
 div.RTE.Word10	.rteRibbons span.arrow1 a{ width:100%; -moz-box-sizing:border-box; }
 div.RTE.Word10	.rteRibbons span.arrow1 > a:first-child{height:35px; margin-bottom:3px; border-radius:3px 3px 0 0; }
-div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; xbackground-position:center bottom}
+div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; }
 div.RTE.Word10	.arrow1:hover a.rtearrow{ outline:solid #F5D368 1px; outline-offset:1px; }
 
 div.RTE.Word10	.arrow2 {border-color:grey; border-radius:0;}
