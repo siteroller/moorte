@@ -791,7 +791,7 @@ MooRTE.Elements =
 			}
 		}
 	, paste32:
-		{ 'class':'bigIcons', title:'Paste (Ctrl+V)' }
+		{ 'class':'bigIcon', title:'Paste (Ctrl+V)' }
    , save:
    	{ src:'http://siteroller.net/test/save.php', events:
 			{ click:function(){
@@ -984,8 +984,8 @@ MooRTE.Elements =
 	, multiLevelList:	{'class':'wideIcon'}
 	, paragraphSpacing:	{'class':'wideIcon'}
 	, borderBottom:{}
-	, changeStyles:{'class':'bigIcons'}
-	, textEffect:	{'class':'bigIcons'}
+	, changeStyles:{'class':'bigIcon'}
+	, textEffect:	{'class':'bigIcon'}
 	, insertPicture:{}
 	, formatPainter:{}
 	, find: 			{}
@@ -1075,7 +1075,7 @@ MooRTE.Word10 = // Word 10 Elements
    	{ tag:'div'
    	, events:{ load:{addTab:['RibbonTabs', 'HomeTab']} }
    	, contains: 
-			'div.rteClipGroup:[div:[paste32,arrow,span:[cut,copy,formatPainter]]]\
+			'div.rteClipGroup:[div:[paste32,arrow,span.stacked:[cut,copy,formatPainter]]]\
 			,div.rteFontGroup:[div:[fontFamily,arrow,fontSize,arrow,increaseFontSize,decreaseFontSize\
 				,span.rtedivider,changeCase,span.rtedivider,removeFormat,bold,italic,underline,arrow,strikethrough\
 				,subscript,superscript,span.rtedivider,style,arrow,hilight,arrow,fontColor,arrow]]\
@@ -1083,16 +1083,16 @@ MooRTE.Word10 = // Word 10 Elements
 				,span.rtedivider,indent,outdent,span.rtedivider,sort,span.rtedivider,invisibleChars,justifyLeft,justifyCenter\
 				,justifyRight,justifyFull,span.rtedivider,paragraphSpacing,span.rtedivider,fill,arrow,borderBottom,arrow]]\
 			,div.rteStylGroup:[div:[div.stylesCollection:[div.f_normal.rteSelected:div,div.f_noSpacing:div,div.f_h1:div,div.f_h2:div,div.f_h3:div],changeStyles,arrow]]\
-			,div.rteEditGroup:[div:[find,replace,selection]]'
+			,div.rteEditGroup:[div.stacked:[find,replace,selection]]'
 		}
 	, InsertRibbon:
-		{ tag:'div', contains:
+		{ tag:'div.bigIcons', contains:
 			'div.rtePageGroup:[div:[coverPage,arrow,blankPage,pageBreak]]\
 			,div.rteTablGroup:[div:table]\
 			,div.rteIlluGroup:[div:[picture,clipArt,shapes,smartArt,chart,screenshot]]\
 			,div.rteLinkGroup:[div:[hyperlink,bookmark,"cross-reference"]]\
 			,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
-			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,span.stacked:[signatureLine,dateTime,object]]]\
+			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,span.stacked.smallIcons:[signatureLine,dateTime,object]]]\
 			,div.rteSymbGroup:[div:[equation,arrow,symbol]]'
 		}
 
