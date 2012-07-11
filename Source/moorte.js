@@ -374,17 +374,20 @@ MooRTE.Utilities = {
 		var collection = []
 		, bar = place.hasClass('MooRTE') ? place : place.getParent('.MooRTE');
 		
-		els.each(function(btn){
-			if (Type.isObject(btn)){
-				var btnVals = Object.values(btn)[0];
-				btn = Object.keys(btn)[0];
-			}
-			// console.log('addElements called. elements:',elements,', btn is:',btn,', e is:',e,', func args are:',arguments);
-		
-			if (Type.isElement(btn))       var newEl = btn;
-			else if(!MooRTE.Elements[btn]) var newEl = new Element(btn);
-			else var loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
+		els.each(function(button){
+			if (Type.isObject(button)){
+				var btnVals = Object.values(button)[0];
+				button = Object.keys(button)[0];
+				}
+			//console.log('addElements called. elements:',elements,', btn is:',button,', e is:',e,', func args are:',arguments);
+
+			if (Type.isElement(button)) var newEl = button;
+			else {
+				var btn = button.match(/^([^.#!<>[]+)/i)[0];
+				if (!MooRTE.Elements[btn]) var newEl = new Element(button);
+				else var loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
 				    , e = place['get' + loc]('.rte' + btn);
+				}
 				 
 			if (newEl) var e = newEl.inject(place, relative);
 			else if (!e || !options.ifExists){
@@ -400,9 +403,11 @@ MooRTE.Utilities = {
 					, events:{}
 					}, Object.clone(val));
 
-				if (!val.tag || val.tag.test(/^a$/i)) properties.href = 'javascript:void(0)';
+				if (!val.tag || val.tag == 'A') val.tag = input ? 'input' : 'a';
+				if (val.tag == 'a') properties.href = 'javascript:void(0)';
 				if (Browser.ie || Browser.opera) unselectable = input || textarea ? 'off' : 'on';
-				
+				if (val.class) button += '.'+val.class;				
+
 				properties.events.mousedown = function(e){
 					MooRTE.activeBar = bar;
 					var source = bar.retrieve('source')
@@ -416,7 +421,7 @@ MooRTE.Utilities = {
 						(MooRTE.activeField = fields[0]).focus();
 
 					if (e && e.stop) input || textarea ? e.stopPropagation() : e.stop();
-					!(val.events||{}).click && !source && (!val.tag || val.tag == 'a')
+					!(val.events||{}).click && !input //&& !source && (!val.tag || val.tag == 'a')
 						? MooRTE.Utilities.exec(val.args || btn)
 						: MooRTE.Utilities.eventHandler(source || 'click', this, btn);
 					}
@@ -428,11 +433,9 @@ MooRTE.Utilities = {
 							if (properties[where]) delete properties[where][del]
 							});
 					});
+				
+				e = new Element(val.tag + '.rte'+button, properties).store('key',btn).inject(place, relative);
 
-				e = new Element((input && !val.tag ? 'input' : val.tag || 'a'), properties)
-					.addClass('rte' + btn)
-					.inject(place, relative);
-			
 				if (val.onUpdate || state)
 					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
 						/font(name|size)|(back|fore|hilite)color/i
