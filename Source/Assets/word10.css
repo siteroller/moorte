@@ -106,9 +106,9 @@ div.RTE.Word10	.rteEditGroup > div{ width:75px  }
 div.RTE.Word10	.rtePageGroup > div{ width:132px }
 div.RTE.Word10	.rteTablGroup > div{ width:46px  }
 div.RTE.Word10	.rteIlluGroup > div{ width:295px }
-div.RTE.Word10	.rteLinkGroup > div{ width:202px }
+div.RTE.Word10	.rteLinkGroup > div{ width:208px }
 div.RTE.Word10	.rteHeadGroup > div{ width:145px }
-div.RTE.Word10	.rteTextGroup > div{ width:290px }
+div.RTE.Word10	.rteTextGroup > div{ width:295px }
 div.RTE.Word10	.rteSymbGroup > div{ width:100px }
 
 /* RteFlyouts: Fourth row, flyouts */

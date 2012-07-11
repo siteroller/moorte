@@ -500,13 +500,6 @@ MooRTE.Utilities = {
 		MooRTE.Utilities.tabs.call(this, 'flyouts', content, {place:'Flyouts', events:{show:show}}, btn, event);
 		}
 
-	, flyoutWrap: function(btn, event){
-		new Element('span.flyout').wraps(this).grab(
-			new Element('span',{events:{click:function(){
-				MooRTE.Utilities.flyout.call(this, btn+'Flyout', '', event); }
-				}}));
-		}
-
 	, clipStickyWin: function(caller){
 		if (Browser.firefox || (Browser.webkit && caller=='paste')) 
 			if (window.AssetLoader) AssetLoader.javascript(['mootools-more.js','StickyWinModalUI.js'], {
@@ -1030,7 +1023,7 @@ MooRTE.Elements =
 	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
 };
 
-MooRTE.Reserved = ['tag', 'key', 'contains', 'source', {events:'click'}, {events:'load'}];
+MooRTE.Reserved = ['tag', 'key', 'contains', 'source', 'class', {events:'click'}, {events:'load'}];
 
 MooRTE.Groups   =	{ RibbonOpts:{ place:'Ribbons'} }
 
@@ -1044,9 +1037,13 @@ MooRTE.Word10 = // Word 10 Elements
 			{ load: function(){
 				var prev = this.getPrevious();
 				var which = prev.get('tag') == 'input' ? 2 : +(prev.getSize().y > 25);
+				//var which = +(prev.getSize().y < 25) + +(prev.get('tag') == 'input');
 				new Element('span.arrowCase.arrow' + which).wraps(prev).grab(this);
 				}
-			//, click: {'flyout':[prev.get('class').substr(3)+'Flyout']}
+			, click: function(){
+				var prev = this.getPrevious().retrieve('key');
+				MooRTE.Utilities.flyout.call(this,prev+'Flyout', prev, 'click');
+				}
 			}
 		}
 
@@ -1097,7 +1094,7 @@ MooRTE.Word10 = // Word 10 Elements
 		}
 
 	// Flyouts
-	, underlineFlyout:  { tag:'span'}
+	, underlineFlyout:  { tag:'div'}
    , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
    , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
    , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordcase,togglecase'}
