@@ -20,7 +20,7 @@ div.RTE.Word07	{ background-color:#B9D2F8;
 					background-image:-ms-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px);
 					background-image:-moz-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); 
 					background-image:-webkit-linear-gradient(top, #c4e2fa 0, #fcfdfe 45px); }
-div.RTE.Word07	.rteTop{ background-color:#fefefe; }
+div.RTE.Word07	.rteTopBar{ background-color:#fefefe; }
 
 div.RTE.Word10	{ font:12px/18px Arial,Helvetica,'MS Sans Serif',Geneva,sans-serif}
 div.RTE.Word10	a,
@@ -29,15 +29,20 @@ div.RTE.Word10	a{ text-decoration:none; color:black; vertical-align:top;
 						font:12px/18px Arial,Helvetica,'MS Sans Serif',Geneva,sans-serif;
 						}
 
-/* RteTop: Top Row */
-div.RTE.Word10	.rteTop{ background-color:rgba(254,254,254,0.8); }
-div.RTE.Word10	div a.rteSelected{ border:1px solid black; background-color:#FFB874 }
+/* RteTopBar: Top Row */
+div.RTE.Word10	.rteTopBar{ background-color:rgba(254,254,254,0.8); }
+div.RTE.Word10	div a.rteSelected{ border:1px solid #c3964f; background-color:#FFB874;
+					background-image:url('images/Word10.png'), linear-gradient(top, #ffe387 0, #ffd77e 33%, #fff292);
+					background-image:url('images/Word10.png'), -ms-linear-gradient(top, #ffe387 0, #ffd77e 33%, #fff292);
+					background-image:url('images/Word10.png'), -moz-linear-gradient(top, #ffe387, #ffd77e 33%, #fff292);
+					background-image:url('images/Word10.png'), -webkit-linear-gradient(top, #ffe387 0, #ffd77e 33%, #fff292);
+ 					}
 
-div.RTE.Word10	.rteTop a,
+div.RTE.Word10	.rteTopBar a,
 div.RTE.Word10	.rteRibbons .smallIcons > a,
 div.RTE.Word10	.rteRibbons a{ margin:3px 0; border:1px transparent solid; border-radius:3px;  
 					background-image:url('images/Word10.png'); background-repeat:no-repeat, repeat;  }
-div.RTE.Word10	.rteTop a:hover,
+div.RTE.Word10	.rteTopBar a:hover,
 div.RTE.Word10	.rteRibbons .smallIcons > a:hover,
 div.RTE.Word10	.rteHomeRibbon a:hover{ border-color:#f1cb57; background-color:#FFB874;
 					background-image:url('images/Word10.png'), linear-gradient(top,#ffe387,#fff292);
@@ -142,6 +147,7 @@ div.RTE.Word10	.rteHomeRibbon>div.rteClipGroup>div>span:last-child{padding-top:2
 
 /* [RteRibbons>div.rteHomeRibbon>div].rteStylGroup: */
 div.RTE.Word10	.rteStylGroup>div{position:relative;}
+div.RTE.Word10	.rteStylGroup .arrowCase{position:absolute;right:2px;top:0;}
 div.RTE.Word10	.stylesCollection{ border:1px solid #c6cacd; overflow-x:hidden; min-width:100px; max-width:575px;
 					overflow-y:auto; scrollbar-arrow-color: green; overflow: -moz-scrollbars-vertical; 
 					cursor:pointer; height:52px; margin-right:50px; }
@@ -306,7 +312,6 @@ div.RTE.Word10 div.rteHomeRibbon>div>div{height:68px}
 div.RTE.Word10 div.bigIcons>div>div{height:71px;}
 div.RTE.Word10	.rtefontFamily {width:85px;}
 div.RTE.Word10	.rtefontSize { width:30px;}
-div.RTE.Word10 a.rtechangeStyles{position:absolute;right:5px;top:0;}
 div.RTE.Word10	span.rtedivider{width:5px;height:24px;background-image:url(images/Word10.png) }
 
 div.RTE.Word10	.rteRibbons .stacked>a{float:left; width:auto; margin:0; clear:left; height:19px; padding:0;}
@@ -328,7 +333,7 @@ div.RTE.Word10	.arrow0 a.rtearrow{ width:9px; border-radius:0 3px 3px 0}
 div.RTE.Word10	.arrow1 { padding:1px; }
 div.RTE.Word10	.rteRibbons span.arrow1 a{ width:100%; -moz-box-sizing:border-box; }
 div.RTE.Word10	.rteRibbons span.arrow1 > a:first-child{height:35px; margin-bottom:3px; border-radius:3px 3px 0 0; }
-div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; }
+div.RTE.Word10	span.arrow1 a.rtearrow{min-width:40px; height:26px; border-radius:0 0 3px 3px; line-height:14px;}
 div.RTE.Word10	.arrow1:hover a.rtearrow{ outline:solid #F5D368 1px; outline-offset:1px; }
 
 div.RTE.Word10	.arrow2 {border-color:grey; border-radius:0;}
@@ -340,7 +345,7 @@ div.RTE.Word10	div.bigIcons > div > div > a:after{ width:0; height:0; line-heigh
 
 
 /* default button sizes */
-div.RTE.Word10	.rteTop a,
+div.RTE.Word10	.rteTopBar a,
 div.RTE.Word10	.rteHomeRibbon a{ width:20px; height:19px; }
 
 div.RTE.Word10	.rteRibbons a.bigIcon,
@@ -356,6 +361,7 @@ div.RTE.Word10	.rtecut:before        { content:'Cut' }
 div.RTE.Word10	.rtecopy:before       { content:'Copy'}
 div.RTE.Word10	.rteformatPainter:before{ content:'Format Painter'}
 div.RTE.Word10	.rtepaste32+a:before { content:'Paste\a' }
+div.RTE.Word10	.rtechangeStyles+a:before { content:'Change\a Styles' }
 
 div.RTE.Word10	.rteFontGroup:after  { content:'Font' }
 div.RTE.Word10	.rteParaGroup:after  { content:'Paragraph'}
@@ -458,7 +464,31 @@ div.RTE.Word10	.f_listParagraph>div:after{ content: }
 div.RTE.Word10	.f_indent		>div:after{ content: }	
 div.RTE.Word10	.f_title 		>div:after{ content: }	
 
-/*
+/* popup - experimental*/
+.popup{
+    background-color:#f7f7f7; padding:0 6px 6px; border-radius:7px; border:#666 solid 1px;
+    position:absolute; top:50px; left:50px;
+    -moz-box-shadow: 0 0 5px 5px #888; -webkit-box-shadow: 0 0 5px 5px; box-shadow: 0 0 5px 5px #888;}
+.title{ float:left; padding:8px 0; width:200px;}
+.closeandhelp{ float:right; border:solid 1px #a9a9a9; border-radius:0 0 5px 5px; width:75px}
+.closeandhelp>a{ display:inline-block; text-align:center}
+.help{width:27px; border-right:1px solid #c6c6c6}
+.content{ clear:both; width:410px; background-color:#f0f0f0; border:solid 1px #7b7b7b; padding:6px; }
+textarea{height:150px; width:100%}
+.submit{text-align:right}
+.submit > input{ width:75px; height:20px; margin-left:10px;  }
+
+.title:after{ content:'Cross-reference'}
+.fields{display:inline-block; width:49%; vertical-align:top }
+.fields select{width:98%; height:20px; }
+.opt input[type='text']{width:20px}
+.opt {opacity:.7}
+.content{font:11px/24px Tahoma}
+
+
+
+/* border-image-source: linear-gradient(to top, #c38942, #c2a35c)
+
 div.RTE.Word10	span.rtestart{background-image:url(images/start.gif); height:21px; width:7px; margin:0}
 div.RTE.Word10	.displayHtml{position:absolute; border:1px solid grey; left:0; top:0 }
 div.RTE.Word10	.rteStylGroup>div>div>div{ margin:3px; height:42px; width:58px; }

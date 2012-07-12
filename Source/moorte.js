@@ -1045,7 +1045,7 @@ MooRTE.Word10 = // Word 10 Elements
 				}
 			, click: function(){
 				var prev = this.getPrevious().retrieve('key');
-				MooRTE.Utilities.flyout.call(this,prev+'Flyout', prev, 'click');
+				MooRTE.Utilities.flyout.call(this, prev+'Flyout', prev, 'click');
 				}
 			}
 		}
@@ -1067,6 +1067,7 @@ MooRTE.Word10 = // Word 10 Elements
 		}
 	
 	// Ribbons
+	, TopBar: {tag:'div', contains:'save,undo,redo'} 
    , FileRibbon: 
 		{ tag:'div', contains:
 			'div.rteFileGroup:[div:[insertHorizontalRule]]' 
