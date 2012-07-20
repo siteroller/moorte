@@ -485,7 +485,9 @@ textarea{height:150px; width:100%}
 .opt {opacity:.7}
 .content{font:11px/24px Tahoma}
 
-
+.rtesymbolFlyout table {table-layout: fixed;}
+.rtesymbolFlyout td{ display:table-cell; height:25px; width:25px; border:1px solid black; 
+	text-align:center; vertical-align:middle;}
 
 /* border-image-source: linear-gradient(to top, #c38942, #c2a35c)
 

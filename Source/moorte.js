@@ -1135,6 +1135,24 @@ MooRTE.Word10 = // Word 10 Elements
    		}
    	}
    , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordCase,togglecase'}
+   , symbolFlyout:
+   	{ tag: 'div', events:
+			{ load:function(){
+				var chars = 
+					[ [174,169,165,163,8364]
+					, [8805,8804,8800,177,8482]
+					, [945,181,8734,215,247]
+					, [931,937,8719,946,0]
+					];
+				
+				var table = new Element('table').inject(this);
+				chars.forEach(function(row){
+					var tr = new Element('tr').inject(table);
+					row.forEach(function(char){ new Element('td',{html:'&#'+char+';'}).inject(tr) });
+					});
+				}
+   		}
+   	}
 	}
 Object.merge(MooRTE.Elements,MooRTE.Word10);
 
