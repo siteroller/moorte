@@ -253,7 +253,7 @@ MooRTE.Range = {
 		if (Browser.firefox) MooRTE.Range.selection = window.getSelection();
 		if (!Browser.ie) MooRTE.Range.content = new Element('div');
 }());
-MooRTE.Tabs = {};
+MooRTE.Tabs = {active:{}};
 MooRTE.Utilities = {
 	exec: function(){
 		var args = Array.from(arguments).flatten();
@@ -496,12 +496,18 @@ MooRTE.Utilities = {
 		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
 
-	, flyout: function(content, btn, event){
-		var show = function(flyout){
-			var pos = this.getCoordinates(this.getParent('.MooRTE'));
-			flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-			}
-		MooRTE.Utilities.tabs.call(this, 'flyouts', content, {place:'Flyouts', events:{show:show}}, btn, event);
+	, flyout: function(content, btn, event, popup){
+		var opts = {place:'Flyouts'};
+		popup
+			? content =
+				[ 'div.popup:[div.title,div.closeandhelp:[a.help,a.close],div.content:['
+   			, 'div.submit:[span.input.insert,span.input.cancel]] ]'].join(content)
+   		: opts.events = {show: function(flyout){
+				var pos = this.getCoordinates(this.getParent('.MooRTE'));
+				flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
+				}};
+
+		MooRTE.Utilities.tabs.call(this, 'flyouts', content, opts, btn, event);
 		}
 
 	, clipStickyWin: function(caller){
@@ -950,7 +956,7 @@ MooRTE.Elements =
 			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1) }() }
 		}
 
-	, sentencecase:{ tag:'div', text:'Sentence case' } 
+	, sentencecase:{ tag:'div', text:'Sentence case'} 
 	, lowercase:	{ tag:'div', text:'lowercase'}
 	, uppercase:	{ tag:'div', text:'UPPERCASE'}
 	, wordCase:		{ tag:'div', text:'Word Case'}
@@ -1117,10 +1123,9 @@ MooRTE.Word10 = // Word 10 Elements
 		}
 
 	// Flyouts
-	, underlineFlyout:  { tag:'div'}
+	, underlineFlyout:  { tag:'div' }
    , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
    , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
-   , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordcase,togglecase'}
    , fontFamilyFlyout: { contains: 'div.f_calibri,div.f_tahoma,div.f_comic'}
    , fontSizeFlyout:  
    	{ tag:'div', events:
@@ -1129,6 +1134,7 @@ MooRTE.Word10 = // Word 10 Elements
    			}
    		}
    	}
+   , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordCase,togglecase'}
 	}
 Object.merge(MooRTE.Elements,MooRTE.Word10);
 
