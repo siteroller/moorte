@@ -292,8 +292,8 @@ MooRTE.Utilities = {
 			val = window.document.queryCommandValue(vals[0]);
 			if (val) vals[2].call(vals[1], vals[0], val);
 		});
-		update.custom.each(function(){
-			vals[2].call(vals[1], vals[0]);
+		update.custom.each(function(vals){
+			vals[2].call(vals[1], vals[0], e);
 		});
 		if (Browser.firefox && MooRTE.Range.selection.anchorNode.id == 'rteMozFix'){
 			MooRTE.Range.selection.extend(MooRTE.Range.selection.anchorNode.parentNode, 0);
@@ -388,7 +388,7 @@ MooRTE.Utilities = {
 				else var loc = {before:'Previous', after:'Next', top:'First'}[relative] || 'Last'
 				    , e = place['get' + loc]('.rte' + btn);
 				}
-				 
+			
 			if (newEl) var e = newEl.inject(place, relative);
 			else if (!e || !options.ifExists){
 				var val = MooRTE.Elements[btn]
@@ -436,11 +436,12 @@ MooRTE.Utilities = {
 				
 				e = new Element(val.tag + '.rte'+button, properties).store('key',btn).inject(place, relative);
 
-				if (val.onUpdate || state)
-					bar.retrieve('update', {'value':[], 'state':[], 'custom':[] })[ 
+				if ((val.events||{}).update || state)
+					bar.retrieve('update', {'value':[], 'state':[], 'custom':[]})[
 						/font(name|size)|(back|fore|hilite)color/i
 							.test(btn) ? 'value' : (state ? 'state' : 'custom')
-					].push([btn, e, val.onUpdate]);
+					].push([btn, e, (val.events||{}).update]);
+				
 				if (val.shortcut) bar.retrieve('shortcuts',{})[val.shortcut] = btn;//.set(val.shortcut,btn);
 				//if (collection.getCoordinates().top < 0)toolbar.addClass('rteTopDown'); //untested!!
 			}
@@ -473,6 +474,7 @@ MooRTE.Utilities = {
 			if ((options.events||{}).hide) options.events.hide.call(this, name);
 			}, this);
 
+		MooRTE.Tabs.active[tabGroup] = name;
 		this.addClass('rteSelected').addClass('rteGroupBtn_'+name);
 		if (entry = MooRTE.Tabs[tabGroup][name]){
 			if (!entry[0]) entry[0] = this;
@@ -485,7 +487,6 @@ MooRTE.Utilities = {
 
 		var group = MooRTE.Utilities.addElements(args[1], options.place, {className:'rteGroup_'+name});
 		MooRTE.Tabs[tabGroup][name] = [this, group];
-		//console.log(options.events);
 		if ((options.events||{}).show) options.events.show.call(this, {content:group});
 		}
 
@@ -1095,6 +1096,24 @@ MooRTE.Word10 = // Word 10 Elements
 			,div.rteHeadGroup:[div:[header,footer,pageNumber]]\
 			,div.rteTextGroup:[div:[textBox,quickParts,wordArt,dropCap,span.stacked.smallIcons:[signatureLine,dateTime,object]]]\
 			,div.rteSymbGroup:[div:[equation,arrow,symbol]]'
+		}
+	// Flyout Triggers
+	, symbol:{ events:{ click:{flyout:['symbolFlyout']} }}
+	, changeCase:
+		{ 'class':'wideIcon', events:
+			{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]']}
+			, update:function(el, event){
+				var active, flyouts = MooRTE.Tabs.flyouts;
+				if  (	!flyouts 
+					|| !(active = flyouts[MooRTE.Tabs.active.flyouts])
+					|| MooRTE.Tabs.active.flyouts == event.target.retrieve('key')
+					 ) return;
+				
+				active[0].removeClass('rteSelected');
+				active[1].addClass('rteHide');
+				MooRTE.Tabs.active.flyouts = '';
+				}
+			}
 		}
 
 	// Flyouts

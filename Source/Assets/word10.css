@@ -357,7 +357,7 @@ div.RTE.Word10	.rteRibbons a.wideIcon{width:27px;}
 
 /* English Language */
 div.RTE.Word10	.rteClipGroup:after  { content:'Clipboard' } 
-div.RTE.Word10	.rtecut:before        { content:'Cut' } 
+div.RTE.Word10	.rtecut:before        { content:'Cut \25BE' } 
 div.RTE.Word10	.rtecopy:before       { content:'Copy'}
 div.RTE.Word10	.rteformatPainter:before{ content:'Format Painter'}
 div.RTE.Word10	.rtepaste32+a:before { content:'Paste\a' }
@@ -473,7 +473,7 @@ div.RTE.Word10	.f_title 		>div:after{ content: }
 .closeandhelp{ float:right; border:solid 1px #a9a9a9; border-radius:0 0 5px 5px; width:75px}
 .closeandhelp>a{ display:inline-block; text-align:center}
 .help{width:27px; border-right:1px solid #c6c6c6}
-.content{ clear:both; width:410px; background-color:#f0f0f0; border:solid 1px #7b7b7b; padding:6px; }
+.content{ clear:both; width:410px; min-height:100px; background-color:#f0f0f0; border:solid 1px #7b7b7b; padding:6px; }
 textarea{height:150px; width:100%}
 .submit{text-align:right}
 .submit > input{ width:75px; height:20px; margin-left:10px;  }
