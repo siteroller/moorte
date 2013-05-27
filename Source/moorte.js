@@ -193,7 +193,7 @@ MooRTE.Range = {
 	, insert: function(what, range){ //html option that says if text or html?
 		if (Browser.ie){
 			if(!range) range = MooRTE.Range.create();
-			range.pasteHTML(what); 
+			range.pasteHTML(what);
 		} else MooRTE.Utilities.exec('insertHTML',what);
 		return MooRTE.Range;
 	}
@@ -496,18 +496,18 @@ MooRTE.Utilities = {
 		MooRTE.Tabs[tabGroup][tabName][+(tabName != Array.from(arguments).splice(-2,1))] = this;
 		}
 
-	, flyout: function(content, btn, event, popup){
-		var opts = {place:'Flyouts'};
-		popup
-			? content =
-				[ 'div.popup:[div.title,div.closeandhelp:[a.help,a.close],div.content:['
-   			, 'div.submit:[span.input.insert,span.input.cancel]] ]'].join(content)
-   		: opts.events = {show: function(flyout){
+	, flyout: function(content, btn, event){
+		var opts = {place:'Flyouts', events:{show: function(flyout){
 				var pos = this.getCoordinates(this.getParent('.MooRTE'));
 				flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-				}};
-
+				}}};
 		MooRTE.Utilities.tabs.call(this, 'flyouts', content, opts, btn, event);
+		}
+	, popup: function(content, btn, event){
+		content= [ 'div.popup:[div.title,div.closeandhelp:[a.help,a.close],div.content:['
+   				, ',div.submit:[span.input.insert,span.input.cancel]] ]'].join(content);
+   	console.log(1);
+		MooRTE.Utilities.tabs.call(this, 'popups', content, {place:'Flyouts'}, btn, event);
 		}
 
 	, clipStickyWin: function(caller){
@@ -794,7 +794,12 @@ MooRTE.Elements =
 			}
 		}
 	, paste32:
-		{ 'class':'bigIcon', title:'Paste (Ctrl+V)' }
+		{ 'class':'bigIcon', title:'Paste (Ctrl+V)', events:
+			{ click:function(){
+				var content = '';
+				MooRTE.Utilities.flyout(content,'paste32','click',1)} 
+			}
+		}
    , save:
    	{ src:'http://siteroller.net/test/save.php', events:
 			{ click:function(){
@@ -956,11 +961,18 @@ MooRTE.Elements =
 			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1) }() }
 		}
 
-	, sentencecase:{ tag:'div', text:'Sentence case'} 
-	, lowercase:	{ tag:'div', text:'lowercase'}
-	, uppercase:	{ tag:'div', text:'UPPERCASE'}
-	, wordCase:		{ tag:'div', text:'Word Case'}
-	, togglecase:	{ tag:'div', text:'tOGGLE cASE'}
+	, sentencecase:{ tag:'p', text:'Sentence case'} 
+	, lowercase:	{ tag:'p', text:'lowercase'}
+	, uppercase:	{ tag:'p', text:'UPPERCASE'}
+	, wordCase: 	
+		{ tag:'p', text:'Word Case', events:
+			{ click:function(){
+				console.log(window.getSelection(), window.getSelection().toString());
+				MooRTE.Range.replace(MooRTE.Range.get('text').capitalize()); MooRTE.Range.set()
+				}
+			}
+		} 
+	, togglecase:	{ tag:'p', text:'tOGGLE cASE'}
 
  	, backColor:
  		{ events:
@@ -1019,12 +1031,12 @@ MooRTE.Elements =
 	, dateTime:{}
 	, object:{}
 	, equation:{}
-	, symbol:{}
 	, pasteMenu:{tag:'span'}
-	, changeCase:
+	/*, changeCase:
 		{ 'class':'wideIcon', events:
-			{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
+			{ click: MooRTE.Utilities.flyout.pass('div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]')} 
 		}
+		*/
 	,fontSize: {tag:'input', type:'text', value:11}
 	,fontFamily:{tag:'input', type:'text', value:'Calibri (Body)'} 
 	
@@ -1065,7 +1077,7 @@ MooRTE.Word10 = // Word 10 Elements
 	, HomeTab:	
 		{ text:'Home', 'class':'rteSelected', events:
 			{ load: {addTab:['RibbonTabs']}
-   		, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
+			, click:{tabs: ['RibbonTabs', 'HomeRibbon', MooRTE.Groups.RibbonOpts]}
    		}
    	}
    , InsertTab:
@@ -1127,7 +1139,7 @@ MooRTE.Word10 = // Word 10 Elements
    , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
    , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
    , fontFamilyFlyout: { contains: 'div.f_calibri,div.f_tahoma,div.f_comic'}
-   , fontSizeFlyout:  
+   , fontSizeFlyout:
    	{ tag:'div', events:
    		{ load: function(){
    			[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);
@@ -1136,23 +1148,46 @@ MooRTE.Word10 = // Word 10 Elements
    	}
    , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordCase,togglecase'}
    , symbolFlyout:
-   	{ tag: 'div', events:
-			{ load:function(){
-				var chars = 
-					[ [174,169,165,163,8364]
-					, [8805,8804,8800,177,8482]
-					, [945,181,8734,215,247]
-					, [931,937,8719,946,0]
-					];
-				
-				var table = new Element('table').inject(this);
-				chars.forEach(function(row){
-					var tr = new Element('tr').inject(table);
-					row.forEach(function(char){ new Element('td',{html:'&#'+char+';'}).inject(tr) });
-					});
-				}
-   		}
+   	{ tag: 'div', contains: function(){
+			var chars = [174,169,165,163,8364,8805,8804,8800,177,8482,945,181,8734,215,247,9217,931,937,8719,946]
+			  , div = new Element('div').addEvent('mousedown:relay(a)', function(){ 
+			  			MooRTE.Range.insert(this.get('text')) 
+			  			})
+			  , p = new Element('p').addEvent('mousedown',function(){ 
+						MooRTE.Utilities.popup.call(this,'symbolChart','symbolPopup','click') 
+						});
+
+			chars.forEach(function(char){ new Element('a',{href:'#',html:'&#'+char+';'}).inject(div); }); 
+			return [div,p];
+			}()
    	}
+
+   , symbolChart:
+		{ tag:'div',contains: [new Element('input#charCode',{type:'text'}),
+			function(){
+			//<a>'+n+'</a>
+			for (var htm = '', n = 0; n < 10000; n++) htm += '<span>&#'+n+';</span>';
+			return new Element('div',{html:htm}).addEvent('mousedown:relay(span)',function(){
+				MooRTE.Range.insert(this.get('text'))
+				});
+			}()
+			]
+   	}
+   , equations:
+		[ 'ax^2 + bx + c = 0'
+		, 'x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}'
+		, '\\textstyle \\sqrt{x+2}\\quad \\underline 4\\quad \\overline{x+y}\\quad x^{\\underline n}\\quad x^{\\overline{m+n}} \\quad \\sqrt{x^2+\\sqrt{\alpha}}'
+		, '\\cos x\\,+\\,\\cos y\\,=\\,2 \\cos \\frac{x\\,+\\,y}{2} \\cos \\frac{x\\,-\\,y}{2}'
+		, '\\textstyle 10^{10}\\quad 2^{n+1}\\quad (n+1)^2\\quad \\sqrt{1-x^2}\\quad \\overline{w+\\bar z} \\quad p^{e_1}_1\\quad a_{b_{c_{d_e}}}\\quad \\root 3 \\of {h_n(\\alpha x)}'
+		, '(1+x)^n=1+nx/1!+(n(n-1) x^2)/2!+?'
+		, 'x^2 + y^2 = r^2'
+		, 'A = \\pi r^2 \\sin x\\,\\pm\\,\\sin y\\,=\\,2 \\sin \\frac{x\\,\\pm\\,y}{2} \\cos \\frac{x\\,\\mp\\,y}{2}'
+		, '(x+y)^n = \\sum_{r=0}^{n} {{n}\\choose{r}}y^r x^{n-r}'
+		, '\\psi(x)=\\sum_i C_i \\phi_i(x)'
+		]
+
+   // Popups
+   , paste32Popup:{contains:'div.pasteMsg'}
 	}
 Object.merge(MooRTE.Elements,MooRTE.Word10);
 

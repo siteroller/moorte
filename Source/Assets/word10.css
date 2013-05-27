@@ -118,10 +118,10 @@ div.RTE.Word10	.rteSymbGroup > div{ width:100px }
 
 /* RteFlyouts: Fourth row, flyouts */
 div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3x;}
-div.RTE.Word10	.rteFlyouts > div > div{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px;
+div.RTE.Word10	.rteFlyouts > div > p{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px; margin:0; border:1px solid transparent;
 							-moz-box-sizing:border-box; -webkit-box-sizing:border-box; -ms-box-sizing:border-box; box-sizing:border-box }
-div.RTE.Word10	.rteFlyouts > div > div:hover{ border:1px solid #999; }
-div.RTE.Word10	.rteFlyouts > div > div:before{content:' '; margin-right:5px; display:inline-block; 
+div.RTE.Word10	.rteFlyouts > div > p:hover{ border-color:#999;  }
+div.RTE.Word10	.rteFlyouts > div > p:before{content:' '; margin-right:5px; display:inline-block; 
 					border-right:#e2e4e7 solid 1px; height:100%; width:25px; vertical-align:middle;}
 div.RTE.Word10	.rteFlyouts > div.rteSelected{display:block; position:absolute; }
 
@@ -413,6 +413,8 @@ div.RTE.Word10 .rteSymbGroup:after  { content:'Symbols';}
 div.RTE.Word10 .rteequation+a:before{ content:'Equation\a';} 
 div.RTE.Word10 .rtesymbol:before    { content:'Symbol\a';}
 
+div.RTE.Word10 .rtesymbolFlyout p:after{content:'More Symbols';}
+
 div.RTE.Word10 .coverPage:{}
 div.RTE.Word10 .blankPage:{}
 div.RTE.Word10 .pageBreak:{}
@@ -485,9 +487,16 @@ textarea{height:150px; width:100%}
 .opt {opacity:.7}
 .content{font:11px/24px Tahoma}
 
-.rtesymbolFlyout table {table-layout: fixed;}
-.rtesymbolFlyout td{ display:table-cell; height:25px; width:25px; border:1px solid black; 
-	text-align:center; vertical-align:middle;}
+.mouseover{}
+.selected{}
+.selectedMouseover{}
+.pasteMsg:after{content:"For security reasons (to keep rogue sites from passwords in the computer's memory), this browser does not support a 'Paste' button. \a You may use Ctrl + P (or Cmd + P on a Mac) to paste content.' "}
+
+div.RTE.Word10	.rtesymbolFlyout div{ width:130px;}
+div.RTE.Word10	.rtesymbolFlyout a{ display:inline-block; height:25px; width:25px; text-align:center; }
+div.RTE.Word10	.rtesymbolChart{height:400px; overflow:scroll;}
+div.RTE.Word10	.rtesymbolChart span{width:25px; height:25px; border:1px solid; text-align:center; font-family:Arial Unicode MS; vertical-align:top }
+div.RTE.Word10	.rtesymbolChart a{background-color:#ddd; display:block; font:8px tahoma;}
 
 /* border-image-source: linear-gradient(to top, #c38942, #c2a35c)
 
