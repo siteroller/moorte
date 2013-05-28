@@ -39,71 +39,113 @@ var MooRTE = new Class({
 	
 	Implements: [Options]
 
-	, options: { floating: true // false broken by WK bug - "an editable element may not contain non-editable content".
-			   , padFloat: true // if (padFloat && where == before||after) existing margins are enlarged. top/bottom: padding always added. If false shrinks element accordingly.
-			   , where: 'before' // 'top/bottom/before/after' (Mootools standard). 'top' is the same as 'before', except that it shrinks the element accordingly.
-			   , stretch: false // If element grows, should it stretch the element or add toolbars. Other options abound.
-			   , location: 'elements'
-			   , buttons: 'div.Menu:[Main,File,Insert]'
-			   , skin: 'Word03'
-			   , elements: 'textarea, .rte'
-	}
+	, options: 
+		{ floating: true // false broken by WK bug - "an editable element may not contain non-editable content".
+		, padFloat: true // if (padFloat && where == before||after) existing margins are enlarged. top/bottom: padding always added. If false shrinks element accordingly.
+		//, where: 'before' //  'top' is the same as 'before', except that it shrinks the element accordingly.
+		, stretch: false // If element grows, should it stretch the element or add toolbars. Other options abound.
+		// TODO: floating, padFloat, and stretch should be combined.
+		, location: 'elements' // [element:Mixed [, where:String]]
+			// element: An Element or collection of elements, A CSS selector, or the keywords: 'hidden', 'inline', 'page' or 'elements'.
+			// If one element, will create on toolbar. If multiple, each rte will have it's own toolbar. If the numbers do not match, will return an error.
+			// where: 'top/bottom/before/after' (Mootools standard).
+		, buttons: 'div.Menu:[Main,File,Insert]'
+		, skin: 'Word03'
+		, elements: 'textarea, .rte'
+		}
+
 	, initialize: function(options){
+
 		this.setOptions(options);
+
 		var rte
 		  , self = this
-		  , els = $$(this.options.elements)
-		  , l = this.options.location.substr(4,1).toLowerCase();
-		  
-		if (!MooRTE.activeField) MooRTE.extend({ ranges:{}, btnVals:[], activeField:'', activeBar:'' });
-		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
+		  , els = $$(this.options.elements);
 		
+		if (!MooRTE.activeField) MooRTE.extend(
+			{ ranges: {}
+			, btnVals: []
+			, activeBar: ''
+			, activeField: ''
+			});
+		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
+
+		var loc = this.options.location;
+		if (Type.isArray(loc)) loc = Type.isElement(loc[1]) ? {els: loc} : loc[0];
+		if (typeOf(loc)[0] == 'e') loc = {els: loc};
+		else if (Type.isString(loc))
+			loc = 'page,hidden,inline,elements'.contains(loc,',') ? {keyword:loc} : {els: $$(loc)};
+		loc.where = this.options.location[1] == 'elements' ? 'before' : 'top';
+		if (loc.els.length == 1) loc.els = loc.els[0];
+		else if (loc.els.length){ 
+			loc.keyword = 'elements';
+			if (loc.els.length != els.length)
+				return console.log('Mismatch between number of editable elements and toolbars');
+			}
+		/*
+		console.log(loc);
+		
+		if (loc.els && loc.els.length == 1 && !Type.isElement(loc.els)) loc['els'] = loc['els'][0];
+		
+		var loc = instanceOf(this.options.location, Element) 
+			? 'defined'
+			: this.options.location.toLowerCase();
+		
+		if (loc.substr(0,4) == 'page') {
+			loc = 'defined';
+			this.options.where = loc.substr(5);
+			this.options.location = document.body;
+			}
+		*/
 		els.each(function(el,index){
+			// If element is a input, replace with a regular element.
 			if ('textarea,input'.contains(el.get('tag'), ',')) els[index] = el = self.textArea(el);
-			if (l=='e' || !rte) rte = self.insertToolbar(l);
-			if ('bt'.contains(l)) el.set('contentEditable', true);
-			else l == 'e'
-				? self.positionToolbar(el, rte)
-				: MooRTE.Utilities.addEvents(el.set('contentEditable',true), {
-					'focus': function(){ self.positionToolbar(el, rte); },
-					'blur': function(){
-						this.setStyle( 'padding-top'
-									 , this.getStyle('padding-top')
-										.slice(0,-2)
-										- rte
-											.getFirst()
-											.getSize()
-											.y
-									).removeClass('rteShow');
-						rte.addClass('rteHide');
+			// Make element editable
+			el.set('contentEditable', true);
+			
+			// Create toolbar
+			if (loc.keyword == 'elements' || !rte) rte = self.insertToolbar(loc, index);
+			// Position - not sure why this is only if elements!
+			if (loc.keyword == 'elements') self.positionToolbar(el, rte);
+			else if (loc.keyword = 'inline') MooRTE.Utilities.addEvents(
+				{ 'focus': function(){ self.positionToolbar(el, rte); }
+				, 'blur': function(){
+					this.removeClass('rteShow')
+						.setStyle( 'padding-top', this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y);
+					rte.addClass('rteHide');
 					}
 				});
+			
 			
 			//if (Browser.firefox) el.innerHTML += "<p id='rteMozFix' style='display:none'><br></p>";
 			
 			el.store('bar', rte);
-			MooRTE.Utilities.addEvents(el, { keydown: MooRTE.Utilities.shortcuts
-					        , keyup  : MooRTE.Utilities.updateBtns
-					        , mouseup: MooRTE.Utilities.updateBtns
-					        , focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
-					        });
+			MooRTE.Utilities.addEvents(el, 
+				{ keydown: MooRTE.Utilities.shortcuts
+				, keyup  : MooRTE.Utilities.updateBtns
+				, mouseup: MooRTE.Utilities.updateBtns
+				, focus  : function(){ MooRTE.activeField = this; MooRTE.activeBar = rte; }
+				});
 			MooRTE.Utilities.addEvents(rte, {'mouseup': MooRTE.Utilities.updateBtns});
-		});
-		rte.store('fields', els);
+			});
+		console.log(rte);
+		
+		rte.store('fields', els); // Q: Is this right? How can this work where there is more than one rte?
 		
 		MooRTE.activeField = els[0];
 		MooRTE.activeBar = MooRTE.activeField.retrieve('bar');
 		
-		if (l=='t') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
-		else if (l=='b') rte.addClass('rtePageBottom');
+		//if (loc=='pagetop') rte.addClass('rtePageTop').getFirst().addClass('rteTopDown');
+		//else if (loc=='pagebottom') rte.addClass('rtePageBottom');
+
 		if (Browser.firefox) MooRTE.Utilities.exec('styleWithCSS');
 		// MooRTE.Utilities.exec('useCSS', 'true'); - FF2, perhaps other browsers?
-	}
-	, insertToolbar: function (pos){
+		}
+	, insertToolbar: function (pos, index){
 		var self = this;
-		var rte = new Element('div', {'class':'rteRemove MooRTE '+(!pos||pos=='n'?'rteHide':''), 'contentEditable':false })
+		var rte = new Element('div', {'class':'rteRemove MooRTE '+(pos.keyword == 'hidden' || pos.keyword =='inline' ? 'rteHide' : ''), 'contentEditable':false })
 					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
-					.inject(document.body);
+					.inject((pos.keyword == 'elements' ? pos.els[index] : pos.els) || document.body, pos.where);
 		MooRTE.activeBar = rte;
 		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom'])//,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
