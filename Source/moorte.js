@@ -71,24 +71,28 @@ var MooRTE = new Class({
 		if (!Browser.ie) MooRTE.btnVals.push('unselectable');
 		
 		var loc = this.options.location;
-		if (Type.isArray(loc)) loc = Type.isElement(loc[1]) ? {els: loc} : loc[0];
-		loc = typeOf(loc)[0] == 'e' ? {els: loc}
-			: 'page,hidden,inline,elements'.contains(loc,',') ? {keyword: loc} : {els: $$(loc)};	
+		if (Type.isArray(loc) && !Type.isElement(loc[1])) loc = loc[0];
+		loc = 'page,hidden,inline,elements'.contains(loc,',') ? {where: loc} : {els: $$(loc)};
+		loc.where = this.options.location[1] == 'elements' ? 'before' : 'top';
+		if (loc.els && loc.els.length) loc.els.length == 1 ? loc.els = loc.els[0] :
+			(loc.els.length == els.length ? loc.where = 'userEls' 
+				: console.log('Mismatch between number of editable elements and toolbars'));
+		
+		/*
 		if (loc.els.length){
-			loc.els.length == 1 ? loc.els = loc.els[0] : loc.keyword = 'elements';
+			loc.els.length == 1 ? loc.els = loc.els[0] : loc.where = 'userEls';
 			if (loc.els.length > 1 && loc.els.length != els.length)
 				return console.log('Mismatch between number of editable elements and toolbars');
 			}
-		loc.where = this.options.location[1] == 'elements' ? 'before' : 'top';
-
+		*/
 		els.each(function(el,index){
 			if ('textarea,input'.contains(el.get('tag'), ',')) els[index] = el = self.textArea(el);
 	
-			if (loc.keyword == 'elements' || !rte) rte = self.insertToolbar(loc, index);
-			if (loc.keyword == 'elements') self.positionToolbar(el, rte); // TODO: Why only for 'elements'?
-			else if (loc.keyword == 'inline') MooRTE.Utilities.addEvents(
-				{ 'focus': function(){ self.positionToolbar(el, rte); }
-				, 'blur': function(){
+			if ('elements,userEls'.contains(loc.where) || !rte) rte = self.insertToolbar(loc, index);
+			if (loc.where == 'elements') self.positionToolbar(el, rte);
+			else if (loc.where == 'inline') MooRTE.Utilities.addEvents (
+				{ focus: function(){ self.positionToolbar(el, rte); }
+				, blur: function(){
 					this.removeClass('rteShow')
 						.setStyle( 'padding-top', this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y);
 					rte.addClass('rteHide');
@@ -119,11 +123,12 @@ var MooRTE = new Class({
 		}
 	, insertToolbar: function (pos, index){
 		var self = this;
-		var rte = new Element('div', {'class':'rteRemove MooRTE '+(pos.keyword == 'hidden' || pos.keyword =='inline' ? 'rteHide' : ''), 'contentEditable':false })
-					.adopt(new Element('div', {'class':'RTE '+self.options.skin }))
-					.inject((pos.keyword == 'elements' ? pos.els[index] : pos.els) || document.body, pos.where);
+		var klass = 'rteRemove MooRTE ' + (pos.where == 'hidden' || pos.where =='inline' ? 'rteHide' : '');
+		var rte = new Element('div', {'class': klass, contentEditable: false })
+			.adopt (new Element('div', {'class': 'RTE ' + self.options.skin }))
+			.inject ((pos.where == 'elements' ? pos.els[index] : pos.els) || document.body, pos.where);
 		MooRTE.activeBar = rte;
-		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom'])//,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
+		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom']);  //,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 		}
 	, positionToolbar: function (el, rte){
@@ -182,7 +187,7 @@ MooRTE.Range = {
 	}
 	, get: function(type, range){
 		if (!range) range = MooRTE.Range.create();
-		
+
 		switch (type){
 			case 'text': return range.text || range.toString();
 			case 'node': return range.cloneContents
@@ -515,10 +520,17 @@ MooRTE.Utilities = {
 		}
 
 	, flyout: function(content, btn, event){
-		var opts = {place:'Flyouts', events:{show: function(flyout){
-				var pos = this.getCoordinates(this.getParent('.MooRTE'));
-				flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-				}}};
+		var opts = 
+			{ place: 'Flyouts'
+			, events: 
+				{ show: function(flyout){
+					var pos = this.getParent().getCoordinates(this.getParent('.MooRTE'));
+					flyout.content.setPosition({x:pos.left - 1, y:pos.height + pos.top });
+					flyout.content.setStyle('min-width', pos.width - 4);
+					flyout.content.setStyles({'overflow-y':'scroll', 'padding-left':2});
+					}
+				}
+			};
 		MooRTE.Utilities.tabs.call(this, 'flyouts', content, opts, btn, event);
 		}
 	, popup: function(content, btn, event){
@@ -541,21 +553,24 @@ MooRTE.Utilities = {
 			});
 	}
 	, fontsize: function(dir, size){
+	
 		if (size == undefined)
 			size = window.document.queryCommandValue('fontsize') 
 				|| MooRTE.Range.parent().getStyle('font-size');
 		
-		if (size == +size) size = +size + dir;
+		//if (size == +size) size = +size + dir;
+		if (dir) size = +size + dir;
 		else {
 			// MooRTE.Utilities.convertunit(size[0],size[1],'px'); Convert em's, xx-small, etc.
 			size = size.split(/([^\d]+)/)[0];
 			[0,10,13,16,18,24,32,48].every(function(s,i){
 				if (s < size) return true;
 				size = !(s - size) || dir < 0 ? i + dir : i;
-			});
+				});
+			}
+
+		MooRTE.Utilities.exec('fontsize', size);
 		}
-		MooRTE.Utilities.exec('fontsize', size);		
-	}
 	, clean: function(html, options){
 	
 		options = Object.append({
@@ -1137,10 +1152,10 @@ MooRTE.Word10 = // Word 10 Elements
 	, symbol:{ events:{ click:{flyout:['symbolFlyout']} }}
 	, changeCase:
 		{ 'class':'wideIcon', events:
-			{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]']}
-			, update:function(el, event){
+			{ click : {flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]']}
+			, update: function(el, event){
 				var active, flyouts = MooRTE.Tabs.flyouts;
-				if  (	!flyouts 
+				if  (  !flyouts 
 					|| !(active = flyouts[MooRTE.Tabs.active.flyouts])
 					|| MooRTE.Tabs.active.flyouts == event.target.retrieve('key')
 					 ) return;
@@ -1154,16 +1169,21 @@ MooRTE.Word10 = // Word 10 Elements
 
 	// Flyouts
 	, underlineFlyout:  { tag:'div' }
-   , bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
-   , listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
-   , fontFamilyFlyout: { contains: 'div.f_calibri,div.f_tahoma,div.f_comic'}
-   , fontSizeFlyout:
-   	{ tag:'div', events:
-   		{ load: function(){
-   			[11,12,13,14,15,16].each(function(num){ this.grab(new Element('div',{text:num})); },this);
-   			}
-   		}
-   	}
+	, bulletsFlyout:    { contains: 'insertorderedlist,insertunorderedlist'}  
+	, listFlyout:       { contains: 'insertorderedlist,insertunorderedlist'}
+	, fontFamilyFlyout: { tag:'div', contains: 'div.f_calibri,div.f_tahoma,div.f_comic'}
+	, fontSizeFlyout:
+		{ tag: 'div'
+		, events:
+			{ load: function(){
+				this.addEvent('click:relay(div)',function(){
+					MooRTE.Utilities.fontsize(0, this.get('text'));
+					});
+				[8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
+					.each(function(num){ this.grab(new Element('div',{text:num})); },this);
+				}
+			}
+		}
    , changeCaseFlyout: { contains: 'sentencecase,lowercase,uppercase,wordCase,togglecase'}
    , symbolFlyout:
    	{ tag: 'div', contains: function(){
