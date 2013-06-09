@@ -77,14 +77,7 @@ var MooRTE = new Class({
 		if (loc.els && loc.els.length) loc.els.length == 1 ? loc.els = loc.els[0] :
 			(loc.els.length == els.length ? loc.where = 'userEls' 
 				: console.log('Mismatch between number of editable elements and toolbars'));
-		
-		/*
-		if (loc.els.length){
-			loc.els.length == 1 ? loc.els = loc.els[0] : loc.where = 'userEls';
-			if (loc.els.length > 1 && loc.els.length != els.length)
-				return console.log('Mismatch between number of editable elements and toolbars');
-			}
-		*/
+
 		els.each(function(el,index){
 			if ('textarea,input'.contains(el.get('tag'), ',')) els[index] = el = self.textArea(el);
 	
@@ -93,8 +86,8 @@ var MooRTE = new Class({
 			else if (loc.where == 'inline') MooRTE.Utilities.addEvents (
 				{ focus: function(){ self.positionToolbar(el, rte); }
 				, blur: function(){
-					this.removeClass('rteShow')
-						.setStyle( 'padding-top', this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y);
+					var pad = this.getStyle('padding-top').slice(0,-2) - rte.getFirst().getSize().y;
+					this.removeClass('rteShow').setStyle('padding-top', pad);
 					rte.addClass('rteHide');
 					}
 				});
@@ -491,8 +484,8 @@ MooRTE.Utilities = {
 
 		if (!entry) MooRTE.Tabs[tabGroup] = {};
 		else Object.each(entry, function(els, title){
-			// ToDo: if (this = this) return [as otherwise hide event will be called].
-			if (els[0]) els[0].removeClass('rteSelected');
+			//[Hide when same, as in when called from custom, to prevent it hiding itself.].
+			if (els[0]) if (els[0] == this) return; else els[0].removeClass('rteSelected');
 			if (els[1]) els[1].addClass('rteHide');
 			if ((options.events||{}).hide) options.events.hide.call(this, name);
 			}, this);
@@ -525,9 +518,8 @@ MooRTE.Utilities = {
 			, events: 
 				{ show: function(flyout){
 					var pos = this.getParent().getCoordinates(this.getParent('.MooRTE'));
-					flyout.content.setPosition({x:pos.left - 1, y:pos.height + pos.top });
-					flyout.content.setStyle('min-width', pos.width - 4);
-					flyout.content.setStyles({'overflow-y':'scroll', 'padding-left':2});
+					flyout.content.setStyle('min-width', pos.width - 4)
+						.setPosition({x:pos.left - 1, y:pos.height + pos.top });
 					}
 				}
 			};
@@ -536,7 +528,7 @@ MooRTE.Utilities = {
 	, popup: function(content, btn, event){
 		content= [ 'div.popup:[div.title,div.closeandhelp:[a.help,a.close],div.content:['
    				, ',div.submit:[span.input.insert,span.input.cancel]] ]'].join(content);
-   	console.log(1);
+   		console.log(1);
 		MooRTE.Utilities.tabs.call(this, 'popups', content, {place:'Flyouts'}, btn, event);
 		}
 
@@ -1151,7 +1143,8 @@ MooRTE.Word10 = // Word 10 Elements
 	// Flyout Triggers
 	, symbol:{ events:{ click:{flyout:['symbolFlyout']} }}
 	, changeCase:
-		{ 'class':'wideIcon', events:
+		{ 'class':'wideIcon'
+		, events:
 			{ click : {flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]']}
 			, update: function(el, event){
 				var active, flyouts = MooRTE.Tabs.flyouts;
@@ -1181,6 +1174,17 @@ MooRTE.Word10 = // Word 10 Elements
 					});
 				[8,9,10,11,12,14,16,18,20,22,24,26,28,36,48,72]
 					.each(function(num){ this.grab(new Element('div',{text:num})); },this);
+				}
+			, update: function(el, event){
+				var active, flyouts = MooRTE.Tabs.flyouts;
+				if  (  !flyouts 
+					|| !(active = flyouts[MooRTE.Tabs.active.flyouts])
+					|| MooRTE.Tabs.active.flyouts == event.target.retrieve('key')
+					 ) return;
+				
+				active[0].removeClass('rteSelected');
+				active[1].addClass('rteHide');
+				MooRTE.Tabs.active.flyouts = '';
 				}
 			}
 		}

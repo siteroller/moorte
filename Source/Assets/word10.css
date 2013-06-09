@@ -117,7 +117,8 @@ div.RTE.Word10	.rteTextGroup > div{ width:295px }
 div.RTE.Word10	.rteSymbGroup > div{ width:100px }
 
 /* RteFlyouts: Fourth row, flyouts */
-div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; border:#a7abaf solid 1px; border-radius:3x;}
+div.RTE.Word10	.rteFlyouts > div{ cursor:pointer; position:absolute; background-color: #fff; 
+					border:#a7abaf solid 1px; border-radius:3x;overflow-y:scroll; padding-left:2px }
 div.RTE.Word10	.rteFlyouts > div > p{ color:#3b3b3b; height:24px; padding-right:10px; border-radius:3px; width:150px; margin:0; border:1px solid transparent;
 							-moz-box-sizing:border-box; -webkit-box-sizing:border-box; -ms-box-sizing:border-box; box-sizing:border-box }
 div.RTE.Word10	.rteFlyouts > div > p:hover{ border-color:#999;  }
