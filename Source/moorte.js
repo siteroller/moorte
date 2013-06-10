@@ -1,3 +1,4 @@
+
 /*
 ---
 description: Rich Text Editor (WYSIWYG / NAWTE / Editor Framework) that can be applied directly to any collection of DOM elements.
@@ -35,9 +36,9 @@ Object.extend('set', function(key, val){
 	return obj;
 });
 
-var MooRTE = new Class({
-	
-	Implements: [Options]
+var MooRTE = new Class(
+
+	{ Implements: [Options]
 
 	, options: 
 		{ floating: true // false broken by WK bug - "an editable element may not contain non-editable content".
@@ -124,6 +125,7 @@ var MooRTE = new Class({
 		MooRTE.Utilities.addElements(this.options.buttons, [rte.getFirst(), 'bottom']);  //,{className:'rteGroup_Auto'}); ////3rdel. Should give more appropriate name. Also, allow for last of multiple classes  
 		return rte;
 		}
+
 	, positionToolbar: function (el, rte){
 		el.set('contentEditable', true).addClass('rteShow');
 		var o = this.options
@@ -150,10 +152,11 @@ var MooRTE = new Class({
 				.addClass('rteFloat')
 				.getFirst()
 				.addClass('rteFloat');
-		}		
+			}		
 		//else rte.inject(el,'top').setStyle('margin','-'+el.getStyle('padding-top')+' -'+el.getStyle('padding-left'));
 		else el.setStyle('padding-top', el.getStyle('padding-top').slice(0,-2)*1 + rteHeight).grab(rte,'top');
-	}
+		}
+
 	, textArea: function (el){
 		var div = new Element('div', 
 			{ text: el.get('value')
@@ -167,17 +170,42 @@ var MooRTE = new Class({
 		var form = el.getParent('form');
 		if (form) MooRTE.Utilities.addEvents(form, {'submit': function(){
 			el.set('value', MooRTE.Utilities.clean(div)).replaces(div); 
-		} });
+			} });
 		return div;
-	}
-});
+		}
+	});
 
+MooRTE.Elements =
+	{ strikethrough	:{}
+	, justifyLeft	:{}
+	, justifyFull	:{}
+	, justifyCenter	:{}
+	, justifyRight	:{}
+	, subscript		:{}
+	, superscript	:{}
+	, outdent		:{}
+	, indent		:{}
+	, insertHorizontalRule:{}
+	, bold		 	:{ key:'b', source:'<b>' }
+	, italic		:{ key:'i', source:'<i>' }
+	, underline		:{ key:'u', source:'<u>' }
+	, insertOrderedList:  { title:'Numbered List' }
+	, insertUnorderedList:{ title:'Bulleted List' }
+	, selectall   	:{ title:'Select All (Ctrl + A)' }
+	, removeFormat	:{ title:'Clear Formatting' }
+	, undo        	:{ title:'Undo (Ctrl + Z)' }
+	, redo			:{ title:'Redo (Ctrl + Y)' }
+	};
+
+MooRTE.Tabs = {active:{}};   
+MooRTE.Reserved = ['tag', 'key', 'contains', 'source', 'class', {events:'click'}, {events:'load'}];
+MooRTE.Groups   =	{ RibbonOpts:{ place:'Ribbons'} }
 MooRTE.Range = {
 	create: function(range){
 		var sel = window.document.selection || window.getSelection();
 		if (!sel || sel.getRangeAt && !sel.rangeCount) return null; //console.log(1);
 		return MooRTE.ranges[range || 'a1'] = sel.getRangeAt ? sel.getRangeAt(0) : sel.createRange();
-	}
+		}
 	, get: function(type, range){
 		if (!range) range = MooRTE.Range.create();
 
@@ -266,15 +294,14 @@ MooRTE.Range = {
 };
 
 (function(){
-		if (Browser.firefox) MooRTE.Range.selection = window.getSelection();
-		if (!Browser.ie) MooRTE.Range.content = new Element('div');
-}());
-MooRTE.Tabs = {active:{}};
-MooRTE.Utilities = {
-	exec: function(){
+	if (Browser.firefox) MooRTE.Range.selection = window.getSelection();
+	if (!Browser.ie) MooRTE.Range.content = new Element('div');
+	}());
+MooRTE.Utilities = 
+	{ exec: function(){
 		var args = Array.from(arguments).flatten();
 		document.execCommand(args[0], args[2]||null, args[1]||false);
-	}
+		}
 	, shortcuts: function(e){
 		if (e.key=='enter'){
 			if (!Browser.ie) return;
@@ -663,6 +690,16 @@ MooRTE.Utilities = {
 	}
 };
 
+if (false) Object.extend(MooRTE.Utilities, 
+	{	update: function(group){
+	 		Object.each(MooRTE.tabs[group], function(els){
+	 			els[0].removeClass('rteSelected');
+	 			});
+	 		pos = styles.getStyle('background-position');
+			head.setStyle('background-position', pos);
+			}
+	});
+
 MooRTE.extensions = function(){
 	
 	var params = Array.link(arguments, {'options': Type.isObject, 'cmd': Type.isString, 'rte':Type.isElement})
@@ -758,321 +795,8 @@ MooRTE.extensions = function(){
 	return editables;
 }
 
-if (false) Object.extend(MooRTE.Utilities, 
-	{	update: function(group){
-	 		Object.each(MooRTE.tabs[group], function(els){
-	 			els[0].removeClass('rteSelected');
-	 			});
-	 		pos = styles.getStyle('background-position');
-			head.setStyle('background-position', pos);
-			}
-	});
-
-
 Element.implement({moorte:MooRTE.extensions});
 Elements.implement({moorte:MooRTE.extensions});
-	
-MooRTE.Elements =
-	{ strikethrough:{}
-   , justifyLeft	:{}
-   , justifyFull	:{}
-   , justifyCenter:{}
-   , justifyRight	:{}
-   , subscript		:{}
-   , superscript	:{}
-   , outdent		:{}
-   , indent			:{}
-   , insertHorizontalRule:{}
-   , bold		 	:{ key:'b', source:'<b>' }
-   , italic		 	:{ key:'i', source:'<i>' }
-   , underline	 	:{ key:'u', source:'<u>' }
-   , insertOrderedList:  { title:'Numbered List' }
-   , insertUnorderedList:{ title:'Bulleted List' }
-   , selectall   	:{ title:'Select All (Ctrl + A)' }
-   , removeFormat	:{ title:'Clear Formatting' }
-   , undo        	:{ title:'Undo (Ctrl + Z)' }
-   , redo         :{ title:'Redo (Ctrl + Y)' }
-   , cut:
-   	{ title:'Cut (Ctrl+X)', events:
-			{ load:MooRTE.Utilities.clipStickyWin
-			, click:function(action){ Browser.firefox ? MooRTE.Elements.clipPop.show() : MooRTE.Utilities.exec(action); }
-			}
-		}
-   , copy:
-   	{ title:'Copy (Ctrl+C)', events:
-			{ load:MooRTE.Utilities.clipStickyWin
-			, click: function(action){ 
-				Browser.firefox 
-					? MooRTE.Elements.clipPop.show() 
-					: MooRTE.Utilities.exec(action); 
-				}
-			}
-		}
-   , paste:
-   	{ title:'Paste (Ctrl+V)', events:
-			{ load: MooRTE.Utilities.clipStickyWin //load:function() { MooRTE.Utilities.clipStickyWin(1) },
-			, click: function(action){ 
-				Browser.firefox || Browser.webkit 
-					? MooRTE.Elements.clipPop.show() 
-					: MooRTE.Utilities.exec(action); 
-					}
-			}
-		}
-	, paste32:
-		{ 'class':'bigIcon', title:'Paste (Ctrl+V)', events:
-			{ click:function(){
-				var content = '';
-				MooRTE.Utilities.flyout(content,'paste32','click',1)} 
-			}
-		}
-   , save:
-   	{ src:'http://siteroller.net/test/save.php', events:
-			{ click:function(){
-				var content = { 'page': window.location.pathname }
-				  , next = 0; 
-				content.content = []; 
-				this.getParent('.MooRTE').retrieve('fields').each(function(el){
-					content['content'][next++] = MooRTE.Utilities.clean(el);
-					});
-
-				new Request(
-					{ url: MooRTE.Elements.save.src
-					, onComplete:function(response){alert("Your submission has been received:\n\n"+response);}
-					}).send(Object.toQueryString(content));
-				}
-			}
-		}
-   , 'Html/Text':
-   	{ click:['DisplayHTML'] }
-   , DisplayHTML:
-		{ tag: 'textarea', unselectable:'off', 'class': 'displayHtml'
-		, init:function(){
-				var el= this.getParent('.MooRTE').retrieve('fields')
-				  , p = el.getParent()
-				  , size = (p.hasClass('rteTextArea') ? p : el).getSize(); 
-				this.set({'styles':{width:size.x, height:size.y}, 'text':el.innerHTML.trim()})
-			}
-		}
-   , colorpicker	:{ tag:'img', 'src':'images/colorPicker.jpg', 'class':'colorPicker', click:function(){
-							//c[i] = ((hue - brightness) * saturation + brightness) * 255;  hue=angle of ColorWheel.  saturation =percent of radius, brightness = scrollWheel.
-							//for(i=0;i<3;i++) c[i] = ((((h=Math.abs(++hue)) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-							//c[1] = -(c[2] - 255*saturation);var hex = c.rgbToHex();
-							//var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 - 2, saturation = Math.sqrt(x*x+y*y) / radius;
-							var c, radius = this.getSize().x/2, x = mouse.x - radius, y = mouse.y - radius, brightness = hue.y / hue.getSize().y, hue = Math.atan2(x,y)/Math.PI * 3 + 1, saturation = Math.sqrt(x*x+y*y) / radius;
-							for(var i=0;i<3;i++) c[i] = (((Math.abs((hue+=2)%6 - 3) < 1 ? 1 : h > 2 ? 0 : -(h-2)) - brightness) * saturation + brightness) * 255;  
-							var hex = [c[0],c[2],c[1]].rgbToHex();
-						 }}
-   , hyperlink		:{ title:'Create hyperlink'
-					   , click:function(){
-								MooRTE.Range.create();
-								$('popTXT').set('value',MooRTE.Range.get('text', MooRTE.ranges.a1));
-								MooRTE.Elements.linkPop.show();
-						}
-					   , load: function(){
-							if (window.Asset) new Asset.javascript('StickyWinModalUI.js', {
-								self: this
-								//, path: 'CMS/library/thirdparty/MooRTE/Source/Assets/scripts/'
-								, onComplete: function(){
-									var body = "<span style='display:inline-block; width:100px'>Text of Link:</span><input id='popTXT'/><br/>\
-												<span style='display:inline-block; width:100px'>Link To Location:</span><input id='popURL'/><br/>\
-												<input type='radio' name='pURL'  value='web' checked/>Web<input type='radio' name='pURL' id='pURL1' value='email'/>Email"
-									  , buttons = 
-										[ { text:'cancel' }
-										, { text:'OK'
-										  , click: function(){
-												// if(me.getParent('.MooRTE').hasClass('rteHide'))MooRTE.ranges.a1.commonAncestorContainer.set('contenteditable',true);
-												MooRTE.Range.set();
-												var value = $('popURL').get('value');
-												if ($('pURL1').get('checked')) value = 'mailto:' + value;
-												MooRTE.Utilities.exec(value ? 'createlink' : 'unlink', value); 
-												} 
-										  }
-										];
-									MooRTE.Elements.linkPop = new StickyWin.Modal({content: StickyWin.ui('Edit Link', body, {buttons:buttons})});	
-									MooRTE.Elements.linkPop.hide();
-								}
-							})
-						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload    :{ load: function(){
-						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
-							onComplete:function(){
-								var uploader = new MooUpload(this,
-									{ action: MooRTE.Path + 'mooupload/Demo/upload.php'	// Path to upload script
-									, flash: { movie: MooRTE.Path + 'mooupload/Source/Moo.Uploader.swf' }
-  									, autostart: true
-  									, accept: 'image/*'
-  									, onButtonDown :function(){ MooRTE.Range.set() }
-									, onButtonEnter :function(){ MooRTE.Range.create() }
-									, onFileUpload: function(args, data){
-										var path = MooRTE.Path + 'mooupload/Demo/tmp/' + data.upload_name;
-										MooRTE.Range.set();
-										MooRTE.Utilities.exec('insertimage',path)
-									  }
-										
-									})
-							  }.bind(this)
-							})
-					  }
-					}
-   , blockquote	:{ click:function(){	MooRTE.Range.wrap('blockquote'); } }
-   , start			:{ tag:'span' }
-   , viewSource	:{ click:'source', source:function(btn){
-						var bar = MooRTE.activeBar, el = bar.retrieve('fields')[0], ta = bar.getElement('textarea.rtesource');
-						if(this.hasClass('rteSelected')){
-							bar.eliminate('source');
-							this.removeClass('rteSelected');
-							if (el.contains(el.retrieve('bar'))) el.moorte('remove'); //was hasChild
-							el.set('html',ta.addClass('rteHide').get('value')).moorte();
-						} else {
-							bar.store('source','source');
-							if(ta){
-								this.addClass('rteSelected');
-								ta.removeClass('rteHide').set('text',MooRTE.Utilities.clean(bar.retrieve('fields')[0]));
-							} else MooRTE.Utilities.group.apply(this, ['source', btn]);
-						}
-					}}
-   , source			:{ tag:'textarea', 'class':'displayHtml', unselectable:'off', load:function(){ 
-						var bar = this.getParent('.MooRTE'), el = bar.retrieve('fields')[0], size = el.getSize(), barY = bar.getSize().y;
-						this.set({'styles':{ width:size.x, height: size.y - barY, top:barY }, 'text':MooRTE.Utilities.clean(el) });
-					}}
-   , cleanWord		:{	click: function() {
-						var s = this.replace(/\r/g, '\n').replace(/\n/g, ' ');
-						var rs = [
-							/<!--.+?-->/g,			// Comments
-							/<title>.+?<\/title>/g,	// Title
-							/<(meta|link|.?o:|.?style|.?div|.?head|.?html|body|.?body|.?span|!\[)[^>]*?>/g, // Unnecessary tags
-							/ v:.*?=".*?"/g,		// Weird nonsense attributes
-							/ style=".*?"/g,		// Styles
-							/ class=".*?"/g,		// Classes
-							/(&nbsp;){2,}/g,		// Redundant &nbsp;s
-							/<p>(\s|&nbsp;)*?<\/p>/g// Empty paragraphs
-						]; 
-						rs.each(function(regex) {
-							s = s.replace(regex, '');
-						});
-						return s.replace(/\s+/g, ' ');
-					} }
-
-   , decreaseFontSize:
-		{ events:
-			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(-1) }() }
-			/* Fontsize was originally only supposed to accept valuies between 1 - 7.
-				It was afterwards changed to accept a much, much greater range of values, but not a single browser has a correct implementation.
-					http://msdn.microsoft.com/en-us/library/ms530759(VS.85).aspx
-					http://msdn.microsoft.com/en-us/library/aa219652(office.11).aspx
-					(Linked to by http://msdn.microsoft.com/en-us/library/aa220275(office.11).aspx)
-				
-				Table of values:
-			
-				Webkit is particularly bad:
-					#12874 [WontFix]: execCommand FontSize -webkit-xxx-large instead of passed px value - https://bugs.webkit.org/show_bug.cgi?id=12874
-						Now this gives me (no matter what I pass): <span class="Apple-style-span" style="font-size: -webkit-xxx-large;">Text</span>		
-					#21679 [New]: execCommand FontSize does not change size of background color - https://bugs.webkit.org/show_bug.cgi?id=21679
-						Double the text height, the previous background color will only cover the bottom half of the new text.
-					#21033 [Resolved]: QueryCommandValue('FontSize') returns bogus pixel values - https://bugs.webkit.org/show_bug.cgi?id=21033
-						The actual text is much smaller than the px values Safari gives. WK should return 1-7, as in IE and FF.
-					The actual ridiculous results of the command:
-						https://bug-21033-attachments.webkit.org/attachment.cgi?id=66960
-						Test: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size.html
-						Results: http://gitorious.org/webkit/webkit/blobs/860c3cf250187b1679ce9701fe5892a482d319e6/LayoutTests/editing/execCommand/query-font-size-expected.txt
-						
-						Possible values "reference a table of font sizes computed by the user-agent". Possible values are:
-						http://www.w3schools.com/CSS/pr_font_font-size.asp
-						http://style.cleverchimp.com/font_size_intervals/altintervals.html
-			*///MooRTE.Range.parent().parentElement.parentElement.getElements('span[style^="font-size:"]').setStyle('font-size',+fontsize[0] - 1 + fontsize[1]);
-		}
-   , increaseFontSize:
-   	{ event:
-			{ click: function(){ if (!Browser.firefox) return MooRTE.Utilities.fontsize.pass(1) }() }
-		}
-
-	, sentencecase:{ tag:'p', text:'Sentence case'} 
-	, lowercase:	{ tag:'p', text:'lowercase'}
-	, uppercase:	{ tag:'p', text:'UPPERCASE'}
-	, wordCase: 	
-		{ tag:'p', text:'Word Case', events:
-			{ click:function(){
-				console.log(window.getSelection(), window.getSelection().toString());
-				MooRTE.Range.replace(MooRTE.Range.get('text').capitalize()); MooRTE.Range.set()
-				}
-			}
-		} 
-	, togglecase:	{ tag:'p', text:'tOGGLE cASE'}
-
- 	, backColor:
- 		{ events:
-	 		{ load:function(){
-				MooRTE.Utilities.assetLoader(
-					{ scripts: ['/siteroller/classes/colorpicker/Source/ColorRoller.js'] 
-					, styles:  ['/siteroller/classes/colorpicker/Source/ColorRoller.js'] 
-					, onComplete:function(){}
-					})
-				}
-			, click: function(){
-				var empty = (Browser.Engine.gecko ? 'hilitecolor' : 'backcolor');
-				}
-			}
-		}
-	, insertImage:	{}
- 	, foreColor:	{}			
- 	, formatBlock:	{}
-	, style: 		{}				
-	, hilight:		{}
-	, fontColor:	{}
-	, fill:			{}
-	, invisibleChars:{}
-	, multiLevelList:	{'class':'wideIcon'}
-	, paragraphSpacing:	{'class':'wideIcon'}
-	, borderBottom:{}
-	, changeStyles:{'class':'bigIcon'}
-	, textEffect:	{'class':'bigIcon'}
-	, insertPicture:{}
-	, formatPainter:{}
-	, find: 			{}
-	, replace: 		{}
-	, selection: 	{}
-	, sort: 			{}
-	, coverPage:{}
-	, blankPage:{}
-	, pageBreak:{}
-	, table:{}
-	, picture:{}
-	, clipArt:{}
-	, shapes:{}
-	, smartArt:{}
-	, chart:{}
-	, screenshot:{}
-	, hyperlink:{}
-	, bookmark:{}
-	, 'cross-reference':{}
-	, header:{}
-	, footer:{}
-	, pageNumber:{}
-	, textBox:{}
-	, quickParts:{}
-	, wordArt:{}
-	, dropCap:{}
-	, signatureLine:{}
-	, dateTime:{}
-	, object:{}
-	, equation:{}
-	, pasteMenu:{tag:'span'}
-	/*, changeCase:
-		{ 'class':'wideIcon', events:
-			{ click: MooRTE.Utilities.flyout.pass('div.caseFlyouts:[sentencecase,lowercase,uppercase,wordCase,togglecase]')} 
-		}
-		*/
-	,fontSize: {tag:'input', type:'text', value:11}
-	,fontFamily:{tag:'input', type:'text', value:'Calibri (Body)'} 
-	
-
-	// Generic
-	, Toolbar    	:{ tag:'div', title:'' } // Could use div.Toolbar, defined seperately for clarity.
-};
-
-MooRTE.Reserved = ['tag', 'key', 'contains', 'source', 'class', {events:'click'}, {events:'load'}];
-
-MooRTE.Groups   =	{ RibbonOpts:{ place:'Ribbons'} }
 
 MooRTE.Word10 = // Word 10 Elements
 	{ stylesCollection:
@@ -1232,41 +956,3 @@ MooRTE.Word10 = // Word 10 Elements
    , paste32Popup:{contains:'div.pasteMsg'}
 	}
 Object.merge(MooRTE.Elements,MooRTE.Word10);
-
-// TabGroup Triggers. Samples, these can be created dynamically or manually.
-MooRTE.GroupsDeprecated = 	// Default Word03/Tango Groups. Could be integrated into MooRTE.Elements, but neater seperate.
-	{ Main : 'Toolbar:[start,bold,italic,underline,strikethrough,Justify,Lists,Indents,subscript,superscript]'
-	, File : {Toolbar:['start','save','cut','copy','paste','redo','undo','selectall','removeformat','viewSource']}
-	, Font : {Toolbar:['start','fontsize','decreaseFontSize','increaseFontSize','backcolor','forecolor']}
- 	, Sert : {Toolbar:['start','inserthorizontalrule', 'blockquote','hyperlink']}
-	, RibbonOpts	:{ place:'Ribbons'}
-
-	// Other deprecated elements. Or those waiting till dev on the Word03 skin starts again.
-	, Main			:{text:'Main'  , 'class':'rteText', load :{tabs: [MooRTE.Groups.Main, 'tabs1', null]} ,click:'load'}
-   , File			:{text:'File'  , 'class':'rteText rteFile', click:{tabs: [MooRTE.Groups.File, 'tabs1', null]} }
-   , Font			:{text:'Font'  , 'class':'rteText', click:{tabs: [MooRTE.Groups.Font, 'tabs1', null]} }
- 	//, Insert			:{text:'Insert', 'class':'rteText', click:{tabs: [MooRTE.Groups.Sert, 'tabs1', null]} } //'Upload Photo'
-   , View			:{text:'Views' , 'class':'rteText', click:{tabs: {Toolbar:['start','Html/Text']}} }
-   , Indents: {'class':'Flyout', contains:'div.Flyout:[indent,outdent]' }
-   , Justify:
-   	{ 'class':'Flyout rteSelected', contains:'div.Flyout:[justifyleft,justifycenter,justifyright,justifyfull]' }
-   , input:  {click:function(){ MooRTE.Range.insert("<input>") } }
-   , submit:   {click:function(){ MooRTE.Range.insert('<input type="submit" value="Submit">') }}	
-   , fontSize:	{ tag:'span.flyout', contains:'inputFontSize', click:{flyout:['fontSizeFlyouts']} }
-   , inputFontSize:{ tag:'input', type:'text', value:12 }
-   , fontDropdown:{ tag:'div', contains:"'input[type=text]',div.f_calibri,div.f_tahoma,div.f_comic"}
-	/*
-   , changecase:	{ click:{flyout:['div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]']} }
-   , changecase2:
-   	{ click:{tabs:
-			['flyouts', 'div.caseFlyouts:[sentencecase,lowercase,uppercase,wordcase,togglecase]'
-			, {place:'Flyouts', events:{show:
-					function(flyout){
-						var pos = this.getCoordinates(this.getParent('.MooRTE'));
-						flyout.content.setPosition({x:pos.left, y:pos.height + pos.top + 1});
-						}
-					}}
-				]}
-		}
-	*/
-	}	
