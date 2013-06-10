@@ -1,6 +1,6 @@
 <?php 
 $script = $shrunk = '';
-$files = ['Core', 'Range', 'Utilities', 'Extensions', 'Word10'];
+$files = ['Core', 'Range', 'Utilities', 'Extensions', 'Basic', 'Word10'];
 require __DIR__ . "/Assets/scripts/JShrink.php";
 foreach ($files as $file){
 	$js = file_get_contents("$file.js");
