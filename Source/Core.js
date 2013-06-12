@@ -185,14 +185,14 @@ MooRTE.Elements =
 	, outdent		:{}
 	, indent		:{}
 	, insertHorizontalRule:{}
-	, bold		 	:{ key:'b', source:'<b>' }
+	, bold			:{ key:'b', source:'<b>' }
 	, italic		:{ key:'i', source:'<i>' }
 	, underline		:{ key:'u', source:'<u>' }
 	, insertOrderedList:  { title:'Numbered List' }
 	, insertUnorderedList:{ title:'Bulleted List' }
 	, selectall   	:{ title:'Select All (Ctrl + A)' }
 	, removeFormat	:{ title:'Clear Formatting' }
-	, undo        	:{ title:'Undo (Ctrl + Z)' }
+	, undo			:{ title:'Undo (Ctrl + Z)' }
 	, redo			:{ title:'Redo (Ctrl + Y)' }
 	};
 
