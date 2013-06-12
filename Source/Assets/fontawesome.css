@@ -1,0 +1,75 @@
+/* Begin General */
+div.MooRTE{ left:0; width:100%; position:absolute; top:0; }
+div.MooRTE.rteFloat{ position:absolute; }
+div.MooRTE.rtePageBottom{ position:fixed; bottom:0}
+div.MooRTE.rtePageTop{ position:fixed; top:0;  }
+.rteHide{ display:none; }
+.rteShow{ border:2px groove #000; vertical-align:top; position:relative;}
+.rteTextArea{ border:1px solid #666; display:inline-block; word-wrap: break-word; overflow-y:hidden; overflow-x:auto;}
+div.rteTextArea{ *display:inline; }
+.rteTopDown{top:0;}
+.bbox{ -moz-box-sizing:  border-box; -ms-box-sizing:  border-box; box-sizing:  border-box; -webkit-box-sizing:  border-box  }
+.rteShow, .cbox{ -moz-box-sizing: content-box; -ms-box-sizing: content-box; box-sizing: content-box; -webkit-box-sizing: content-box }
+.spinWait {position:absolute; border:0}
+/* End General*/
+
+/* Font Awesome is licensed under the SIL Open Font License v1.1, http://scripts.sil.org/OFL */
+@font-face {
+	font-family: 'FontAwesome';
+	src: url('./fonts/FontAwesome/fontawesome-webfont.eot?v=3.1.0');
+	src: url('./fonts/FontAwesome/fontawesome-webfont.eot?#iefix&v=3.1.0') format('embedded-opentype'), url('./fonts/FontAwesome/fontawesome-webfont.woff?v=3.1.0') format('woff'), url('./fonts/FontAwesome/fontawesome-webfont.ttf?v=3.1.0') format('truetype'), url('./fonts/FontAwesome/fontawesome-webfont.svg#fontawesomeregular?v=3.1.0') format('svg');
+	font-weight: normal;
+	font-style: normal;
+	}
+
+div.RTE.FontAwesome	{ 
+ 	background: -moz-linear-gradient(center bottom , #EEEEEE 0%, #FFFFFF 100%) repeat scroll 0 0 #F6F6F6;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
+    display: block;
+    font-size: 0;
+    position: relative;
+    text-align: center;
+	}
+
+div.RTE.FontAwesome	a,
+div.RTE.FontAwesome	span{ display:inline-block; }
+
+/* default button styles */
+div.RTE.FontAwesome	.editor > a{
+	text-decoration:none; color:black;
+	border-left: 1px solid #FFFFFF;
+    border-right: 1px solid #DDDDDD;
+	}
+div.RTE.FontAwesome	.editor > a:first-child{
+	border-left: 1px solid #DDDDDD;
+	}
+div.RTE.FontAwesome	.editor > a:before{ 
+	height:40px;
+	width:68px;
+	display:inline-block;
+	text-align:center;
+	font:18px/40px FontAwesome; 
+	text-decoration: inherit;
+	-webkit-font-smoothing: antialiased;
+	*margin-right: .3em;
+	}					
+
+/* RteRibbons: Third Row, the content. */
+div.RTE.FontAwesome .rteincreaseFontSize:before{content:'\f031\f0de'}
+div.RTE.FontAwesome .rtedecreaseFontSize:before{content:'\f031\f0dd';}
+div.RTE.FontAwesome .rtejustifyRight:before{content:'\f038'}
+div.RTE.FontAwesome .rtejustifyLeft:before{content:'\f036'}
+div.RTE.FontAwesome .rtejustifyFull:before{content:'\f039'}
+div.RTE.FontAwesome .rtejustifyCenter:before{content:'\f037'}
+div.RTE.FontAwesome .rteunderline:before{content:'\f0cd'}
+div.RTE.FontAwesome .rtesuperscript:before{content:'\f12b'}
+div.RTE.FontAwesome .rtesubscript:before{content:'\f12c'}
+div.RTE.FontAwesome .rtestrikethrough:before{content:'\f0cc'}
+div.RTE.FontAwesome .rteremoveFormat:before{content:'\f12d'}
+div.RTE.FontAwesome .rteitalic:before{content:'\f033'}
+div.RTE.FontAwesome .rtebold:before{content:'\f032'}
+div.RTE.FontAwesome .rteinsertUnorderedList:before{content:'\f0cb'}
+div.RTE.FontAwesome .rteindent:before{content:'\f03c'}
+div.RTE.FontAwesome .rteoutdent:before{content:'\f03b'}
+div.RTE.FontAwesome .rteinsertOrderedList:before{content:'\f0ca'}
