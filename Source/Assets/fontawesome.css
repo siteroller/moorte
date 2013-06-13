@@ -36,14 +36,13 @@ div.RTE.FontAwesome	a,
 div.RTE.FontAwesome	span{ display:inline-block; }
 
 /* default button styles */
+div.RTE.FontAwesome #rtemooupload_btnAddfile, 
 div.RTE.FontAwesome	.editor > a{
 	text-decoration:none; color:black;
 	border-left: 1px solid #FFFFFF;
     border-right: 1px solid #DDDDDD;
 	}
-div.RTE.FontAwesome	.editor > a:first-child{
-	border-left: 1px solid #DDDDDD;
-	}
+div.RTE.FontAwesome #rtemooupload_btnAddfile, 
 div.RTE.FontAwesome	.editor > a:before{ 
 	height:40px;
 	width:68px;
@@ -53,7 +52,13 @@ div.RTE.FontAwesome	.editor > a:before{
 	text-decoration: inherit;
 	-webkit-font-smoothing: antialiased;
 	*margin-right: .3em;
-	}					
+	}
+div.RTE.FontAwesome	#rtemooupload_btnAddfile{ 
+	margin:0; padding:0; border:0; background:transparent; 
+	}
+div.RTE.FontAwesome	.editor > a:first-child{
+	border-left: 1px solid #DDDDDD;
+	}				
 
 /* RteRibbons: Third Row, the content. */
 div.RTE.FontAwesome .rteincreaseFontSize:before{content:'\f031\f0de'}
@@ -73,3 +78,4 @@ div.RTE.FontAwesome .rteinsertUnorderedList:before{content:'\f0cb'}
 div.RTE.FontAwesome .rteindent:before{content:'\f03c'}
 div.RTE.FontAwesome .rteoutdent:before{content:'\f03b'}
 div.RTE.FontAwesome .rteinsertOrderedList:before{content:'\f0ca'}
+div.RTE.FontAwesome #rtemooupload_btnAddfile:before{content:'\f03e'}

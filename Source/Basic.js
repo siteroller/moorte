@@ -100,26 +100,26 @@ MooRTE.BasicElements =
 								}
 							})
 						}}  // Ah, but its a shame this ain't LISP ;) ))))))))))!
-   , mooupload    :{ load: function(){
-						new Asset.javascript(MooRTE.Path + 'mooupload/Source/mooupload.js', {
-							onComplete:function(){
-								var uploader = new MooUpload(this,
-									{ action: MooRTE.Path + 'mooupload/Demo/upload.php'	// Path to upload script
-									, flash: { movie: MooRTE.Path + 'mooupload/Source/Moo.Uploader.swf' }
-  									, autostart: true
-  									, accept: 'image/*'
-  									, onButtonDown :function(){ MooRTE.Range.set() }
+   , moouploads:		{ events: { load: function(){
+						new Asset.javascript(AssetLoader.path + 'mooupload/Source/mooupload.js', {
+							onComplete: function(){
+								var uploader = new MooUpload( this,
+									{ action: AssetLoader.path + 'mooupload/Demo/upload.php'	// Path to upload script
+									, flash: { movie: AssetLoader.path + 'mooupload/Source/Moo.Uploader.swf' }
+									, autostart: true
+									, accept: 'image/*'
+									, onButtonDown :function(){ MooRTE.Range.set() }
 									, onButtonEnter :function(){ MooRTE.Range.create() }
 									, onFileUpload: function(args, data){
-										var path = MooRTE.Path + 'mooupload/Demo/tmp/' + data.upload_name;
+										var path = AssetLoader.path + 'mooupload/Demo/tmp/' + data.upload_name;
 										MooRTE.Range.set();
 										MooRTE.Utilities.exec('insertimage',path)
-									  }
-										
+										}
 									})
-							  }.bind(this)
+								}
 							})
-					  }
+					  		}
+						}
 					}
    , blockquote	:{ click:function(){	MooRTE.Range.wrap('blockquote'); } }
    , start			:{ tag:'span' }
